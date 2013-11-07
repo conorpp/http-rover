@@ -1,3 +1,6 @@
+reference/
+dependencies.txt
+
 lib-cov
 *.seed
 *.log
