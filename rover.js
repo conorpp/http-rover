@@ -7,8 +7,13 @@ sub.subscribe('rover');
 
 //run the webcam stream async
 var PASSWORD = 'abc';
+var cmd = 'ffmpeg -s '+S.width+'x'+S.height+' -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 30 http://localhost:8082/'+PASSWORD;
 var terminal = require('child_process');
-terminal.exec('ffmpeg -s '+S.width+'x'+S.height+' -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 30 http://localhost:8082/'+PASSWORD);
+var spawn = terminal.exec(cmd);
+process.on('exit', function() {
+  console.log('process pid ', spawn.pid);
+  terminal.exec('kill -9 '+spawn.pid);
+});
 
 var five = require("johnny-five"),
     // or "./lib/johnny-five" when running from the source
