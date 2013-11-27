@@ -1,0 +1,25 @@
+
+.hide{display:none;}
+
+.fixed{
+    position: fixed;
+}
+.abs{
+    position: absolute;
+}
+.rel{
+    position: relative;
+}
+
+.bg1{
+    background:#a5a5a5;
+}
+
+#controlBar{
+    width:100%;
+    bottom:0%;
+}
+#controlBar button{
+    font-size: 2em;
+    margin-bottom:  10px;
+}

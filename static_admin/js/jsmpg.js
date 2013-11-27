@@ -86,6 +86,8 @@ jsmpeg.prototype.decodeSocketHeader = function( data ) {
 };
 
 jsmpeg.prototype.receiveSocketMessage = function( event ) {
+	//@@marker
+	//console.log(event);
 	var messageData = new Uint8Array(event.data);
 
 	if( !this.sequenceStarted ) {
