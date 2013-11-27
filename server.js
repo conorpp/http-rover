@@ -12,6 +12,8 @@ app.engine('html', hbs.__express);
 
 var redis = require('socket.io/node_modules/redis');
 var pub = redis.createClient(S.redis_port, S.host);
+var sub = redis.createClient(S.redis_port, S.host);
+sub.subscribe('feedback');
 var io = require('socket.io').listen(S.command_port);
 var PASSWORD = 'abc';
 var STREAM_MAGIC_BYTES = 'jsmp';
@@ -71,6 +73,10 @@ io.sockets.on('connection', function(socket){
 	console.log('stop');
 	Command.stop();
     });
+    socket.on('reset', function(data){
+	console.log('reset');
+	Command.reset();
+    });
 
     
 }); // end io.sockets.on
@@ -103,8 +109,25 @@ var Command = {
     stop: function(){
 	var data = {func:'stop'};
 	pub.publish('rover', JSON.stringify(data));
+    },
+    reset: function(){
+	var data = {func:'reset'};
+	pub.publish('rover', JSON.stringify(data));
     }
 }
+
+sub.on('message', function(channel, data){
+    data = JSON.parse(data);
+
+    switch (data.func) {
+        case 'reset':
+	    console.log('resetting clients');
+	    io.sockets.emit('reset');
+        break;
+    default:
+	console.log('no cases met.');
+    }
+});
 
 console.log('Listening for commands on ', S.command_port);
 console.log('Listening for http requests on ', S.http_port);

@@ -1,20 +1,22 @@
 
+iframe{
+    width:500px;
+    height:380px;
+    border:none;
+    overflow: hidden;
+}
+
 .hide{display:none;}
 
-.fixed{
-    position: fixed;
-}
-.abs{
-    position: absolute;
-}
-.rel{
-    position: relative;
-}
+.fixed{position: fixed;}
+.abs{position: absolute;}
+.rel{position: relative;}
 
-.bg1{
-    background:#a5a5a5;
-}
+.bg1{background:#a5a5a5;}
 
+#audio{
+    margin-top: -10000px;
+}
 #controlBar{
     width:100%;
     bottom:0%;

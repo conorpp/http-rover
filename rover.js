@@ -8,23 +8,38 @@ if (process.argv[2]=='deploy') {
 console.log('Starting up rover.  Here are settings ', S);
 
 var redis = require('socket.io/node_modules/redis');
+var pub = redis.createClient(S.redis_port, S.host);
 var sub = redis.createClient(S.redis_port, S.host);
 sub.subscribe('rover');
 
 //run/restart the webcam stream async
 var spawns = [];
+var cmds = [];
 var PASSWORD = 'abc';
 var terminal = require('child_process');
 console.log('Starting video and audio streams . . .');
 var video = 'ffmpeg -f video4linux2 -s '+S.width+'x'+S.height+' -r 15 -i /dev/video0 -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
 var audio = 'ffmpeg -f alsa -i hw:0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
+cmds.push(video);
+cmds.push(audio);
 spawns.push(terminal.exec(video));
 spawns.push(terminal.exec(audio));
-
-process.on('SIGINT', function() {
-    for (var i in spawns) {
-        spawns[i].kill();
+function killSpawns(reset){
+    reset = reset || false;
+    terminal.exec('pkill -9 ffmpeg');
+    if (reset) {
+        console.log('reset');
+        setTimeout(function(){
+            for (var i in cmds) {
+                spawns[i] = terminal.exec(cmds[i]);
+            }
+            var data = JSON.stringify({func:'reset'});
+            pub.publish('feedback', data);
+        },100);
     }
+}
+process.on('SIGINT', function() {
+    killSpawns();
     process.exit();
 });
 /* init the board */
@@ -39,6 +54,7 @@ var serialPort = new SerialPort("/dev/"+tty, {
 
 serialPort.on('open',function () {
   Rover.init();
+  process.stdin.resume();
   serialPort.on('data', function(data) {});
   var buf = new Buffer(1);
   buf.writeUInt8(0x0,0);
@@ -52,7 +68,6 @@ serialPort.on('open',function () {
   });
 });
 
-process.stdin.resume();
 /* accept a decimal number on range 0-255 
    writes the hex conversion to usb.  STDIN.   */
 process.stdin.on('data', function(data){
@@ -172,6 +187,11 @@ sub.on('message', function(channel, data){
         break;
         case 'reverse':
             Rover.reverse();
+        break;
+        case 'reset':
+            console.log('Resetting spawns . . .');
+            var reset = true;
+            killSpawns(reset);
         break;
         default:
             console.log('No cases were met on pubsub.');

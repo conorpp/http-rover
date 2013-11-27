@@ -1,12 +1,10 @@
 
-
-<!-- video-->
-<object width="470" height="320"> <param name="movie" value="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf"></param><param name="flashvars" value="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Frovervideo%2Fmystream&autoPlay=true"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="direct"></param><embed src="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="direct" width="470" height="320" flashvars="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Frovervideo%2Fmystream&autoPlay=true"></embed></object>
-<!-- audio-->
-<object width="470" height="320"> <param name="movie" value="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf"></param><param name="flashvars" value="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Froveraudio%2Fmystream&autoPlay=true"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="direct"></param><embed src="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="direct" width="470" height="320" flashvars="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Froveraudio%2Fmystream&autoPlay=true"></embed></object>
-
+<iframe src="/video" id="stream">
+    
+</iframe>
 
 <div class="fixed " id="controlBar">
+    <button id="reset" type="button" class="btn btn-primary">Reset Stream</button>
     <div class="btn-group">
       <button id="left" type="button" class="btn btn-default">Left</button>
       <button id="forward" type="button" class="btn btn-default">Forward</button>
@@ -42,14 +40,19 @@
         },
         stop: function(){
             this.socket.emit('stop');
+        },
+        reset: function(){
+            this.socket.emit('reset');
         }
     };
     Command.connect();
     
-    Command.socket.on('blink', function(data){
-        console.log('Blink command recieved: ', data['on']);
+    Command.socket.on('reset', function(data){
+        $('iframe').attr('src','');
+        $('iframe').attr('src','/video');
+        console.log('reset stream');
     });
-    
+
     $('#forward').on('click', function(){
         Command.forward();
     });
@@ -65,5 +68,7 @@
      $('#stop').on('click', function(){
         Command.stop();
     });
-    
+     $('#reset').on('click', function(){
+        Command.reset();
+    });
 </script>
