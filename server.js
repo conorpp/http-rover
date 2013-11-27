@@ -3,20 +3,29 @@ var S = require('./static_admin/js/settings').Settings;
 console.log('Starting up node server.  Here are settings \n', S);
 
 
-var express = require('express');
-var hbs = require('hbs');
+var express = require('express')
+  , stylus = require('stylus')
+  , nib = require('nib')
 var app = express();
+function compile(str, path) {
+  return stylus(str)
+    .set('filename', path)
+    .use(nib())
+}
+app.set('view engine','jade');
+app.use(express.logger('dev'));
+app.use(stylus.middleware({
+    src: __dirname + '/public',
+    compile: compile
+}));
 app.use(express.static('static_admin'));
-app.set('view engine','html');
-app.engine('html', hbs.__express);
 
 var redis = require('socket.io/node_modules/redis');
 var pub = redis.createClient(S.redis_port, S.host);
 var sub = redis.createClient(S.redis_port, S.host);
 sub.subscribe('feedback');
 var io = require('socket.io').listen(S.command_port);
-var PASSWORD = 'abc';
-var STREAM_MAGIC_BYTES = 'jsmp';
+
 
 app.get('/', function(request, response){
   response.render('index');

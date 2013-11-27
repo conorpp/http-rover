@@ -18,7 +18,7 @@ var cmds = [];
 var PASSWORD = 'abc';
 var terminal = require('child_process');
 console.log('Starting video and audio streams . . .');
-var video = 'ffmpeg -f video4linux2 -s '+S.width+'x'+S.height+' -r 15 -i /dev/video0 -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
+var video = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video0 -an -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
 var audio = 'ffmpeg -f alsa -i hw:0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
 cmds.push(video);
 cmds.push(audio);

@@ -1,0 +1,16 @@
+extend layout
+block content
+    #navBar.abs
+        button(id='reset' class='btn btn-primary') Reset Stream
+    #streamWrap
+        iframe(src='/video' id='stream')
+        #controlBar
+            .btn-group
+                button(id='left' class='btn btn-default') Left
+                button(id='forward' class='btn btn-default') Forward
+                button(id='reverse' class='btn btn-default') Reverse
+                button(id='right' class='btn btn-default') Right
+            button(id='stop' class='btn btn-danger') Stop
+                
+                
+                
