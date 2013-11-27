@@ -12,15 +12,21 @@ var sub = redis.createClient(S.redis_port, S.host);
 sub.subscribe('rover');
 
 //run/restart the webcam stream async
+var spawns = [];
 var PASSWORD = 'abc';
-var cmd = 'avconv -s '+S.width+'x'+S.height+' -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 30 http://'+S.host+':'+S.source_video_port+'/'+PASSWORD;
 var terminal = require('child_process');
-terminal.exec('pkill -9 ffmpeg');
-var spawn;
-setTimeout(function(){
-    spawn = terminal.exec(cmd);
-},1000);
+console.log('Starting video and audio streams . . .');
+var video = 'ffmpeg -f video4linux2 -s '+S.width+'x'+S.height+' -r 15 -i /dev/video0 -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
+var audio = 'ffmpeg -f alsa -i hw:0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
+spawns.push(terminal.exec(video));
+spawns.push(terminal.exec(audio));
 
+process.on('SIGINT', function() {
+    for (var i in spawns) {
+        spawns[i].kill();
+    }
+    process.exit();
+});
 /* init the board */
 
 var SerialPort = require("serialport").SerialPort
