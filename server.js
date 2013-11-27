@@ -1,6 +1,6 @@
 
 var S = require('./static_admin/js/settings').Settings;
-console.log('Starting up node server.  Here are settings ', S);
+console.log('Starting up node server.  Here are settings \n', S);
 
 
 var express = require('express');
@@ -16,7 +16,13 @@ var io = require('socket.io').listen(S.command_port);
 var PASSWORD = 'abc';
 var STREAM_MAGIC_BYTES = 'jsmp';
 
-	
+app.get('/', function(request, response){
+  response.render('index');
+});
+app.get('/video', function(request, response){
+  response.render('video');
+});
+
 io.configure(function(){
     //io.set('authorization', function(data, accept){
 	/*if (data.headers.cookie) {
@@ -42,25 +48,33 @@ io.sockets.on('connection', function(socket){
         console.log('User disconnected.');
     });
     
-    socket.on('blink', function(data){
-	console.log('blink');
-	Command.blink();
+    socket.on('forward', function(data){
+	console.log('forward');
+	Command.forward();
+    });
+
+    socket.on('left', function(data){
+	console.log('left');
+	Command.left();
     });
     
-    socket.on('message', function(data){
-	if (data.board) {
-	    if (data.pass == PASSWORD) {
-		console.log('board connected.');
-		B.Board = this;
-	    }
-	}
+    socket.on('right', function(data){
+	console.log('right');
+	Command.right();
     });
+    
+    socket.on('reverse', function(data){
+	console.log('reverse');
+	Command.reverse();
+    });
+    socket.on('stop', function(data){
+	console.log('stop');
+	Command.stop();
+    });
+
     
 }); // end io.sockets.on
 
-app.get('/', function(request, response){
-  response.render('stream-example');
-});
 
 /* namespace for sending command to rover. */
 var Command = {
@@ -68,62 +82,31 @@ var Command = {
     blink:function(){
 	this.on = !this.on;
 	var data = {on:this.on, func:'blink'};
-	console.log('publishing data : ', data);
+	pub.publish('rover', JSON.stringify(data));
+    },
+    forward:function(){
+	var data = {func:'forward'};
+	pub.publish('rover', JSON.stringify(data));
+    },
+    left: function(){
+	var data = {func:'left'};
+	pub.publish('rover', JSON.stringify(data));
+    },
+    right: function(){
+	var data = {func:'right'};
+	pub.publish('rover', JSON.stringify(data));
+    },
+    reverse: function(){
+	var data = {func:'reverse'};
+	pub.publish('rover', JSON.stringify(data));
+    },
+    stop: function(){
+	var data = {func:'stop'};
 	pub.publish('rover', JSON.stringify(data));
     }
 }
 
-//server to send video stream to all connected clients.
-var socketServer = new (require('ws').Server)({port: S.client_video_port});
-socketServer.on('connection', function(socket) {
-        // Send magic bytes and video size to the newly connected socket
-        // struct { char magic[4]; unsigned short width, height;}
-        var streamHeader = new Buffer(8);
-        streamHeader.write(STREAM_MAGIC_BYTES);
-        streamHeader.writeUInt16BE(S.width, 4);
-        streamHeader.writeUInt16BE(S.height, 6);
-        socket.send(streamHeader, {binary:true});
-
-        console.log( 'New WebSocket Connection ('+socketServer.clients.length+' total)' );
-        
-        socket.on('close', function(code, message){
-                console.log( 'Disconnected WebSocket ('+socketServer.clients.length+' total)' );
-        });
-});
-
-socketServer.broadcast = function(data, opts) {
-        for( var i in this.clients ) {
-                this.clients[i].send(data, opts);
-        }
-};
-
-
-// HTTP Server to accept incomming MPEG Stream
-var streamServer = require('http').createServer( function(request, response) {
-        var params = request.url.substr(1).split('/');
-
-        if( params[0] == PASSWORD ) {
-                console.log(
-                        'Stream Connected: ' + request.socket.remoteAddress  );
-                request.on('data', function(data){
-                        socketServer.broadcast(data, {binary:true});
-                });
-        }
-        else {
-                console.log(
-                        'Failed Stream Connection: '+ request.socket.remoteAddress + 
-                        request.socket.remotePort + ' - wrong secret.'
-                );
-                response.end();
-        }
-}).listen(S.source_video_port);
-
-console.log('Listening for MPEG Stream on http://127.0.0.1:'+S.source_video_port+'/<password>');
-console.log('Awaiting WebSocket connections on ws://127.0.0.1:'+S.client_video_port);
-console.log('Listening for commands on '+S.command_port);
+console.log('Listening for commands on ', S.command_port);
+console.log('Listening for http requests on ', S.http_port);
 app.listen(S.http_port);
 
-/*
-the console command to get ffmeg going
-$ ffmpeg -s 640x480 -f video4linux2 -i /dev/video0 -f mpeg1video -b 800k -r 30 http://localhost:8082/abc/
-*/
