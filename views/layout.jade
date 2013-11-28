@@ -7,8 +7,12 @@ html
         link(rel='stylesheet', href='/css/main.css')
         script(src='/js/utils.js')
         script(src='/js/settings.js')
+        script(src='/js/ui.js')
         script(src='/js/main.js')
     body
+        a(href='/')
+            #logo.abs.fs20.color0.mar10
+                | <span class="glyphicon glyphicon-eye-open"></span>
         #wrap
             block content
         #footer
@@ -16,4 +20,17 @@ html
                 p(class='muted credit' class='color0')
                     a(href='mailto:conorpp@vt.edu') Conor Patrick
                     | .
-        
+                    a(href='/about', class='fright right15') About 
+        #templates
+            | <div id="popupSpace" class="hide fixed fright mar15 shadow level5 popupSpace"></div>
+            
+            |<div id="popupTemplate">
+            |<div class="color0 background3">
+            |<div class="abs fright clicker pad10 fs18 pX">X</div>
+            |<div class="background3 pad20  fleft popup">
+            |<p class=" popupTitle fs16 center"><!-- title --></p>
+            |<p class=" popupMessage"><!-- message --></p>
+            |</div>
+            |</div>
+            |</div>            
+            

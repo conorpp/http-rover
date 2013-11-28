@@ -33,6 +33,9 @@ app.get('/', function(request, response){
 app.get('/video', function(request, response){
   response.render('video');
 });
+app.get('/about', function(request, response){
+  response.render('about');
+});
 
 io.configure(function(){
     //io.set('authorization', function(data, accept){

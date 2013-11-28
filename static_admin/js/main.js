@@ -33,9 +33,11 @@
     Command.socket.on('reset', function(data){
         $('iframe').attr('src','');
         $('iframe').attr('src','/video');
-        console.log('reset stream');
+        UI.popup('Stream Reset',
+                 'The stream may take up to 30 seconds ' +
+                 'to come back on.  The camera on the rover just rebooted.', {millis:10000});
     });
-
+$(document).ready(function(){
     $('#forward').on('click', function(){
         Command.forward();
     });
@@ -54,3 +56,9 @@
      $('#reset').on('click', function(){
         Command.reset();
     });
+    $(document).on('click','.pX', function(){
+        var popup = $(this).parents('.popupSpace');
+        popup.hide();
+    });
+
+});
