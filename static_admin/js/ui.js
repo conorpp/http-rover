@@ -8,11 +8,10 @@ var UI = {
                 });
             }
         },
-    /* displays standard message for miliseconds */
+    /* displays standard popup message. */
     popup: function(title, message, options){
         options = options || {};
         clearTimeout(UI.timeout);
-        console.log('popup');
         var popup = $('#popupSpace');
         if(options.clone){
             popup = popup.clone();
@@ -24,6 +23,8 @@ var UI = {
         popup.html(this.T.popup);
         popup.find('.popupTitle').html(title);
         popup.find('.popupMessage').html(message);
+        if (options.error) popup.find('.popupTitle').css('color', 'red');
+        if (options.announcement) popup.find('.popupTitle').css('color', '#8d8cff');
         popup.show('fast');
         if(options.millis!=undefined) this.timeout = setTimeout(function(){popup.hide('fast')},options.millis);
     }

@@ -1,0 +1,20 @@
+extend layout
+block header
+    script(src='/js/admin.js')
+block title
+    | wow much admin.
+block content
+    form(method='post' , action='/logout', id='logout' class="inline")
+        input(type='submit', value='log out')
+    h2.color0 Stats
+
+    each val, key in stats
+        p.color0 #{key} : #{val}
+    
+    h2.color0 Announcement
+    .adminPopup
+        p send a global pop up to all connected users.
+        input(type='text', placeholder='Title', class='block form-control mar5', id='popupTitle')
+        textarea(placeholder='message' class='form-control mar5', id='popupMessage')
+        button(class='btn btn-success', id='send') Send
+    

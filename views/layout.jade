@@ -1,5 +1,5 @@
 !!!5
-html
+html(layout='en')
     head
         title Http Rover
         link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
@@ -9,23 +9,26 @@ html
         script(src='/js/settings.js')
         script(src='/js/ui.js')
         script(src='/js/main.js')
+        block header
     body
         a(href='/')
             #logo.abs.fs20.color0.mar10
                 | <span class="glyphicon glyphicon-eye-open"></span>
         #wrap
+            h1#title
+                block title
             block content
         #footer
             #container
                 p(class='muted credit' class='color0')
                     a(href='mailto:conorpp@vt.edu') Conor Patrick
                     | .
-                    a(href='/about', class='fright right15') About 
-        #templates
-            | <div id="popupSpace" class="hide fixed fright mar15 shadow level5 popupSpace"></div>
-            
+                    a(href='/about', class='fright right15') About
+                    
+        | <div id="popupSpace" class="hide fixed fleft mar15 shadow level5 popupSpace"></div>
+        #templates.hide            
             |<div id="popupTemplate">
-            |<div class="color0 background3">
+            |<div class="color0 background3 ">
             |<div class="abs fright clicker pad10 fs18 pX">X</div>
             |<div class="background3 pad20  fleft popup">
             |<p class=" popupTitle fs16 center"><!-- title --></p>

@@ -1,11 +1,10 @@
 extend layout
+block title
+    | The Rover
 block content
-    #header
-        h2.color0
-            | The Rover
     #navBar.abs
         button(id='reset' class='btn btn-primary') Reset Stream
-    #streamWrap
+    #streamWrap.center
         iframe(src='/video' id='stream')
         #controlBar
             .btn-group
@@ -17,6 +16,8 @@ block content
                     | <span class="glyphicon glyphicon-chevron-right"></span>
             button(id='stop' class='btn btn-danger') 
                 | <span class="glyphicon glyphicon-remove-circle"></span>
+            .info
+                | you can use arrow keys too
                 
                 
                 
