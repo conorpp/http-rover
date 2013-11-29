@@ -5,19 +5,43 @@ block content
     #navBar.abs
         button(id='reset' class='btn btn-primary') Reset Stream
     #streamWrap.center
-        iframe(src='/video' id='stream')
-        #controlBar
-            .btn-group
-                button(id='left' class='btn btn-default') 
-                    | <span class="glyphicon glyphicon-chevron-left"></span>
-                button(id='forward' class='btn btn-default')
-                    | <span class="glyphicon glyphicon-arrow-up"></span>
-                button(id='right' class='btn btn-default')
-                    | <span class="glyphicon glyphicon-chevron-right"></span>
-            button(id='stop' class='btn btn-danger') 
-                | <span class="glyphicon glyphicon-remove-circle"></span>
-            .info
-                | you can use arrow keys too
+        table
+            tr
+                td
+                    iframe(src='/video' id='stream')
+                    #controlBar
+                        button(id='join' class='btn btn-success right15') Control
+                        .btn-group
+                            button(id='left' class='btn btn-default') 
+                                | <span class="glyphicon glyphicon-chevron-left"></span>
+                            button(id='forward' class='btn btn-default')
+                                | <span class="glyphicon glyphicon-arrow-up"></span>
+                            button(id='right' class='btn btn-default')
+                                | <span class="glyphicon glyphicon-chevron-right"></span>
+                        button(id='stop' class='btn btn-danger') 
+                            | <span class="glyphicon glyphicon-remove-circle"></span>
+                        .info
+                            | you can use arrow keys too
+                td#queue
+                    .fs20 queue
+                    table.table.table-striped.color1.bg0
+                        th
+                            th Position
+                            th User
+                            th Time
+                        tr.success
+                            td
+                            td
+                                |user one
+                        tr
+                            td
+                            td
+                                | user two
+                        tr
+                            td
+                            td
+                                | user tree
+                                            
                 
                 
                 

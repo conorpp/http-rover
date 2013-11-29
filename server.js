@@ -4,14 +4,15 @@
 var S = require('./static_admin/js/settings').Settings;
 console.log('Starting up node server.  Here are settings \n', S);
 
-    express = require('express'),
-    stylus = require('stylus'),
-    nib = require('nib'),
-    views = require('./views'),
-    live = require('./live');
+//globals
+express = require('express'),
+stylus = require('stylus'),
+nib = require('nib'),
+redis = require('socket.io/node_modules/redis'),
+views = require('./views'),
+live = require('./live');
     
 var app = express();
-console.log('LIVE : ', live);
 
 function compile(str, path) {
   return stylus(str)

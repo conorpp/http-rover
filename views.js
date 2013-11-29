@@ -59,6 +59,9 @@ var views = {
             }
             res.end();
         });
+        this.app.post('/join', function(req, res){
+            
+        });
     },
     
     /*

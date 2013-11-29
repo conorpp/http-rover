@@ -5,6 +5,7 @@ var UI = {
         getTemplates : function(){
                 $(document).ready(function(){
                     UI.T.popup = $('#popupTemplate').html();
+                    UI.T.nameTemplate = $('#nameTemplate').html();
                 });
             }
         },

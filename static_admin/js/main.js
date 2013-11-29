@@ -2,6 +2,7 @@
 
 var Command = {
     on:false,
+    id:null,
     connect: function(){
         this.socket = io.connect(Settings.host, {port: Settings.command_port});
     },
@@ -27,6 +28,9 @@ Command.socket.on('announce', function(data){
 });
 
 $(document).ready(function(){
+    
+    Command.id = Cookie.get('commandId');
+    
     $('#forward').on('click', function(){
         Command.write('forward');
     });
@@ -45,9 +49,61 @@ $(document).ready(function(){
      $('#reset').on('click', function(){
         Command.write('reset');
     });
+     
+    $('#join').click(function(){    //step one: enter name
+        UI.popup('Enter a name', UI.T.nameTemplate);
+    });
+     
+    $(document).on('click', '.joinSubmit', function(){
+        var name = $.trim($(this).siblings('input.name').val());
+        if (name=='') {
+            $(this).siblings('.errors').html('what\'s your name?');
+            return;
+        }
+        $(this).parents('.popupSpace').hide();
+        join(name);
+    });
+    
     $(document).on('click','.pX', function(){
         var popup = $(this).parents('.popupSpace');
         popup.hide();
     });
 
 });
+
+function join(name){
+    $.ajax({
+        url : '/join',
+        type: "POST",
+        data : {name:name},
+        success:function(data, textStatus, jqXHR) {
+            console.log('got command id , ', data.id);
+            command.id = data.id;
+        },
+        
+    });
+}
+
+var Cookie = {
+    
+    set: function(c_name,value,exdays){
+        var exdate=new Date();
+        exdate.setDate(exdate.getDate() + exdays);
+        var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
+        document.cookie=c_name + "=" + c_value;
+    },
+    
+    get: function(c_name){
+        var c_value = document.cookie;
+        var c_start = c_value.indexOf(" " + c_name + "=");
+        if (c_start == -1) c_start = c_value.indexOf(c_name + "=");
+        if (c_start == -1) c_value = null;
+        else{
+            c_start = c_value.indexOf("=", c_start) + 1;
+            var c_end = c_value.indexOf(";", c_start);
+            if (c_end == -1) c_end = c_value.length;
+            c_value = unescape(c_value.substring(c_start,c_end));
+        }
+        return c_value;
+    }
+};

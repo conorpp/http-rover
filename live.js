@@ -5,6 +5,7 @@ var live = {
     
     // data
     clientCount:0,
+    queue:[],
     
     socket:{
         
@@ -53,17 +54,16 @@ var live = {
                     live.redis.pub.publish('rover', JSON.stringify(data));
                 });
                 
+                
             });
         }
     },
     
     redis: {
         listen: function(port, host){
-            this.port = port;
-            this.host = host;
-            this.r = require('socket.io/node_modules/redis');
-            this.pub = live.redis.r.createClient(port, host);
-            this.sub = live.redis.r.createClient(port, host);
+            //redis is a global from server.js
+            this.pub = redis.createClient(port, host);
+            this.sub = redis.createClient(port, host);
             this.sub.subscribe('feedback');
             this.events();
             return live;
