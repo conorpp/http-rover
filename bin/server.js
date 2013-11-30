@@ -10,6 +10,7 @@ stylus = require('stylus'),
 nib = require('nib'),
 redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
+db = require('./database'),
 live = require('./live');
     
 var app = express();
@@ -34,7 +35,8 @@ app.use(express.bodyParser());
 console.log('Listening for http requests on ', S.http_port);
 console.log('Listening for commands on ', S.command_port);
 console.log('Redis connected to '+S.host+':'+S.redis_port);
+console.log('Database connected to '+S.host+':'+S.redis_port);
 app.listen(S.http_port);
 views.listen(app);
 live.socket.listen(S.command_port).redis.listen(S.redis_port, S.host);
-
+db.listen(S.redis_port, S.host);

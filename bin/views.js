@@ -60,7 +60,21 @@ var views = {
             res.end();
         });
         this.app.post('/join', function(req, res){
-            
+            //res.writeHead(200);
+            if (req.signedCookies.command ) {
+                var rData = {error:'You\'re already in the queue'};
+                res.end(JSON.stringify(rData));
+            }else{
+                var day = 1000*60*60*24;    
+                var queueSecs = 60;
+                var name = (req.body.name+'').substr(0,20);
+                db.store.incr('commandCount');
+                db.store.get('commandCount', function(err, id){
+                    res.cookie('command', id, {maxAge:day, signed:true});
+                    var rData ={id:id, time:queueSecs, position:live.queue.length, name:name};
+                    res.end(JSON.stringify(rData));
+                });
+            }
         });
     },
     

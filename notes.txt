@@ -1,7 +1,0 @@
-usb to uart
-FTDI chip
-
-sabertooth board
-connect to tty on linux to send commands
-
-commands will be in sabertooth manual

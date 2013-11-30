@@ -26,6 +26,18 @@ Command.socket.on('reset', function(data){
 Command.socket.on('announce', function(data){
     UI.popup(data.title, data.message, {announcement:true});
 });
+Command.socket.on('promote', function(data){
+    console.log('you have been promoted.');
+    UI.popup('Command', 'You can now control the rover. You have 1 minute.', {millis:2500});
+});
+Command.socket.on('demote', function(data){
+    console.log('you have been demoted.');
+    UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5500});
+    Cookie.del('command');
+});
+Command.socket.on('changeCommand', function(data){
+    console.log('the command has changed.');
+});
 
 $(document).ready(function(){
     
@@ -76,9 +88,15 @@ function join(name){
         url : '/join',
         type: "POST",
         data : {name:name},
+        dataType: 'json',
         success:function(data, textStatus, jqXHR) {
+            if (data.error) {
+                UI.popup('Error', data.error, {error:true, millis:3800});
+                return;
+            }
             console.log('got command id , ', data.id);
-            command.id = data.id;
+            Command.id = data.id;
+            Command.socket.emit('join', {id:data.id, name:data.name});
         },
         
     });
@@ -105,5 +123,8 @@ var Cookie = {
             c_value = unescape(c_value.substring(c_start,c_end));
         }
         return c_value;
+    },
+    del : function(name) {
+        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
 };
