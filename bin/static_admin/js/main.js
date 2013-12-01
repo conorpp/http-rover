@@ -3,13 +3,32 @@
 var Command = {
     on:false,
     id:null,
+    inCommand:false,
     connect: function(){
         this.socket = io.connect(Settings.host, {port: Settings.command_port});
     },
     write: function(command){
-        this.on = !this.on;
-        this.socket.emit('command', {func:command});
-    }
+        if (!this.inCommand) return;
+        this.socket.emit('command', {func:command, id:this.id});
+    },
+    
+    promote: function(millis){
+        millis = millis || 1000*60;
+        console.log('you have been promoted.');
+        var secs = Math.floor(millis/1000);
+        UI.popup('Command',
+                 'You can now control the rover. You have '+secs+' seconds.',
+                 {millis:2500});
+        UI.timer(millis);
+        this.id = Cookie.get('commandId');
+    },
+    
+    demote: function(){
+        console.log('you have been demoted.');
+        UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5500});
+        Cookie.del('commandId');
+        this.id = null;
+    },
 };
 Command.connect();
     
@@ -19,7 +38,8 @@ Command.socket.on('reset', function(data){
     $('iframe').attr('src','/video');
     UI.popup('Stream Reset',
             'The stream may take up to 30 seconds ' +
-            'to come back on.  The camera on the rover just rebooted.', {millis:10000});
+            'to come back on.  The camera on the rover just rebooted.',
+            {millis:10000, announcement:true});
 });
 
 /* display announcement as popup. */
@@ -27,15 +47,10 @@ Command.socket.on('announce', function(data){
     UI.popup(data.title, data.message, {announcement:true});
 });
 Command.socket.on('promote', function(data){
-    console.log('you have been promoted.');
-    var secs = Math.floor(data.millis/1000);
-    UI.popup('Command', 'You can now control the rover. You have '+secs+' seconds.', {millis:2500});
-    UI.timer(data.millis);
+    Command.promote(data.millis);
 });
 Command.socket.on('demote', function(data){
-    console.log('you have been demoted.');
-    UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5500});
-    Cookie.del('command');
+    Command.demote();
 });
 Command.socket.on('changeCommand', function(data){
     console.log('the command has changed.');
@@ -49,10 +64,13 @@ Command.socket.on('removeQueue', function(data){
     console.log('removed que member , ', data);
     UI.removeQueue(data.position);
 });
-
+Command.socket.on('syncTime', function(data){
+    console.log('got time sync data , ', data);
+    UI.syncTime(data.queueTime);
+});
 $(document).ready(function(){
     
-    getQueue();
+    getData();
 
     Command.id = Cookie.get('commandId');
     
@@ -86,16 +104,16 @@ $(document).ready(function(){
             return;
         }
         $(this).parents('.popupSpace').hide();
-        join(name);
+        join(name.substr(0,20));
     });
     
     $(document).on('click','.pX', function(){
-        var popup = $(this).parents('.popupSpace');
-        popup.hide();
+        $(this).parents('.popupSpace').hide();
     });
 
 });
 
+/* for joining the queue. */
 function join(name){
     $.ajax({
         url : '/join',
@@ -115,13 +133,15 @@ function join(name){
     });
 }
 
-function getQueue(){
+/* for loading current data when page loads. */
+function getData(){
     $.ajax({
-        url : '/queue',
+        url : '/data',
         type: "GET",
         dataType: 'json',
         success:function(data, textStatus, jqXHR) {
-            if (data.error) {
+            console.log('got data data', data);
+            if (data.error) {                   //queue
                 UI.popup('Error', data.error, {error:true, millis:3800});
             }else if (data.html) {
                 console.log('got queue  , ', data);
@@ -129,6 +149,11 @@ function getQueue(){
             }else{
                 UI.noQueue();
             }
+            if (data.popup) {
+                data.popup = JSON.parse(data.popup);
+                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:5000});
+            }
+            
         },
         
     });

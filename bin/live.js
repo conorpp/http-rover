@@ -6,9 +6,10 @@ var live = {
     // data
     clientCount:0,
     queue:[],
-    time:1000*118.5,          //ms
+    time:1000*50,          //ms
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
+    commandId:null,
     
     /* for attempting to reload queue in quick server restarts. */
     initQueue: function(){
@@ -55,15 +56,28 @@ var live = {
         });
     },
     
+    logInterval:null,
     beginQueue: function(){
         live.queueInterval = setInterval(function(){
             console.log('interval executed. length - ', live.queue.length);
             
             live.changeCommand();
             
-            if (live.queue.length <= 0) clearInterval(live.queueInterval);
+            if (live.queue.length <= 0 ) clearInterval(live.queueInterval);
             
         }, live.time);
+        
+        //logging purposes.
+        clearInterval(this.logInterval);
+        var copyTime = Math.floor(this.time/1000);
+        console.log('current queue time - ', copyTime);
+        this.logInterval = setInterval(function(){
+            copyTime--;
+            console.log('current queue time - ', copyTime);
+            if (copyTime <= 0)  clearInterval(live.logInterval);
+            
+        },1000);
+        
     },
     
     /* move queue, change command.  promote is bool to indicate promote or demote current socket.  default false. */
@@ -86,12 +100,17 @@ var live = {
     promote: function(data){
         data.socket.emit('promote', {millis:this.time});
         data.start = new Date().getTime();
+        this.commandId = data.id;
         
     },
     demote: function(data, position){
         data.socket.emit('demote');
         
         live.socket.io.sockets.emit('removeQueue', {position:position || 1});
+    },
+    
+    isCommander: function(id){
+        return (id == this.commandId);
     },
     
     socket:{
@@ -137,19 +156,27 @@ var live = {
                 });
                 
                 socket.on('command', function(data){
-                    console.log('command: ', data.func);
-                    live.redis.pub.publish('rover', JSON.stringify(data));
+                    if (live.isCommander(data.id)) {
+                        console.log('command: ', data.func);
+                        live.redis.pub.publish('rover', JSON.stringify(data));
+                    }else console.log('Command Denied.  ('+data.func+')');
                 });
                 
                 socket.on('join', function(data){
-                    console.log('cookies?', socket.handshake.headers);
                     live.addQueue(data.name, data.id, socket);
-                    
                 });
                 
-                
             });
-        }
+            
+            /* for keeping times synced with all clients */
+            setInterval(function(){
+                if (live.queue.length && live.queue[0].start) {
+                    var queueTime = live.time - (new Date().getTime() - live.queue[0].start);
+                    live.socket.io.sockets.emit('syncTime', {queueTime:queueTime});
+                }
+            },10*1000);
+        },
+        
     },
     
     redis: {

@@ -5,23 +5,33 @@ $(document).ready(function(){
         var title = $.trim($('#popupTitle').val());
         var message = $.trim($('#popupMessage').val());
         if (title=='' || message =='') {
-            UI.popup('Error','You need to fill in a title and a message',{error:true, millis:350330});
+            UI.popup('Error','You need to fill in a title and a message',{error:true, millis:3500});
             return;
         }
-        announce(title, message);
+        announce({title:title, message:message});
         $('#popupTitle').val('');
         $('#popupMessage').val('');
     });
     
+    $('#deletePopup').click(function(){
+        announce({del:true});     //overwrite with blank 
+        $('#savePopup').attr('checked', false);
+    });
 });
 
-function announce(title, message){
+function announce(context){
+    context = context || {};
+    if (!context.del) context.save = $('#savePopup').is(':checked');
     $.ajax({
         url : '/announce',
         type: "POST",
-        data : {title:title, message:message},
+        data : context,
         success:function(data, textStatus, jqXHR) {
             console.log('annoucement made successfully.');
+            if (context.del && !data.error) {
+                UI.popup('Popup removed', 'The popup won\'t display on every page load now.', {millis:5000});
+            }
+
         },
         
     });

@@ -6,15 +6,21 @@ block title
 block content
     form(method='post' , action='/logout', id='logout' class="inline")
         input(type='submit', value='log out')
-    h2.color0 Stats
-
+    h2.color0.head Stats
+    | - current info for application - 
     each val, key in stats
         p.color0 #{key} : #{val}
     
-    h2.color0 Announcement
+    h2.color0.head Announcement
     .adminPopup
-        p send a global pop up to all connected users.
-        input(type='text', placeholder='Title', class='block form-control mar5', id='popupTitle')
-        textarea(placeholder='message' class='form-control mar5', id='popupMessage')
+        | - send a global pop up to all connected users. -
+        lable
+            input(type='checkbox', class='checkbox inline', id='savePopup', checked=checked)
+            | Save and open on every page load.
+        input(type='text', placeholder='Title', class='block form-control mar5', id='popupTitle', value=title)
+        textarea(placeholder='message' class='form-control mar5', id='popupMessage') #{message}
         button(class='btn btn-success', id='send') Send
+        - if(popup)
+            button(class='btn btn-danger', id='deletePopup') Delete
+        
     

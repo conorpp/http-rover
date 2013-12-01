@@ -79,6 +79,10 @@ footer{
 
 .shadow{box-shadow: -2px 2px 20px 1px #000;}
 
+.head{
+    text-decoration: underline;
+}
+
 .popupSpace{
     top:0px;
     max-width: 28em;

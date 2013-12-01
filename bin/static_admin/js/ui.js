@@ -1,6 +1,8 @@
 
 var UI = {
     timeout:null,
+    queueInterval:null,             //for clearing interval on global queue timer
+    
     T : {
         getTemplates : function(){
                 $(document).ready(function(){
@@ -10,6 +12,11 @@ var UI = {
             }
         },
     /* displays standard popup message. */
+    /*
+    @option error - displays error type popup - bool 
+    @option announcment - displays announcemet type popup - bool
+    @option millis - ms for popup to display.  default forever - number
+    */
     popup: function(title, message, options){
         options = options || {};
         clearTimeout(UI.timeout);
@@ -46,10 +53,20 @@ var UI = {
     //for globally adding to queue ui
     addQueue: function(html, position){
         position = position || 1;
-        $('#noQ').remove();
+        if (html) $('#noQ').remove();
         $('#queue').find('tbody').append(html);
-        if (position==1) {
+        if (position==1 && $('#pos1').length) {
             $('#pos1').addClass('success');
+            var time = $('#pos1').find('td.timer');
+            var secs = parseInt(time.text());
+            UI.queueInterval = setInterval(function(){
+                secs = parseInt(time.text()) - 1;
+                if (secs<0) {
+                    clearInterval(UI.queueInterval);
+                    secs='';
+                }
+                time.html(secs);
+            },1000);
         }
     },
     
@@ -57,6 +74,7 @@ var UI = {
     removeQueue: function(position){
         position = position || 1;
         $('#pos'+position).remove();
+        clearInterval(this.queueInterval);
         if ($('tr.queueMember').length){
             $('.queueMember').each(function(){
                 var newPos = parseInt(this.id.replace('pos',''))-1;
@@ -65,17 +83,19 @@ var UI = {
                 }
             });
         }else this.noQueue();
-        if (position==1) {
-            $('#pos1').addClass('success');
-        }
+        this.addQueue(); //call it with no args to set new css class and timer
     },
     
     /* show queue is empty message. */
     noQueue: function(){
         console.log('No queue');
-        var noQ = '<tr><td id="noQ">No queue</td></tr>'
+        var noQ = '<tr><td id="noQ">Empty</td></tr>'
         this.addQueue(noQ);
     },
+    
+    syncTime: function(millis){
+        $('#pos1').find('td.timer').html(Math.floor(millis/1000));
+    }
 };
 
 UI.T.getTemplates();

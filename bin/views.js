@@ -27,7 +27,19 @@ var views = {
         /* admin details.  check if admin cookie else login. */
         this.app.get('/admin', function(req, res){
             if (views.authent(req)) {
-                res.render('admin', {stats:views.stats()});
+                var stats = views.stats();
+                db.store.get('adminPopup', function(err, popup){
+                    console.log('admin popup : ', popup);
+                    if (popup) {
+                        popup = JSON.parse(popup);
+                        var message = popup.message,
+                            title = popup.title,
+                            checked=true;
+                    }else var message = '',
+                            title = '',
+                            checked = false;
+                    res.render('admin', {stats:stats, popup:popup, title:title, message:message, checked:checked});
+                });
             }else{
                 res.render('login');
             }
@@ -53,10 +65,19 @@ var views = {
         /* sends popup announcement to all clients. */
         this.app.post('/announce', function(req, res){
             if (views.authent(req)) {
-                live.socket.io.sockets.emit('announce', {title: req.body.title, message: req.body.message});
+                var context =  {title: req.body.title, message: req.body.message};
+                if (req.body.title) {
+                    live.socket.io.sockets.emit('announce', context);
+                }
+                console.log('req body', req.body);
+                if (req.body.save && JSON.parse(req.body.save)) {
+                    db.store.set('adminPopup', JSON.stringify(context));
+                }else db.store.del('adminPopup');
+                
             }else{
                 res.writeHead(403);
             }
+            
             res.end();
         });
         this.app.post('/join', function(req, res){
@@ -70,19 +91,20 @@ var views = {
                 var name = (req.body.name+'').substr(0,20);
                 db.store.incr('commandCount');
                 db.store.get('commandCount', function(err, id){
-                    res.cookie('command', id, {maxAge:expire, signed:true});
+                    res.cookie('commandId', id, {maxAge:expire, signed:true});
                     var rData ={id:id, time:queueSecs, position:live.queue.length, name:name};
                     res.end(JSON.stringify(rData));
                 });
             }
         });
         
-        /* returns html for queue. */
-        this.app.get('/queue', function(req, res){
+        /* returns data for client. */
+        this.app.get('/data', function(req, res){
             app.render('templates/queue', {queue:live.queue}, function(err, html){
-                if (err) console.log('queue get error ', err);
-                console.log('html  for queue ', html);
-                res.end(JSON.stringify({html:html}));
+                db.store.get('adminPopup', function(err2, popup){
+                    if (err || err2) console.log('queue get error '+ err+'\n'+err2);
+                    res.end(JSON.stringify({html:html, popup:popup}));
+                });
             });
         });
     },
@@ -98,11 +120,12 @@ var views = {
     authent: function(req){
         return (req.signedCookies.admin == this.adminStatus);
     },
-    /* returns live stats about server */
+    /* returns sync live stats about server for admin */
     stats: function(){
 
         return {
-            'Client count': live.clientCount
+            'Connected users': live.clientCount,
+            'Queue length': live.queue.length
             };
     }
     

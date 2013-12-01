@@ -1,17 +1,17 @@
 
-/* top level server entity */
+/* top level server entity.*/
 
 var S = require('./static_admin/js/settings').Settings;
 console.log('Starting up node server.  Here are settings \n', S);
 
-//globals
+/*  the globals.  Never reuse these names.  */
 express = require('express'),
 redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
 db = require('./database'),
-live = require('./live');
-    
+live = require('./live'),
 app = express();
+/******************************************/
 
 app.set('view engine','jade');
 
