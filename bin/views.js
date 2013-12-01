@@ -125,7 +125,8 @@ var views = {
 
         return {
             'Connected users': live.clientCount,
-            'Queue length': live.queue.length
+            'Queue length': live.queue.length,
+            'Command total': live.commandCount
             };
     }
     

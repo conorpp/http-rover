@@ -15,6 +15,7 @@ var database = {
         database.store.get('commandCount',function(err, val){
             if (!val) database.store.set('commandCount', 1);
             console.log('commandCount - ', val);
+            live.commandCount = val;
         });
     }
     

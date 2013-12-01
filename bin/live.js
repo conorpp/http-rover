@@ -10,6 +10,7 @@ var live = {
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     commandId:null,
+    commandCount:0,       //total of people commanded rover.
     
     /* for attempting to reload queue in quick server restarts. */
     initQueue: function(){
@@ -101,6 +102,7 @@ var live = {
         data.socket.emit('promote', {millis:this.time});
         data.start = new Date().getTime();
         this.commandId = data.id;
+        this.commandCount++;
         
     },
     demote: function(data, position){
