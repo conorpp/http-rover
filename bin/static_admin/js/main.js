@@ -42,7 +42,7 @@ Command.socket.on('changeCommand', function(data){
 });
 Command.socket.on('addQueue', function(data){
     console.log('new queue member , ', data);
-    UI.addQueue(data.position, data.html);
+    UI.addQueue(data.html, data.position);
 });
 
 Command.socket.on('removeQueue', function(data){
@@ -53,6 +53,7 @@ Command.socket.on('removeQueue', function(data){
 $(document).ready(function(){
     
     getQueue();
+
     Command.id = Cookie.get('commandId');
     
     $('#forward').on('click', function(){
@@ -122,10 +123,12 @@ function getQueue(){
         success:function(data, textStatus, jqXHR) {
             if (data.error) {
                 UI.popup('Error', data.error, {error:true, millis:3800});
-                return;
+            }else if (data.html) {
+                console.log('got queue  , ', data);
+                UI.addQueue(data.html);
+            }else{
+                UI.noQueue();
             }
-            console.log('got queue  , ', data);
-            $('#queue').find('tbody').append(data.html);
         },
         
     });

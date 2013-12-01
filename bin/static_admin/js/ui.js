@@ -44,7 +44,9 @@ var UI = {
     },
     
     //for globally adding to queue ui
-    addQueue: function(position, html){
+    addQueue: function(html, position){
+        position = position || 1;
+        $('#noQ').remove();
         $('#queue').find('tbody').append(html);
         if (position==1) {
             $('#pos1').addClass('success');
@@ -55,15 +57,25 @@ var UI = {
     removeQueue: function(position){
         position = position || 1;
         $('#pos'+position).remove();
-        $('.queueMember').each(function(){
-            var newPos = parseInt(this.id.replace('pos',''))-1;
-            if (newPos>=position) {
-                $(this).attr('id', 'pos'+newPos);
-            }
-        });
+        if ($('tr.queueMember').length){
+            $('.queueMember').each(function(){
+                var newPos = parseInt(this.id.replace('pos',''))-1;
+                if (newPos>=position) {
+                    $(this).attr('id', 'pos'+newPos);
+                }
+            });
+        }else this.noQueue();
         if (position==1) {
             $('#pos1').addClass('success');
         }
-    }
+    },
+    
+    /* show queue is empty message. */
+    noQueue: function(){
+        console.log('No queue');
+        var noQ = '<tr><td id="noQ">No queue</td></tr>'
+        this.addQueue(noQ);
+    },
 };
+
 UI.T.getTemplates();
