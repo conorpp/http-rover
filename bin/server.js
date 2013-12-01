@@ -13,7 +13,7 @@ views = require('./views'),
 db = require('./database'),
 live = require('./live');
     
-var app = express();
+app = express();
 
 function compile(str, path) {
   return stylus(str)

@@ -8,6 +8,7 @@ block content
         table
             tr
                 td
+                    #time.fs18 
                     iframe(src='/video' id='stream')
                     #controlBar
                         button(id='join' class='btn btn-success right15') Control
@@ -25,22 +26,12 @@ block content
                 td#queue
                     .fs20 queue
                     table.table.table-striped.color1.bg0
-                        th
-                            th Position
-                            th User
-                            th Time
-                        tr.success
-                            td
-                            td
-                                |user one
                         tr
-                            td
-                            td
-                                | user two
-                        tr
-                            td
-                            td
-                                | user tree
+                            th position
+                            th user
+                            th time
+                            
+
                                             
                 
                 

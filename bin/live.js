@@ -6,7 +6,8 @@ var live = {
     // data
     clientCount:0,
     queue:[],
-    time:1000*6,          //ms
+    time:1000*118.5,          //ms
+    secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     
     /* for attempting to reload queue in quick server restarts. */
@@ -27,10 +28,12 @@ var live = {
     
     /* adds to queue and returns id. */
     addQueue:function(name, id, socket){
-        
+        var secs = Math.floor(this.time/1000);
         this.queue.push({
             name:name,
             id:id,
+            time:secs,
+            position: this.queue.length+1,
             socket:socket
         });
         console.log('queue added to. length: '+this.queue.length);
@@ -39,6 +42,17 @@ var live = {
             this.changeCommand(true);   //true indicates to promote
             this.beginQueue();
         }
+        //render html to string.
+        var context = {
+            name:name,
+            position:this.queue.length,
+            time:secs
+        }
+
+        app.render('templates/queue', {queue:[context]}, function(err, html){
+            context.html = html;
+            live.socket.io.sockets.emit('addQueue', context);
+        });
     },
     
     beginQueue: function(){
@@ -65,17 +79,19 @@ var live = {
                 this.promote(this.queue[0]);
             }else console.log('queue depleted.');
         }
-
+        
         this.socket.io.sockets.emit('changeCommand');
     },
     
     promote: function(data){
-        data.socket.emit('promote');
+        data.socket.emit('promote', {millis:this.time});
         data.start = new Date().getTime();
         
     },
-    demote: function(data){
+    demote: function(data, position){
         data.socket.emit('demote');
+        
+        live.socket.io.sockets.emit('removeQueue', {position:position || 1});
     },
     
     socket:{

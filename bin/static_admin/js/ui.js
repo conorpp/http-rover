@@ -28,6 +28,42 @@ var UI = {
         if (options.announcement) popup.find('.popupTitle').css('color', '#8d8cff');
         popup.show('fast');
         if(options.millis!=undefined) this.timeout = setTimeout(function(){popup.hide('fast')},options.millis);
+    },
+    //display timer
+    timer: function(millis){
+        var secs = Math.floor(millis/1000);
+        $('#time').html(secs);
+        var interval = setInterval(function(){
+            secs--;
+            if (secs<0) {
+                clearInterval(interval);
+                secs='';
+            }
+            $('#time').html(secs);
+        },1000);
+    },
+    
+    //for globally adding to queue ui
+    addQueue: function(position, html){
+        $('#queue').find('tbody').append(html);
+        if (position==1) {
+            $('#pos1').addClass('success');
+        }
+    },
+    
+    /* removes from queue and updates. global. */
+    removeQueue: function(position){
+        position = position || 1;
+        $('#pos'+position).remove();
+        $('.queueMember').each(function(){
+            var newPos = parseInt(this.id.replace('pos',''))-1;
+            if (newPos>=position) {
+                $(this).attr('id', 'pos'+newPos);
+            }
+        });
+        if (position==1) {
+            $('#pos1').addClass('success');
+        }
     }
 };
 UI.T.getTemplates();

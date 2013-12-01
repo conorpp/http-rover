@@ -28,7 +28,9 @@ Command.socket.on('announce', function(data){
 });
 Command.socket.on('promote', function(data){
     console.log('you have been promoted.');
-    UI.popup('Command', 'You can now control the rover. You have 1 minute.', {millis:2500});
+    var secs = Math.floor(data.millis/1000);
+    UI.popup('Command', 'You can now control the rover. You have '+secs+' seconds.', {millis:2500});
+    UI.timer(data.millis);
 });
 Command.socket.on('demote', function(data){
     console.log('you have been demoted.');
@@ -38,9 +40,19 @@ Command.socket.on('demote', function(data){
 Command.socket.on('changeCommand', function(data){
     console.log('the command has changed.');
 });
+Command.socket.on('addQueue', function(data){
+    console.log('new queue member , ', data);
+    UI.addQueue(data.position, data.html);
+});
+
+Command.socket.on('removeQueue', function(data){
+    console.log('removed que member , ', data);
+    UI.removeQueue(data.position);
+});
 
 $(document).ready(function(){
     
+    getQueue();
     Command.id = Cookie.get('commandId');
     
     $('#forward').on('click', function(){
@@ -97,6 +109,23 @@ function join(name){
             console.log('got command id , ', data.id);
             Command.id = data.id;
             Command.socket.emit('join', {id:data.id, name:data.name});
+        },
+        
+    });
+}
+
+function getQueue(){
+    $.ajax({
+        url : '/queue',
+        type: "GET",
+        dataType: 'json',
+        success:function(data, textStatus, jqXHR) {
+            if (data.error) {
+                UI.popup('Error', data.error, {error:true, millis:3800});
+                return;
+            }
+            console.log('got queue  , ', data);
+            $('#queue').find('tbody').append(data.html);
         },
         
     });

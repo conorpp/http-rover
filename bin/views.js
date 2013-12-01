@@ -13,7 +13,7 @@ var views = {
     get: function(){
         /*public views*/
         this.app.get('/', function(req, res){
-          res.render('index');
+            res.render('index');
         });
         
         this.app.get('/video', function(req, res){
@@ -61,20 +61,29 @@ var views = {
         });
         this.app.post('/join', function(req, res){
             //res.writeHead(200);
-            if (req.signedCookies.command ) {
+            if (req.signedCookies.command && false) {
                 var rData = {error:'You\'re already in the queue'};
                 res.end(JSON.stringify(rData));
             }else{
-                var day = 1000*60*60*24;    
+                var expire = live.time+live.time*.1;    
                 var queueSecs = 60;
                 var name = (req.body.name+'').substr(0,20);
                 db.store.incr('commandCount');
                 db.store.get('commandCount', function(err, id){
-                    res.cookie('command', id, {maxAge:day, signed:true});
+                    res.cookie('command', id, {maxAge:expire, signed:true});
                     var rData ={id:id, time:queueSecs, position:live.queue.length, name:name};
                     res.end(JSON.stringify(rData));
                 });
             }
+        });
+        
+        /* returns html for queue. */
+        this.app.get('/queue', function(req, res){
+            app.render('templates/queue', {queue:live.queue}, function(err, html){
+                if (err) console.log('queue get error ', err);
+                console.log('html  for queue ', html);
+                res.end(JSON.stringify({html:html}));
+            });
         });
     },
     
