@@ -147,7 +147,7 @@ var live = {
                 socket.on('disconnect', function(data){
                     live.clientCount--;
                     console.log('User disconnected. total: ', live.clientCount);
-                    if (this.commandId) {
+                    if (this.commandId) {   //lose queue
                         for(var i in live.queue){
                             if (live.queue[i].id == this.commandId) {
                                 live.demote(live.queue[i]);

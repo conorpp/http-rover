@@ -4,9 +4,30 @@ var Command = {
     on:false,
     id:null,
     inCommand:false,
+    disconnect:false,
     
     connect: function(){
         this.socket = io.connect(Settings.host, {port: Settings.command_port});
+        this.socket.on('reconnecting', function(){
+            if (Command.disconnect) {
+                var lost = 'Your queue position has been lost.  We are sorry.';
+                Command.demote(true);
+            }else var lost = '';
+            UI.popup('Lost connection','Attempting to reconnect . . . <br>'+lost);
+        });
+        this.socket.on('reconnect_failed', function () {
+            UI.popup('Disconnected','We failed to reconnect you.  Sorry about that.',{millis:4000});
+        });
+        this.socket.on('reconnect', function () {
+            if (Command.disconnect) {
+                var lost = 'We\'d be delighted if you rejoined the queue.';
+            }else var lost = '';
+            UI.popup('Connected','We successfully reconnected you. <br>'+lost,{millis:4100});
+        });
+        this.socket.on('disconnect', function () {
+            Command.disconnect = Command.inCommand;
+            UI.popup('Disconnected','');
+        });
     },
     
     millis: new Date().getTime(),
@@ -45,10 +66,13 @@ var Command = {
         });
     },
     
-    demote: function(){
+    demote: function(hidePopup){
         console.log('you have been demoted.');
-        UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5000});
+        hidePopup = hidePopup || false;
+        if (!hidePopup) 
+            UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5000});
         Cookie.del('commandId');
+        $('#time').html(0);
         this.id = null;
         this.inCommand = false;
         $('html,body').unbind('keydown keyup');
@@ -175,6 +199,7 @@ $(document).ready(function(){
      
     $('#join').click(function(){    //step one: enter name
         UI.popup('Enter a name', UI.T.nameTemplate);
+        $('input.name').focus();
     });
      
     $(document).on('click', '.joinSubmit', function(){
