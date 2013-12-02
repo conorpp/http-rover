@@ -31,6 +31,18 @@ var Command = {
         UI.timer(millis);
         this.id = Cookie.get('commandId');
         this.inCommand = true;
+        $('html,body').keydown(function(e){
+            var c = Command.getCommand(e.keyCode);
+            if (c) {
+                e.preventDefault();
+                Command.write(c);
+                $('#'+c).addClass('active');
+            }
+        });
+        $('html, body').keyup(function(e){
+            var c = Command.getCommand(e.keyCode);
+            if (c) $('#'+c).removeClass('active');
+        });
     },
     
     demote: function(){
@@ -39,7 +51,30 @@ var Command = {
         Cookie.del('commandId');
         this.id = null;
         this.inCommand = false;
+        $('html,body').unbind('keydown keyup');
     },
+    
+    getCommand: function(keyCode){
+        switch (keyCode) {
+            case 37:
+                return 'left';
+            break;
+            case 38:
+                return 'forward';
+            break;
+            case 39:
+                return 'right';
+            break;
+            case 40:
+                return 'reverse';
+            break;
+            default:
+                return false;
+            break;
+        }
+        return false;
+    }
+    
 };
 Command.connect();
     
@@ -97,7 +132,6 @@ $(document).ready(function(){
     });
     
     $('html,body').keydown(function(e){
-        e.preventDefault();
         switch (e.keyCode) {
             case 37:
                 var c = 'left';
@@ -115,6 +149,7 @@ $(document).ready(function(){
                 return;
             break;
         }
+        e.preventDefault();
         Command.write(c);
         $('#'+c).addClass('active');
     });
