@@ -14,18 +14,7 @@ var live = {
     
     /* for attempting to reload queue in quick server restarts. */
     initQueue: function(){
-    /*    db.store.get('queue', function(err, val){
-            if (!val) return;
-            live.queue = JSON.parse(val);
-            console.log('the queue has been loaded.  length - ', live.queue.length);
-            if (live.queue.length) {
-                var time = live.time - (live.queue[0].start - Date().getTime());    //recalculate time remaining.
-                setTimeout(function(){
-                    live.changeCommand();
-                    if (live.queue.length) live.beginQueue();
-                }, time);
-            }
-        });*/
+
     },
     
     /* adds to queue and returns id. */
@@ -69,7 +58,7 @@ var live = {
         }, live.time);
         
         //logging purposes.
-        clearInterval(this.logInterval);
+      /*  clearInterval(this.logInterval);
         var copyTime = Math.floor(this.time/1000);
         console.log('current queue time - ', copyTime);
         this.logInterval = setInterval(function(){
@@ -77,7 +66,7 @@ var live = {
             console.log('current queue time - ', copyTime);
             if (copyTime <= 0)  clearInterval(live.logInterval);
             
-        },1000);
+        },1000);*/
         
     },
     
@@ -112,7 +101,11 @@ var live = {
     },
     
     isCommander: function(id){
-        return (id == this.commandId);
+        var split = id.split(':');
+        var sign = split[1],
+            val = split[0];
+        var hash = crypto.createHmac('sha1', SECRET).update(val).digest('hex');
+        return (sign == hash);
     },
     
     socket:{

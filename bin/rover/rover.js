@@ -3,7 +3,7 @@ if (process.argv[2]=='deploy') {
 	console.log('DEPLOYMENT');
     var S = require('./deployment/settings').Settings;
 }else{
-    var S = require('./static_admin/js/settings').Settings;
+    var S = require('./../static_admin/js/settings').Settings;
 }
 console.log('Starting up rover.  Here are settings ', S);
 
@@ -11,6 +11,7 @@ var redis = require('socket.io/node_modules/redis');
 var pub = redis.createClient(S.redis_port, S.host);
 var sub = redis.createClient(S.redis_port, S.host);
 sub.subscribe('rover');
+sub.subscribe('roverAdmin');
 
 //run/restart the webcam stream async
 var spawns = [];
@@ -189,6 +190,10 @@ sub.on('message', function(channel, data){
             Rover.reverse();
         break;
         case 'reset':
+	    if (channel != 'roverAdmin') {
+		console.log('unauthorized attempt to reset cam.');
+		return;
+	    }
             console.log('Resetting spawns . . .');
             var reset = true;
             killSpawns(reset);

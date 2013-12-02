@@ -10,7 +10,9 @@ redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
 db = require('./database'),
 live = require('./live'),
+crypto = require('crypto'),
 app = express();
+SECRET = 'wow such secret.';
 /******************************************/
 
 app.set('view engine','jade');
@@ -18,7 +20,7 @@ app.set('view engine','jade');
 app.use(express.logger('dev'));
 
 app.use(express.static('static_admin'));
-app.use(express.cookieParser('super secret'));
+app.use(express.cookieParser(SECRET));
 app.use(express.bodyParser());
 
 console.log('Listening for http requests on ', S.http_port);

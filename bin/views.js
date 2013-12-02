@@ -91,7 +91,8 @@ var views = {
                 var name = (req.body.name+'').substr(0,20);
                 db.store.incr('commandCount');
                 db.store.get('commandCount', function(err, id){
-                    res.cookie('commandId', id, {maxAge:expire, signed:true});
+                    var hash = crypto.createHmac('sha1', SECRET).update(id).digest('hex');
+                    res.cookie('commandId', id+':'+hash, {maxAge:expire});
                     var rData ={id:id, time:queueSecs, position:live.queue.length, name:name};
                     res.end(JSON.stringify(rData));
                 });
@@ -106,6 +107,14 @@ var views = {
                     res.end(JSON.stringify({html:html, popup:popup}));
                 });
             });
+        });
+        
+        /* for admins sending commands from ajax. */
+        this.app.post('/command', function(req, res){
+            if (views.authent(req)) {
+                console.log('admin command: ', req.body.func);
+                live.redis.pub.publish('roverAdmin', JSON.stringify(req.body));
+            }else console.log('admin command denied. : ', req.body.func);
         });
     },
     

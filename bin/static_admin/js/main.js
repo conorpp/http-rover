@@ -4,12 +4,21 @@ var Command = {
     on:false,
     id:null,
     inCommand:false,
+    
     connect: function(){
         this.socket = io.connect(Settings.host, {port: Settings.command_port});
     },
+    
+    millis: new Date().getTime(),
+    
     write: function(command){
-        if (!this.inCommand) return;
-        this.socket.emit('command', {func:command, id:this.id});
+        var debounce = new Date().getTime() - this.millis;
+        if (debounce > 200) {
+            console.log('incommand?', this.inCommand);
+            this.millis = new Date().getTime();
+            if (!this.inCommand) return;
+            this.socket.emit('command', {func:command, id:this.id});
+        }
     },
     
     promote: function(millis){
@@ -21,6 +30,7 @@ var Command = {
                  {millis:2500});
         UI.timer(millis);
         this.id = Cookie.get('commandId');
+        this.inCommand = true;
     },
     
     demote: function(){
@@ -28,6 +38,7 @@ var Command = {
         UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5500});
         Cookie.del('commandId');
         this.id = null;
+        this.inCommand = false;
     },
 };
 Command.connect();
@@ -74,24 +85,60 @@ $(document).ready(function(){
 
     Command.id = Cookie.get('commandId');
     
-    $('#forward').on('click', function(){
-        Command.write('forward');
+    var intervalId;
+    $('.command').on('mousedown', function(){
+        var id = this.id;
+        intervalId = setInterval(function(){
+            Command.write(id);
+        },200);
+    }).bind('mouseup', function(){
+        console.log('mouse left');
+        clearInterval(intervalId);
     });
-    $('#left').on('click', function(){
-        Command.write('left');
+    
+    $('html,body').keydown(function(e){
+        e.preventDefault();
+        switch (e.keyCode) {
+            case 37:
+                var c = 'left';
+            break;
+            case 38:
+                var c = 'forward';
+            break;
+            case 39:
+                var c = 'right';
+            break;
+            case 40:
+                var c = 'reverse';
+            break;
+            default:
+                return;
+            break;
+        }
+        Command.write(c);
+        $('#'+c).addClass('active');
     });
-    $('#right').on('click', function(){
-        Command.write('right');
+    $('html, body').keyup(function(e){
+        switch (e.keyCode) {
+            case 37:
+                var c = 'left';
+            break;
+            case 38:
+                var c = 'forward';
+            break;
+            case 39:
+                var c = 'right';
+            break;
+            case 40:
+                var c = 'reverse';
+            break;
+            default:
+                return;
+            break;
+        }
+        $('#'+c).removeClass('active');
     });
-    $('#reverse').on('click', function(){
-        Command.write('reverse');
-    });
-     $('#stop').on('click', function(){
-        Command.write('stop');
-    });
-     $('#reset').on('click', function(){
-        Command.write('reset');
-    });
+
      
     $('#join').click(function(){    //step one: enter name
         UI.popup('Enter a name', UI.T.nameTemplate);

@@ -1,4 +1,7 @@
 //script for admin page.
+
+
+
 $(document).ready(function(){
     
     $('#send').click(function(){
@@ -17,6 +20,11 @@ $(document).ready(function(){
         announce({del:true});     //overwrite with blank 
         $('#savePopup').attr('checked', false);
     });
+    
+    $('#reset').on('click', function(){
+        ajaxCommand('reset');
+    });
+    
 });
 
 function announce(context){
@@ -32,6 +40,18 @@ function announce(context){
                 UI.popup('Popup removed', 'The popup won\'t display on every page load now.', {millis:5000});
             }
 
+        },
+        
+    });
+}
+
+function ajaxCommand(func){
+    $.ajax({
+        url : '/command',
+        type: "POST",
+        data : {func:func},
+        success:function(data, textStatus, jqXHR) {
+            console.log('command made successfully.');
         },
         
     });
