@@ -47,7 +47,7 @@ var Command = {
     
     demote: function(){
         console.log('you have been demoted.');
-        UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5500});
+        UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5000});
         Cookie.del('commandId');
         this.id = null;
         this.inCommand = false;
@@ -98,9 +98,7 @@ Command.socket.on('promote', function(data){
 Command.socket.on('demote', function(data){
     Command.demote();
 });
-Command.socket.on('changeCommand', function(data){
-    console.log('the command has changed.');
-});
+
 Command.socket.on('addQueue', function(data){
     console.log('new queue member , ', data);
     UI.addQueue(data.html, data.position);

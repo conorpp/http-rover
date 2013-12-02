@@ -84,9 +84,8 @@ var live = {
             }else console.log('queue depleted.');
         }
         
-        this.socket.io.sockets.emit('changeCommand');
     },
-    
+    //data is object in queue array
     promote: function(data){
         data.socket.emit('promote', {millis:this.time});
         data.start = new Date().getTime();
@@ -148,6 +147,14 @@ var live = {
                 socket.on('disconnect', function(data){
                     live.clientCount--;
                     console.log('User disconnected. total: ', live.clientCount);
+                    if (this.commandId) {
+                        for(var i in live.queue){
+                            if (live.queue[i].id == this.commandId) {
+                                live.demote(live.queue[i]);
+                                live.queue.splice(i, 1);
+                            }
+                        }
+                    }
                 });
                 
                 socket.on('command', function(data){
@@ -158,6 +165,7 @@ var live = {
                 });
                 
                 socket.on('join', function(data){
+                    socket.commandId = data.id;
                     live.addQueue(data.name, data.id, socket);
                 });
                 
