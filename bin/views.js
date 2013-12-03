@@ -86,8 +86,8 @@ var views = {
                 var rData = {error:'You\'re already in the queue'};
                 res.end(JSON.stringify(rData));
             }else{
-                var expire = live.time+live.time*.1;    
-                var queueSecs = 60;
+                var expire = (live.time * (live.queue.length+1)) + live.time*.2;    
+                var queueSecs = Math.floor(live.time/1000);
                 var name = (req.body.name+'').substr(0,20);
                 db.store.incr('commandCount');
                 db.store.get('commandCount', function(err, id){

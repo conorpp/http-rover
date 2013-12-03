@@ -6,7 +6,7 @@ var live = {
     // data
     clientCount:0,
     queue:[],
-    time:1000*50,          //ms
+    time:1000*60,          //ms
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     commandId:null,
@@ -86,25 +86,42 @@ var live = {
         
     },
     //data is object in queue array
+    //promotes socket if socket exists, otherwise
+    // it will move to next in line.
     promote: function(data){
-        data.socket.emit('promote', {millis:this.time});
-        data.start = new Date().getTime();
-        this.commandId = data.id;
-        this.commandCount++;
-        
+        if (data.socket) {
+            data.socket.emit('promote', {millis:this.time});
+            data.start = new Date().getTime();
+            this.commandId = data.id;
+            this.commandCount++;
+        }else{
+            if (this.queue.length) {
+                this.queue.splice(0,1);
+                if (this.queue.length) {
+                    this.promote(this.queue[0]);
+                }
+            }
+        }
     },
     demote: function(data, position){
-        data.socket.emit('demote');
+        if (data.socket) {        
+            data.socket.emit('demote');
+            live.socket.io.sockets.emit('removeQueue', {position:position || 1});
+        }
+    },
+    
+    next: function(){
         
-        live.socket.io.sockets.emit('removeQueue', {position:position || 1});
     },
     
     isCommander: function(id){
-        var split = id.split(':');
-        var sign = split[1],
-            val = split[0];
-        var hash = crypto.createHmac('sha1', SECRET).update(val).digest('hex');
-        return (sign == hash);
+        if (id){
+            var split = id.split(':');
+            var sign = split[1],
+                val = split[0];
+            var hash = crypto.createHmac('sha1', SECRET).update(val).digest('hex');
+            return (sign == hash);
+        }else return false;
     },
     
     socket:{
@@ -148,12 +165,12 @@ var live = {
                     live.clientCount--;
                     console.log('User disconnected. total: ', live.clientCount);
                     if (this.commandId) {   //lose queue
-                        for(var i in live.queue){
+                       /* for(var i in live.queue){
                             if (live.queue[i].id == this.commandId) {
                                 live.demote(live.queue[i]);
                                 live.queue.splice(i, 1);
                             }
-                        }
+                        } */
                     }
                 });
                 
@@ -169,6 +186,21 @@ var live = {
                     live.addQueue(data.name, data.id, socket);
                 });
                 
+                socket.on('seizeCommand', function(data){   //attempt to give command back to socket.
+                    console.log('attempting to reseize command...');
+                    console.log('data id ', data.id);
+                    var id = data.id.split(':')[0];
+                    socket.commandId = id;
+                    for(var i in live.queue){
+                        console.log('socket id ',live.queue[i].id);
+                        if (live.queue[i].id == id && live.isCommander(data.id)) {
+                            live.queue[i].socket = socket;
+                            var first = (i == 0);
+                            socket.emit('commandSeized', {first:first});
+                            console.log('Command seized!!');
+                        }
+                    } 
+                });
             });
             
             /* for keeping times synced with all clients */

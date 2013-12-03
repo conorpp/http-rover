@@ -4,25 +4,38 @@ var Command = {
     on:false,
     id:null,
     inCommand:false,
+    inQueue:false,
     disconnect:false,
     
     connect: function(){
         this.socket = io.connect(Settings.host, {port: Settings.command_port});
         this.socket.on('reconnecting', function(){
-            if (Command.disconnect) {
-                var lost = 'Your queue position has been lost.  We are sorry.';
-                Command.demote(true);
-            }else var lost = '';
-            UI.popup('Lost connection','Attempting to reconnect . . . <br>'+lost);
+            UI.popup('Lost connection','Attempting to reconnect . . . ');
         });
         this.socket.on('reconnect_failed', function () {
             UI.popup('Disconnected','We failed to reconnect you.  Sorry about that.',{millis:4000});
         });
         this.socket.on('reconnect', function () {
             if (Command.disconnect) {
-                var lost = 'We\'d be delighted if you rejoined the queue.';
+                var lost = 'You may have to wait a moment to send commands again.';
             }else var lost = '';
             UI.popup('Connected','We successfully reconnected you. <br>'+lost,{millis:4100});
+            if (Command.id) {     //attempt to seize command
+                Command.socket.emit('seizeCommand', {id:Command.id});
+            }
+        });
+        this.socket.on('connect', function () {
+            if (Command.id) {     //attempt to seize command
+                Command.socket.emit('seizeCommand', {id:Command.id});
+            }
+        });
+        this.socket.on('commandSeized', function (data) {
+            if (data.first) {
+                UI.popup('Command returned','You are back in control.',{millis:2500});
+                Command.inCommand = true;
+            }else{
+                UI.popup('Connection recognized.','You are back in the queue.',{millis:2500});
+            }
         });
         this.socket.on('disconnect', function () {
             Command.disconnect = Command.inCommand;
@@ -44,13 +57,14 @@ var Command = {
     
     promote: function(millis){
         millis = millis || 1000*60;
-        console.log('you have been promoted.');
+        this.id = Cookie.get('commandId');
+        console.log('you have been promoted.', Cookie.get('commandId'));
         var secs = Math.floor(millis/1000);
         UI.popup('Command',
                  'You can now control the rover. You have '+secs+' seconds.',
                  {millis:2500});
         UI.timer(millis);
-        this.id = Cookie.get('commandId');
+        
         this.inCommand = true;
         $('html,body').keydown(function(e){
             var c = Command.getCommand(e.keyCode);
@@ -75,6 +89,7 @@ var Command = {
         $('#time').html(0);
         this.id = null;
         this.inCommand = false;
+        this.inQueue = false;
         $('html,body').unbind('keydown keyup');
     },
     
@@ -139,63 +154,18 @@ Command.socket.on('syncTime', function(data){
 $(document).ready(function(){
     
     getData();
-
-    Command.id = Cookie.get('commandId');
     
     var intervalId;
     $('.command').on('mousedown', function(){
         var id = this.id;
         intervalId = setInterval(function(){
             Command.write(id);
-        },200);
+        },10);
     }).bind('mouseup', function(){
         console.log('mouse left');
         clearInterval(intervalId);
     });
     
-    $('html,body').keydown(function(e){
-        switch (e.keyCode) {
-            case 37:
-                var c = 'left';
-            break;
-            case 38:
-                var c = 'forward';
-            break;
-            case 39:
-                var c = 'right';
-            break;
-            case 40:
-                var c = 'reverse';
-            break;
-            default:
-                return;
-            break;
-        }
-        e.preventDefault();
-        Command.write(c);
-        $('#'+c).addClass('active');
-    });
-    $('html, body').keyup(function(e){
-        switch (e.keyCode) {
-            case 37:
-                var c = 'left';
-            break;
-            case 38:
-                var c = 'forward';
-            break;
-            case 39:
-                var c = 'right';
-            break;
-            case 40:
-                var c = 'reverse';
-            break;
-            default:
-                return;
-            break;
-        }
-        $('#'+c).removeClass('active');
-    });
-
      
     $('#join').click(function(){    //step one: enter name
         UI.popup('Enter a name', UI.T.nameTemplate);
@@ -233,6 +203,7 @@ function join(name){
             console.log('got command id , ', data.id);
             Command.id = data.id;
             Command.socket.emit('join', {id:data.id, name:data.name});
+            Command.inQueue = true;
         },
         
     });
@@ -290,3 +261,4 @@ var Cookie = {
         document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
     }
 };
+Command.id = Cookie.get('commandId');

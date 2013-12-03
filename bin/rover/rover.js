@@ -1,10 +1,14 @@
 
-if (process.argv[2]=='deploy') {
+if (process.argv.indexOf('deploy') ){
 	console.log('DEPLOYMENT');
     var S = require('./deployment/settings').Settings;
 }else{
     var S = require('./../static_admin/js/settings').Settings;
 }
+console.log(process.argv)
+if (process.argv.indexOf('nostream') == -1) {
+	var stream = true;
+}else var stream = false;
 console.log('Starting up rover.  Here are settings ', S);
 
 var redis = require('socket.io/node_modules/redis');
@@ -21,10 +25,12 @@ var terminal = require('child_process');
 console.log('Starting video and audio streams . . .');
 var video = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video0 -an -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
 var audio = 'ffmpeg -f alsa -i hw:0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
-cmds.push(video);
-cmds.push(audio);
-spawns.push(terminal.exec(video));
-spawns.push(terminal.exec(audio));
+if (stream) {
+	cmds.push(video);
+	cmds.push(audio);
+	spawns.push(terminal.exec(video));
+	spawns.push(terminal.exec(audio));
+}
 function killSpawns(reset){
     reset = reset || false;
     terminal.exec('pkill -9 ffmpeg');
@@ -50,7 +56,6 @@ var tty = 'ttyUSB0';
 
 var serialPort = new SerialPort("/dev/"+tty, {
   baudrate: 9600
-  
 }); 
 
 serialPort.on('open',function () {
@@ -122,7 +127,8 @@ var Rover = {
         this.isMoving = true;
         clearTimeout(this.timeout);
         this.timeout = setTimeout(function(){
-            //clearTimeout(Rover.timeout);
+	    Rover.stop();
+           // clearTimeout(Rover.timeout);
         },this.stopInter);
     },
 
@@ -138,13 +144,13 @@ var Rover = {
     left: function(){
         console.log('going left');
         this.moving();
-        this.write(1,255);
+        this.write(107,148);
     },
     
     right:function(){
         console.log('going right');
         this.moving();
-        this.write(127,128);
+	this.write(21,235);
     },
     
     reverse:function(){
