@@ -9,6 +9,7 @@ console.log(process.argv)
 if (process.argv.indexOf('nostream') == -1) {
 	var stream = true;
 }else var stream = false;
+
 console.log('Starting up rover.  Here are settings ', S);
 
 var redis = require('socket.io/node_modules/redis');
@@ -23,13 +24,22 @@ var cmds = [];
 var PASSWORD = 'abc';
 var terminal = require('child_process');
 console.log('Starting video and audio streams . . .');
-var video = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video0 -an -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
-var audio = 'ffmpeg -f alsa -i hw:0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
-if (stream) {
+//ffmpeg <video options> -i <video source> <audio options> -i <audio source> <output options> <output destination>
+/*
+whole command:
+$ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream
+*/
+var fullStream = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
+var video = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -an -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
+var audio = 'ffmpeg -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
+if (stream && process.argv.indexOf('fullstream') != -1) {
+	cmds.push(fullStream);	//unstable,slow
+	terminal.exec(fullStream);
+} else if (stream) {
 	cmds.push(video);
 	cmds.push(audio);
-	spawns.push(terminal.exec(video));
-	spawns.push(terminal.exec(audio));
+	terminal.exec(video);
+	terminal.exec(audio);
 }
 function killSpawns(reset){
     reset = reset || false;
@@ -38,7 +48,7 @@ function killSpawns(reset){
         console.log('reset');
         setTimeout(function(){
             for (var i in cmds) {
-                spawns[i] = terminal.exec(cmds[i]);
+                terminal.exec(cmds[i]);
             }
             var data = JSON.stringify({func:'reset'});
             pub.publish('feedback', data);

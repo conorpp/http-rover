@@ -54,6 +54,9 @@ var UI = {
     addQueue: function(html, position){
         position = position || 1;
         if (html) $('#noQ').remove();
+        if (position == 1 && $('#pos1').length) {
+            $('#pos1').remove();
+        }
         $('#queue').find('tbody').append(html);
         if (position==1 && $('#pos1').length) {
             $('#pos1').addClass('success');
