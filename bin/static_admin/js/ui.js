@@ -78,6 +78,7 @@ var UI = {
         if ($('tr.queueMember').length){
             $('.queueMember').each(function(){
                 var newPos = parseInt(this.id.replace('pos',''))-1;
+                $(this).find('td.pos').html(newPos);
                 if (newPos>=position) {
                     $(this).attr('id', 'pos'+newPos);
                 }

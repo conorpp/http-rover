@@ -89,7 +89,7 @@ var Settings = {
 var Rover = {
     ready:false,
     isMoving:false,
-    stopInter:220,
+    stopInter:260,		//responsiveness vs jitteryness
     
     init: function(){
         this.ready = true;
@@ -136,25 +136,21 @@ var Rover = {
     },
     
     forward:function(){
-        console.log('going forward');
         this.moving();
         this.write(1,128);
     },
     
     left: function(){
-        console.log('going left');
         this.moving();
         this.write(107,158);
     },
     
     right:function(){
-        console.log('going right');
         this.moving();
 	this.write(21,235);
     },
     
     reverse:function(){
-        console.log('going reverse');
         this.moving();
         this.write(127,255);
     },
@@ -171,7 +167,7 @@ var Rover = {
 
 sub.on('message', function(channel, data){
     data = JSON.parse(data);
-
+	console.log(data.func);
     switch (data.func) {
         case 'blink':
             console.log('Blinking');
@@ -187,7 +183,15 @@ sub.on('message', function(channel, data){
         case 'right':
             Rover.right();
         break;
-    
+        case 'forwardleft':
+		Rover.moving();
+            Rover.write(1,158);
+	    
+        break;
+        case 'forwardright':
+		Rover.moving();
+            Rover.write(31,128);
+        break;
         case 'stop':
             Rover.stop();
         break;

@@ -6,6 +6,7 @@ var Command = {
     inCommand:false,
     inQueue:false,
     disconnect:false,
+    keys:{},
     
     
     connect: function(){
@@ -68,16 +69,22 @@ var Command = {
         
         this.inCommand = true;
         $('html,body').keydown(function(e){
-            var c = Command.getCommand(e.keyCode);
+            Command.keys[e.which] = true;
+            var c = Command.getCommand();
             if (c) {
                 e.preventDefault();
                 Command.write(c);
-                $('#'+c).addClass('active');
+                for (var key in Command.keys) {
+                    $('#'+Command.getCommand(key)).addClass('active');
+                }
+                
             }
         });
         $('html, body').keyup(function(e){
-            var c = Command.getCommand(e.keyCode);
-            if (c) $('#'+c).removeClass('active');
+            for (var key in Command.keys) {
+                $('#'+Command.getCommand(key)).removeClass('active');
+            }
+            delete Command.keys[e.which];
         });
     },
     
@@ -95,6 +102,17 @@ var Command = {
     },
     
     getCommand: function(keyCode){
+        if (keyCode == undefined) {
+            if (this.keys['38'] && this.keys['37']) {
+                return 'forwardleft';
+            }else if (this.keys['38'] && this.keys['39']) {
+                return 'forwardright';
+            }
+            for (var key in this.keys) {
+                keyCode = parseInt(key);
+                break;
+            }
+        }
         switch (keyCode) {
             case 37:
                 return 'left';
@@ -162,9 +180,11 @@ $(document).ready(function(){
         intervalId = setInterval(function(){
             Command.write(id);
         },10);
-    }).bind('mouseup', function(){
+    });
+    $('body').on('click mouseup touchend touchcancel', function(e){
         console.log('mouse left');
         clearInterval(intervalId);
+       // alert('mouse up event test');
     });
     
      

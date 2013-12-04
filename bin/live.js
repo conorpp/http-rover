@@ -6,7 +6,7 @@ var live = {
     // data
     clientCount:0,
     queue:[],
-    time:1000*10,          //ms
+    time:1000*60,          //ms
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     commandId:null,
@@ -108,6 +108,7 @@ var live = {
             data.socket.emit('demote');
             live.socket.io.sockets.emit('removeQueue', {position:position || 1});
             this.queue.shift();
+            this.commandId = null;
         }
     },
     

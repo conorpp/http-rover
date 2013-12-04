@@ -4,7 +4,7 @@ each person in queue
     -   var freshTime = person.time - Math.floor((new Date().getTime() - person.start)/1000);
     - }else var freshTime = person.time;
     tr(id='pos'+person.position, class='queueMember')
-        td #{person.position}
+        td.pos #{person.position}
         td #{person.name}
         td.timer #{freshTime}
     
