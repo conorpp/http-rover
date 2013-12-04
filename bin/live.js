@@ -6,7 +6,7 @@ var live = {
     // data
     clientCount:0,
     queue:[],
-    time:1000*60,          //ms
+    time:1000*10,          //ms
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     commandId:null,
@@ -78,7 +78,6 @@ var live = {
             
         }else{
             this.demote(this.queue[0]);
-            this.queue.shift();
             if (this.queue.length) {
                 this.promote(this.queue[0]);
             }else console.log('queue depleted.');
@@ -104,9 +103,11 @@ var live = {
         }
     },
     demote: function(data, position){
+        console.log('demoting . . .', data);
         if (data.socket) {        
             data.socket.emit('demote');
             live.socket.io.sockets.emit('removeQueue', {position:position || 1});
+            this.queue.shift();
         }
     },
     
@@ -115,12 +116,12 @@ var live = {
     },
     
     isCommander: function(id){
-        if (id){
+        if (id){        //fast.
             var split = id.split(':');
             var sign = split[1],
                 val = split[0];
             var hash = crypto.createHmac('sha1', SECRET).update(val).digest('hex');
-            return (sign == hash);
+            return (sign == hash && this.commandId == val);
         }else return false;
     },
     

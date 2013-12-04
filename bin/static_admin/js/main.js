@@ -7,6 +7,7 @@ var Command = {
     inQueue:false,
     disconnect:false,
     
+    
     connect: function(){
         this.socket = io.connect(Settings.host, {port: Settings.command_port});
         this.socket.on('reconnecting', function(){
@@ -47,7 +48,7 @@ var Command = {
     
     write: function(command){
         var debounce = new Date().getTime() - this.millis;
-        if (debounce > 200) {
+        if (debounce > 125) {
             console.log('incommand?', this.inCommand);
             this.millis = new Date().getTime();
             if (!this.inCommand) return;

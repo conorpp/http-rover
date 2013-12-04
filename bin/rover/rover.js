@@ -1,5 +1,5 @@
 
-if (process.argv.indexOf('deploy') ){
+if (process.argv.indexOf('deploy') != -1){
 	console.log('DEPLOYMENT');
     var S = require('./deployment/settings').Settings;
 }else{
@@ -89,7 +89,7 @@ var Settings = {
 var Rover = {
     ready:false,
     isMoving:false,
-    stopInter:500,
+    stopInter:220,
     
     init: function(){
         this.ready = true;
@@ -125,8 +125,8 @@ var Rover = {
     timeout:null,
     moving:function(){
         this.isMoving = true;
-        clearTimeout(this.timeout);
-        this.timeout = setTimeout(function(){
+        clearInterval(this.timeout);
+        this.timeout = setInterval(function(){
 	    Rover.stop();
            // clearTimeout(Rover.timeout);
         },this.stopInter);
@@ -144,7 +144,7 @@ var Rover = {
     left: function(){
         console.log('going left');
         this.moving();
-        this.write(107,148);
+        this.write(107,158);
     },
     
     right:function(){
@@ -161,10 +161,9 @@ var Rover = {
     
     stop: function(){
         console.log('stopping');
-        this.moving();
-        this.write(0);
+        this.write(0,0);
         setTimeout(function(){      //safety
-            Rover.write(0);    
+            Rover.write(0,0);    
         },10);
     }
     
