@@ -1,139 +1,14 @@
     
+/*
+    The control for implementing the functionality.  Top level entity.
+    
+    TODO:
+    -move AJAX requests to interface
+*/
 
-var Command = {
-    on:false,
-    id:null,
-    inCommand:false,
-    inQueue:false,
-    disconnect:false,
-    keys:{},
-    
-    
-    connect: function(){
-        this.socket = io.connect(Settings.host, {port: Settings.command_port});
-        this.socket.on('reconnecting', function(){
-            UI.popup('Lost connection','Attempting to reconnect . . . ');
-        });
-        this.socket.on('reconnect_failed', function () {
-            UI.popup('Disconnected','We failed to reconnect you.  Sorry about that.',{millis:4000});
-        });
-        this.socket.on('reconnect', function () {
-            if (Command.disconnect) {
-                var lost = 'You may have to wait a moment to send commands again.';
-            }else var lost = '';
-            UI.popup('Connected','We successfully reconnected you. <br>'+lost,{millis:4100});
-            if (Command.id) {     //attempt to seize command
-                Command.socket.emit('seizeCommand', {id:Command.id});
-            }
-        });
-        this.socket.on('connect', function () {
-            if (Command.id) {     //attempt to seize command
-                Command.socket.emit('seizeCommand', {id:Command.id});
-            }
-        });
-        this.socket.on('commandSeized', function (data) {
-            if (data.first) {
-                UI.popup('Command returned','You are back in control.',{millis:2500});
-                Command.inCommand = true;
-            }else{
-                UI.popup('Connection recognized.','You are back in the queue.',{millis:2500});
-            }
-        });
-        this.socket.on('disconnect', function () {
-            Command.disconnect = Command.inCommand;
-            UI.popup('Disconnected','');
-        });
-    },
-    
-    millis: new Date().getTime(),
-    
-    write: function(command){
-        var debounce = new Date().getTime() - this.millis;
-        if (debounce > 125) {
-            console.log('incommand?', this.inCommand);
-            this.millis = new Date().getTime();
-            if (!this.inCommand) return;
-            this.socket.emit('command', {func:command, id:this.id});
-        }
-    },
-    
-    promote: function(millis){
-        millis = millis || 1000*60;
-        this.id = Cookie.get('commandId');
-        console.log('you have been promoted.', Cookie.get('commandId'));
-        var secs = Math.floor(millis/1000);
-        UI.popup('Command',
-                 'You can now control the rover. You have '+secs+' seconds.',
-                 {millis:2500});
-        UI.timer(millis);
-        
-        this.inCommand = true;
-        $('html,body').keydown(function(e){
-            Command.keys[e.which] = true;
-            var c = Command.getCommand();
-            if (c) {
-                e.preventDefault();
-                Command.write(c);
-                for (var key in Command.keys) {
-                    $('#'+Command.getCommand(key)).addClass('active');
-                }
-                
-            }
-        });
-        $('html, body').keyup(function(e){
-            for (var key in Command.keys) {
-                $('#'+Command.getCommand(key)).removeClass('active');
-            }
-            delete Command.keys[e.which];
-        });
-    },
-    
-    demote: function(hidePopup){
-        console.log('you have been demoted.');
-        hidePopup = hidePopup || false;
-        if (!hidePopup) 
-            UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!', {millis:5000});
-        Cookie.del('commandId');
-        $('#time').html(0);
-        this.id = null;
-        this.inCommand = false;
-        this.inQueue = false;
-        $('html,body').unbind('keydown keyup');
-    },
-    
-    getCommand: function(keyCode){
-        if (keyCode == undefined) {
-            if (this.keys['38'] && this.keys['37']) {
-                return 'forwardleft';
-            }else if (this.keys['38'] && this.keys['39']) {
-                return 'forwardright';
-            }
-            for (var key in this.keys) {
-                keyCode = parseInt(key);
-                break;
-            }
-        }
-        switch (keyCode) {
-            case 37:
-                return 'left';
-            break;
-            case 38:
-                return 'forward';
-            break;
-            case 39:
-                return 'right';
-            break;
-            case 40:
-                return 'reverse';
-            break;
-            default:
-                return false;
-            break;
-        }
-        return false;
-    }
-    
-};
+//For page reloads during command.
+Command.id = Cookie.get('commandId');
+
 Command.connect();
     
 /* display ui for stream being reset. */
@@ -147,32 +22,34 @@ Command.socket.on('reset', function(data){
 });
 
 /* display announcement as popup. */
-Command.socket.on('announce', function(data){
+Command.socket.on('announce', function(data){       //not client specific
     UI.popup(data.title, data.message, {announcement:true});
 });
-Command.socket.on('promote', function(data){
+Command.socket.on('promote', function(data){        //is client specific
     Command.promote(data.millis);
 });
-Command.socket.on('demote', function(data){
+Command.socket.on('demote', function(data){     //is client specific
     Command.demote();
 });
 
-Command.socket.on('addQueue', function(data){
+Command.socket.on('addQueue', function(data){   //not client specific
     console.log('new queue member , ', data);
     UI.addQueue(data.html, data.position);
 });
 
-Command.socket.on('removeQueue', function(data){
+Command.socket.on('removeQueue', function(data){    //not client specific
     console.log('removed que member , ', data);
     UI.removeQueue(data.position);
 });
-Command.socket.on('syncTime', function(data){
+
+Command.socket.on('syncTime', function(data){       //not client specific
     console.log('got time sync data , ', data);
     UI.syncTime(data.queueTime);
 });
+
 $(document).ready(function(){
     
-    getData();
+    getData();  //init queue, popup, ect.
     
     var intervalId;
     $('.command').on('mousedown', function(){
@@ -224,7 +101,6 @@ function join(name){
             console.log('got command id , ', data.id);
             Command.id = data.id;
             Command.socket.emit('join', {id:data.id, name:data.name});
-            Command.inQueue = true;
         },
         
     });
@@ -256,30 +132,3 @@ function getData(){
     });
 }
 
-var Cookie = {
-    
-    set: function(c_name,value,exdays){
-        var exdate=new Date();
-        exdate.setDate(exdate.getDate() + exdays);
-        var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-        document.cookie=c_name + "=" + c_value;
-    },
-    
-    get: function(c_name){
-        var c_value = document.cookie;
-        var c_start = c_value.indexOf(" " + c_name + "=");
-        if (c_start == -1) c_start = c_value.indexOf(c_name + "=");
-        if (c_start == -1) c_value = null;
-        else{
-            c_start = c_value.indexOf("=", c_start) + 1;
-            var c_end = c_value.indexOf(";", c_start);
-            if (c_end == -1) c_end = c_value.length;
-            c_value = unescape(c_value.substring(c_start,c_end));
-        }
-        return c_value;
-    },
-    del : function(name) {
-        document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-    }
-};
-Command.id = Cookie.get('commandId');

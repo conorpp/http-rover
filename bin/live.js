@@ -210,6 +210,8 @@ var live = {
                 if (live.queue.length && live.queue[0].start) {
                     var queueTime = live.time - (new Date().getTime() - live.queue[0].start);
                     live.socket.io.sockets.emit('syncTime', {queueTime:queueTime});
+                }else if (!live.queue.length) {
+                    //nobody in queue code.
                 }
             },10*1000);
         },

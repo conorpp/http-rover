@@ -1,5 +1,10 @@
-//script for admin page.
-
+/*
+    This script is for making the admin page work.
+    It mustn't be linked to any page except the admin.
+    
+    TODO:
+    -add option to set queue period
+*/
 
 
 $(document).ready(function(){
@@ -27,6 +32,14 @@ $(document).ready(function(){
     
 });
 
+
+/*
+    For setting single/temporary announcement for clients.
+    
+    @context.del - bool to specify to delete current popup
+    @context.message, context.title - required string for popup contents
+    @context.save - specify to save popup on every page load until deletion.
+*/
 function announce(context){
     context = context || {};
     if (!context.del) context.save = $('#savePopup').is(':checked');
@@ -45,6 +58,12 @@ function announce(context){
     });
 }
 
+/*
+    For sending a command to a rover, regardless of queue.
+    Good for resetting streams.
+    
+    func - string signaling the command for the rover.  See rover.js
+*/
 function ajaxCommand(func){
     $.ajax({
         url : '/command',

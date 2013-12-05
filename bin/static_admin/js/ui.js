@@ -1,11 +1,26 @@
 
+/*
+    The interface/functionality for the UI.
+    Add functionality here, don't implement.
+    Try work with CSS/HTML/ect mostly here.
+    
+    Templates, timers, popup, queue
+    
+    TODO
+    -Fix bugs with queue UI getting out of sync
+*/
+
 var UI = {
     timeout:null,
-    queueInterval:null,             //for clearing interval on global queue timer
+    queueInterval:null,      //for clearing intervals on global queue timer
     
+    /*
+        The HTML templates to be reused in the site.
+    */
     T : {
         getTemplates : function(){
-                $(document).ready(function(){
+                //must wait for document to download or can cause errors
+                $(document).ready(function(){   
                     UI.T.popup = $('#popupTemplate').html();
                     UI.T.nameTemplate = $('#nameTemplate').html();
                 });
@@ -16,6 +31,8 @@ var UI = {
     @option error - displays error type popup - bool 
     @option announcment - displays announcemet type popup - bool
     @option millis - ms for popup to display.  default forever - number
+    @option clone - indicate to make a separate popup,
+                    rather than replace the current one. Not tested. - bool
     */
     popup: function(title, message, options){
         options = options || {};
@@ -36,7 +53,11 @@ var UI = {
         popup.show('fast');
         if(options.millis!=undefined) this.timeout = setTimeout(function(){popup.hide('fast')},options.millis);
     },
-    //display timer
+    /*
+        Display the big timer for when user is in command.
+        
+        millis - millisecond duration for countdown - number
+    */
     timer: function(millis){
         var secs = Math.floor(millis/1000);
         $('#time').html(secs);
@@ -50,7 +71,17 @@ var UI = {
         },1000);
     },
     
-    //for globally adding to queue ui
+    /*
+        Adds html data from server to queue table.
+        Handles the 'empty' message, unique ID's
+        update ID's based on changing position.
+        starts timer in queue table.
+        
+        Slightly buggy.
+        
+        html - string from server that is html for table entry
+        position - number to specify position in queue, default 1.
+    */
     addQueue: function(html, position){
         position = position || 1;
         if (html) $('#noQ').remove();
@@ -73,7 +104,12 @@ var UI = {
         }
     },
     
-    /* removes from queue and updates. global. */
+    /*
+     Remove client in queue from queue table,
+     stop timer if needed.
+     
+     position - number to specify which position to remove, default 1
+    */
     removeQueue: function(position){
         position = position || 1;
         $('#pos'+position).remove();
@@ -87,7 +123,7 @@ var UI = {
                 }
             });
         }else this.noQueue();
-        this.addQueue(); //call it with no args to set new css class and timer
+        this.addQueue(); //call it with no args to set first css class (the green table entry) and timer
     },
     
     /* show queue is empty message. */
@@ -97,9 +133,13 @@ var UI = {
         this.addQueue(noQ);
     },
     
+    /*
+        For updating time remaining with true value from server.
+        For when client/server time values get out of sync.
+    */
     syncTime: function(millis){
-        $('#pos1').find('td.timer').html(Math.floor(millis/1000));
+        $('#pos1').find('td.timer').html(Math.floor(millis/1000)); //convert ms to s
     }
 };
-
+//get templates.
 UI.T.getTemplates();

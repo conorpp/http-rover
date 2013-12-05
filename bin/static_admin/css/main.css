@@ -1,4 +1,14 @@
 
+/*
+Main css file.  Note that twitter bootstrap css library is used mostly
+
+Order of this file
+1. attributes that apply to everything
+2. classes that are reused for building UI
+3. attributes for specific elements
+
+*/
+
 iframe{
     width:500px;
     height:380px;
