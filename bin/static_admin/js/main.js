@@ -26,7 +26,7 @@ Command.socket.on('announce', function(data){       //not client specific
     UI.popup(data.title, data.message, {announcement:true});
 });
 Command.socket.on('promote', function(data){        //is client specific
-    Command.promote(data.millis);
+    Command.promote(data.millis, data.name);
 });
 Command.socket.on('demote', function(data){     //is client specific
     Command.demote();

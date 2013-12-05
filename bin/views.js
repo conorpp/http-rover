@@ -81,12 +81,11 @@ var views = {
             res.end();
         });
         this.app.post('/join', function(req, res){
-            //res.writeHead(200);
-            if (req.signedCookies.command && false) {
+            if (req.cookies.commandId && live.queue.length) {
                 var rData = {error:'You\'re already in the queue'};
                 res.end(JSON.stringify(rData));
             }else{
-                var expire = (live.time * (live.queue.length+1)) + live.time*.2;    
+                var expire = (live.time * (live.queue.length+1)) + live.time*.1;    
                 var queueSecs = Math.floor(live.time/1000);
                 var name = (req.body.name+'').substr(0,20);
                 db.store.incr('commandCount');

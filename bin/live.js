@@ -24,7 +24,7 @@ var live = {
             name:name,
             id:id,
             time:secs,
-            position: this.queue.length+1,
+            position: this.queue.length +1,
             socket:socket
         });
         console.log('queue added to. length: '+this.queue.length);
@@ -82,6 +82,9 @@ var live = {
                 this.promote(this.queue[0]);
             }else console.log('queue depleted.');
         }
+        for (q in this.queue) {
+            this.queue[q].position = this.queue.indexOf(this.queue[q])+1;
+        }
         
     },
     //data is object in queue array
@@ -89,7 +92,7 @@ var live = {
     // it will move to next in line.
     promote: function(data){
         if (data.socket) {
-            data.socket.emit('promote', {millis:this.time});
+            data.socket.emit('promote', {millis:this.time, name:data.name});
             data.start = new Date().getTime();
             this.commandId = data.id;
             this.commandCount++;

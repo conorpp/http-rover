@@ -85,13 +85,13 @@ var Command = {
         
         millis - number that is length of timer in milliseconds. default 60,000
     */
-    promote: function(millis){
+    promote: function(millis, name){
         millis = millis || 1000*60;
         this.id = Cookie.get('commandId');
         console.log('you have been promoted.', Cookie.get('commandId'));
         var secs = Math.floor(millis/1000);
-        UI.popup('Command',
-                 'You can now control the rover. You have '+secs+' seconds.',
+        UI.popup( name+', you are in control',
+                 'You have '+secs+' seconds.',
                  {millis:2500});
         UI.timer(millis);
         

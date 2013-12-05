@@ -85,7 +85,7 @@ var UI = {
     addQueue: function(html, position){
         position = position || 1;
         if (html) $('#noQ').remove();
-        if (position == 1 && $('#pos1').length) {
+        if (position == 1 && $('#pos1').length && html) {
             $('#pos1').remove();
         }
         $('#queue').find('tbody').append(html);
