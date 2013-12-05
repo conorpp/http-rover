@@ -195,12 +195,12 @@ sub.on('message', function(channel, data){
         break;
         case 'forwardleft':
 		Rover.moving();
-            Rover.write(1,158);
+	    Rover.write(31,128);
 	    
         break;
         case 'forwardright':
 		Rover.moving();
-            Rover.write(31,128);
+            Rover.write(1,158);
         break;
         case 'stop':
             Rover.stop();
