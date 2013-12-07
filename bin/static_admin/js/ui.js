@@ -62,6 +62,7 @@ var UI = {
         var secs = Math.floor(millis/1000);
         $('#time').html(secs);
         var interval = setInterval(function(){
+            secs = parseInt($('#time').text());
             secs--;
             if (secs<0) {
                 clearInterval(interval);
@@ -130,6 +131,7 @@ var UI = {
     noQueue: function(){
         console.log('No queue');
         var noQ = '<tr><td id="noQ">Empty</td></tr>'
+        $('tr.queueMember').remove();
         this.addQueue(noQ);
     },
     

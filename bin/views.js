@@ -115,6 +115,21 @@ var views = {
                 live.redis.pub.publish('roverAdmin', JSON.stringify(req.body));
             }else console.log('admin command denied. : ', req.body.func);
         });
+        
+        /* admin kicking */
+        this.app.post('/kick', function(req, res){
+            console.log('kicking.  everyone :  ', req.body.everyone);
+            if (!views.authent(req)) return;
+            if (req.body.everyone) {
+                live.socket.io.sockets.emit('kick');
+                live.queue = [];
+            }else if (req.body.name) {
+                var member = live.getQueue({name:req.body.name});
+                var kick = true;
+                live.demote(member, member.index+1, kick);
+            }
+            res.end();
+        });
     },
     
     /*

@@ -30,6 +30,16 @@ $(document).ready(function(){
         ajaxCommand('reset');
     });
     
+    $('#kick').on('click', function(){
+        var name = $.trim($('#kickName').val());
+        var everyone = $('#kickEveryone').is(':checked');
+        console.log(everyone);
+        if (name == '' && !everyone) {
+            UI.popup('No name', 'Specify a name of someone that\'s in the queue to kick.', {millis:3500, error:true});
+            return;
+        }
+        kick(name, everyone);
+    });
 });
 
 
@@ -71,6 +81,22 @@ function ajaxCommand(func){
         data : {func:func},
         success:function(data, textStatus, jqXHR) {
             console.log('command made successfully.');
+        },
+        
+    });
+}
+
+function kick(name, everyone){
+    data = {name:name};
+    if (everyone) {
+        data.everyone = everyone
+    }
+    $.ajax({
+        url : '/kick',
+        type: "POST",
+        data : data,
+        success:function(data, textStatus, jqXHR) {
+            console.log('kick made successfully.');
         },
         
     });

@@ -4,6 +4,7 @@
     
     TODO:
     -move AJAX requests to interface
+    -move seizeCOmmand event inner code to interface
 */
 
 //For page reloads during command.
@@ -29,7 +30,13 @@ Command.socket.on('promote', function(data){        //is client specific
     Command.promote(data.millis, data.name);
 });
 Command.socket.on('demote', function(data){     //is client specific
-    Command.demote();
+    if (!data.kick) {
+        Command.demote();
+    }else{
+        hidepopup = true;
+        Command.demote(hidepopup);
+        UI.popup('Kicked out.','You have been removed from the queue.',{millis: 6500});
+    }
 });
 
 Command.socket.on('addQueue', function(data){   //not client specific
@@ -47,10 +54,34 @@ Command.socket.on('syncTime', function(data){       //not client specific
     UI.syncTime(data.queueTime);
 });
 
+Command.socket.on('kick', function(data){           //not client specific
+    console.log('Kicked out');
+    UI.popup('Queue emptied','The queue has been emptied by an admin.  Sorry if this is inconvenient', {millis:6500});
+    hidepopup = true;
+    Command.demote(hidepopup);
+    UI.noQueue();
+});
+
+Command.socket.on('commandSeized', function (data) {
+    console.log('command siezed ', data);
+    if (data.first) {
+        UI.popup('Command returned','You are back in control.',{millis:2500});
+        if (!Command.inCommand) {
+            Command.promote(data.millis, data.name);
+        }
+    }else{
+        UI.popup('Connection recognized.','You are back in the queue.',{millis:2500});
+    }
+});
 $(document).ready(function(){
     
     getData();  //init queue, popup, ect.
     
+    if (Command.id) {     //attempt to seize command
+        Command.socket.emit('seizeCommand', {id:Command.id});
+        UI.popup('Command or queue connection lost',
+                 'Reconnecting you now . . .', {millis:3000, error:true});
+    }
     var intervalId;
     $('.command').on('mousedown', function(){
         var id = this.id;
@@ -124,7 +155,7 @@ function getData(){
             }
             if (data.popup) {
                 data.popup = JSON.parse(data.popup);
-                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:5000});
+                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:5000, clone:true});
             }
             
         },

@@ -27,3 +27,11 @@ block content
     | - Reset the stream.  All connected clients will be notified. - <br />
     button(id='reset' class='btn btn-primary') Reset Stream
     
+    h2.head Kick People
+    | - Kick someone out of the queue by name.  Or everyone.  Notification will be sent. - <br />
+    lable
+        input(type='checkbox', class='checkbox inline', id='kickEveryone', checked=checked)
+        | Everyone.
+    input(type='text', placeholder='Or by name', class='block form-control mar5', id='kickName', value=title)
+    button(id='kick' class='btn btn-danger') Kick
+    

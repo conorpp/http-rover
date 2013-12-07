@@ -41,18 +41,9 @@ var Command = {
             }
         });
         this.socket.on('connect', function () {
-            if (Command.id) {     //attempt to seize command
-                Command.socket.emit('seizeCommand', {id:Command.id});
-            }
+            console.log('socket connected');
         });
-        this.socket.on('commandSeized', function (data) {
-            if (data.first) {
-                UI.popup('Command returned','You are back in control.',{millis:2500});
-                Command.inCommand = true;
-            }else{
-                UI.popup('Connection recognized.','You are back in the queue.',{millis:2500});
-            }
-        });
+
         this.socket.on('disconnect', function () {
             Command.disconnect = Command.inCommand;
             UI.popup('Disconnected','');
@@ -127,7 +118,7 @@ var Command = {
                      '<br>Tell us what you think at '+
                      '<span style="color:rgb(141, 140, 255);" >conorpp@vt.edu<span>');
         Cookie.del('commandId');
-        $('#time').html(0);
+        $('#time').html('');
         this.id = null;
         this.inCommand = false;
         $('html,body').unbind('keydown keyup');

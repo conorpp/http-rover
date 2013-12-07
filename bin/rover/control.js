@@ -25,6 +25,8 @@ serial = new serialPort("/dev/ttyUSB0", {
     baudrate: 9600
 });
 /********************************************************/
+sub.subscribe('rover');			//communication channels
+sub.subscribe('roverAdmin');
 
 //Administrative commands.
 sub.on('message', function(channel, data){
@@ -32,14 +34,14 @@ sub.on('message', function(channel, data){
     switch (data.func) {
         case 'reset':
 	    if (channel != 'roverAdmin') {
-		console.log('unauthorized attempt to reset cam.');
+		console.log('unauthorized attempt for ' + data.func + 'command');
 		return;
 	    }
             console.log('Resetting stream . . .');
             Stream.reset();
         break;
         default:
-	    if (channel == 'roverAdmin') {
+	    if (channel=='roverAdmin') {
 		console.log('No cases met on admin channel.');
 	    }
     }

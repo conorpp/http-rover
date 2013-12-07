@@ -59,10 +59,13 @@ var Stream = {
         console.log('Starting streams . . .');
         if (options.fullStream) {
             var vid = terminal.exec(this.fullStream());
+            console.log(this.fullStream());
         }else{
             var vid = terminal.exec(this.video());
+            console.log(this.video());
             if (options.audio == undefined || options.audio) {
                 var aud = terminal.exec(this.audio());
+                console.log(this.audio());
                 aud.on('error', function(err){
                     console.log('Error streaming audio : ', err);
                 });
@@ -76,7 +79,7 @@ var Stream = {
     },
     
     kill: function(){
-        terminal.exec('pkill -INT ffmpeg');
+        terminal.exec('pkill -s INT ffmpeg');
     },
     
     /*

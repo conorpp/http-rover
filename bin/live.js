@@ -12,6 +12,7 @@ var live = {
     commandId:null,
     commandCount:0,       //total of people commanded rover.
     
+    
     /* for attempting to reload queue in quick server restarts. */
     initQueue: function(){
 
@@ -70,6 +71,23 @@ var live = {
         
     },
     
+    //for getting a queue member by an attribute
+    //return 0 if none.  Adds index as an attribute.
+    getQueue: function(filter){
+        for (i in filter) {
+            var key = i;
+            var val = filter[i];
+            break;
+        }
+        for (s in this.queue) {
+            if (this.queue[s][key] == val) {
+                this.queue[s].index = parseInt(s);
+                return this.queue[s];
+            }
+        }
+        return 0;
+    },
+    
     /* move queue, change command.  promote is bool to indicate promote or demote current socket.  default false. */
     changeCommand: function(promote){
         
@@ -105,20 +123,18 @@ var live = {
             }
         }
     },
-    demote: function(data, position){
-        console.log('demoting . . .', data);
-        if (data.socket) {        
-            data.socket.emit('demote');
+    
+    demote: function(data, position, kick){
+        console.log('demoting . . .', position + 0);
+        if (data && data.socket) {        
+            data.socket.emit('demote', {kick:kick});
             live.socket.io.sockets.emit('removeQueue', {position:position || 1});
-            this.queue.shift();
+            this.queue.splice(position - 1, 1);
             this.commandId = null;
         }
     },
     
-    next: function(){
-        
-    },
-    
+    //validate
     isCommander: function(id){
         if (id){        //fast.
             var split = id.split(':');
@@ -193,19 +209,24 @@ var live = {
                 
                 socket.on('seizeCommand', function(data){   //attempt to give command back to socket.
                     console.log('attempting to reseize command...');
-                    console.log('data id ', data.id);
                     var id = data.id.split(':')[0];
                     socket.commandId = id;
-                    for(var i in live.queue){
-                        console.log('socket id ',live.queue[i].id);
-                        if (live.queue[i].id == id && live.isCommander(data.id)) {
-                            live.queue[i].socket = socket;
-                            var first = (i == 0);
-                            socket.emit('commandSeized', {first:first});
+                    var member = live.getQueue({id:id});
+                    if (member) {
+                            member.socket = socket;
+                            var first = (member.index == 0);
+                            if (member.start) {
+                                var millis = live.time - (new Date().getTime() - member.start);
+                            }else millis = live.time;
+                            socket.emit('commandSeized', {
+                                first:first,
+                                name:member.name,
+                                millis: millis
+                            });
                             console.log('Command seized!!');
                         }
-                    } 
                 });
+                
             });
             
             /* for keeping times synced with all clients */

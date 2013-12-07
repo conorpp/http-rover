@@ -69,7 +69,6 @@ var Rover = {
         clearInterval(this.timeout);
         this.timeout = setInterval(function(){
 	    Rover.stop();
-           // clearTimeout(Rover.timeout);
         },this.stopInter);
     },
 
@@ -84,8 +83,21 @@ var Rover = {
     },
     /*
 	Call once to listen for commands.
+	motor args:
+	Left F fastest - 1
+	Left F slowest - 60
+	
+	Left R fastest - 127
+	Left R slowest - 68
+	
+	Right F fastest - 128
+	Right F slowest - 185
+	
+	Right R fastest - 255
+	Right R slowest - 195
     */
     listen: function(){
+	console.log('listening for commands . . .');
 	sub.on('message', function(channel, data){
 	    data = JSON.parse(data);
 	    console.log('Command : ',data.func);
@@ -110,7 +122,7 @@ var Rover = {
 		break;
 		case 'forwardright':
 		    Rover.moving();
-		    Rover.write(1,158);
+		    Rover.write(1,160);
 		break;
 		case 'stop':
 		    Rover.stop();
