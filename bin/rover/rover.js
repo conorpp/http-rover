@@ -33,22 +33,18 @@ var fullStream = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 alsa -a
 var video = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -an -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
 var audio = 'ffmpeg -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
 
-var processes = [];
 if (stream && process.argv.indexOf('fullstream') != -1) {
 	cmds.push(fullStream);	//unstable,slow
 	terminal.exec(fullStream);
 } else if (stream) {
 	cmds.push(video);
 	cmds.push(audio);
-	var p = terminal.exec(video);
-	processes.push(terminal.exec(video));
-	processes.push(terminal.exec(audio));
+	terminal.exec(video);
+	terminal.exec(audio);
 }
 function killSpawns(reset){
     reset = reset || false;
     terminal.exec('pkill -INT ffmpeg');
-    for (p in processes) {
-    }
     if (reset) {
         console.log('reset');
         setTimeout(function(){
@@ -57,7 +53,7 @@ function killSpawns(reset){
             }
             var data = JSON.stringify({func:'reset'});
             pub.publish('feedback', data);
-        },100);
+        },120);
     }
 }
 process.on('SIGINT', function() {
