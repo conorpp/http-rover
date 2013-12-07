@@ -29,21 +29,26 @@ console.log('Starting video and audio streams . . .');
 whole command:
 $ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream
 */
-var fullStream = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
+var fullStream = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
 var video = 'ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -an -f flv rtmp://184.173.103.51:31002/rovervideo/mystream';
 var audio = 'ffmpeg -f alsa -ac 1 -i hw:1,0 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/roveraudio/mystream';
+
+var processes = [];
 if (stream && process.argv.indexOf('fullstream') != -1) {
 	cmds.push(fullStream);	//unstable,slow
 	terminal.exec(fullStream);
 } else if (stream) {
 	cmds.push(video);
 	cmds.push(audio);
-	terminal.exec(video);
-	terminal.exec(audio);
+	var p = terminal.exec(video);
+	processes.push(terminal.exec(video));
+	processes.push(terminal.exec(audio));
 }
 function killSpawns(reset){
     reset = reset || false;
-    terminal.exec('pkill -9 ffmpeg');
+    terminal.exec('pkill -INT ffmpeg');
+    for (p in processes) {
+    }
     if (reset) {
         console.log('reset');
         setTimeout(function(){
