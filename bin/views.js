@@ -23,7 +23,12 @@ var views = {
         this.app.get('/about', function(req, res){
           res.render('about');
         });
-        
+        this.app.get('/webm', function(req, res){
+          res.render('webm');
+        });
+        this.app.get('/canvas', function(req, res){
+          res.render('canvas');
+        });
         /* admin details.  check if admin cookie else login. */
         this.app.get('/admin', function(req, res){
             if (views.authent(req)) {
@@ -80,6 +85,13 @@ var views = {
             
             res.end();
         });
+        /*
+            client data api
+        */
+        
+        //For joining the queue.
+        /* - need name.
+         */
         this.app.post('/join', function(req, res){
             if (req.cookies.commandId && live.queue.length) {
                 var rData = {error:'You\'re already in the queue'};
@@ -98,7 +110,10 @@ var views = {
             }
         });
         
-        /* returns data for client. */
+        //Returns data for the client
+        /* - queue html
+         * - admin popup if there is one.
+        */
         this.app.get('/data', function(req, res){
             app.render('templates/queue', {queue:live.queue}, function(err, html){
                 db.store.get('adminPopup', function(err2, popup){

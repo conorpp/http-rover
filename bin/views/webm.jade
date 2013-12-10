@@ -1,0 +1,17 @@
+extend layout
+block header
+    link(rel='stylesheet', href='/video/video-js.min.css')
+    script(src='/js/lib/recorderWorker.js')
+    script(src='/js/lib/recorder.js')
+block content
+    //| <audio controls autoplay></audio>
+    //| <input onclick="startRecording()" type="button" value="start recording" />
+    //| <input onclick="stopRecording()" type="button" value="stop recording and play" />
+    
+    | <video id="videoStream" class="video-js vjs-default-skin" controls
+    |     preload="auto" width="640" height="264" data-setup='{ "techOrder": ["flash"] }'>
+    |     <source src="rtmp://184.173.103.51:31002/rovervideo/mystream" type='rtmp/flv'>
+    | </video>
+    
+    script(src='/video/video.js')
+    script(src='/js/video.js')

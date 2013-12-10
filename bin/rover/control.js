@@ -8,11 +8,11 @@ var redis = require('socket.io/node_modules/redis'),
     Rover = require('./rover'),
     serialPort = require("serialport").SerialPort;
 
-//Handle terminal args
+//Handle terminal args.  *S is global.
 if (process.argv.indexOf('deploy') != -1){
-    var S = require('./deployment/settings').Settings;
+    S = require('./deployment/settings').Settings;
 }else{
-    var S = require('./../static_admin/js/settings').Settings;
+    S = require('./../static_admin/js/settings').Settings;
 }
 
 console.log('Starting up rover.  Here are settings ', S);
@@ -54,5 +54,9 @@ process.on('SIGINT', function() {
 
 Rover.connect();
 if (process.argv.indexOf('nostream') == -1) {
-    Stream.run();
+    
+    if (process.argv.indexOf('fullstream') != -1) var full = true;
+    else var full = false;
+    
+    Stream.run({fullStream: full});
 }

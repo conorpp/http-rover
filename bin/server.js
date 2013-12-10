@@ -1,7 +1,7 @@
 
 /* top level server entity.*/
 
-var S = require('./static_admin/js/settings').Settings;
+S = require('./static_admin/js/settings').Settings;
 console.log('Starting up node server.  Here are settings \n', S);
 
 /*  the globals.  Never reuse these names.  */
@@ -10,6 +10,7 @@ redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
 db = require('./database'),
 live = require('./live'),
+canvas = require('./canvas-server'),
 crypto = require('crypto'),
 app = express();
 SECRET = 'wow such secret.';
@@ -31,3 +32,4 @@ app.listen(S.http_port);
 views.listen(app);
 live.socket.listen(S.command_port).redis.listen(S.redis_port, S.host);
 db.listen(S.redis_port, S.host);
+canvas.stream();

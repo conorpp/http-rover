@@ -2,6 +2,9 @@
   Interface for video and audio live streaming
   on the rover.
   $ ffmpeg <video options> -i <video source> <audio options> -i <audio source> <output options> <output destination>
+
+webm testing command:
+ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream
 */
 
 var Stream = {
@@ -16,9 +19,12 @@ var Stream = {
     
     aSource:'hw:1,0',
     
+    password:'abc',
+    
+    //deprecated.  Just replaced by canvas.
     video : function(){
         return (
-            'ffmpeg -f video4linux2 -s 320x240 -r 15 ' +        //video options
+            'ffmpeg -f video4linux2 -s '+S.width+'x'+S.height+' -r 15 ' +        //video options
             '-i '+ this.vSource +                               //video source
             ' -an -f flv ' +                                    //output options
             this.rtmpHost + '/rovervideo/' + this.app           //destination
@@ -34,18 +40,27 @@ var Stream = {
             );
     },
     
-    //full stream tends to be slower
+    //full stream tends to be slower.  Deprecated.
     fullStream: function(){
         return (
-            'ffmpeg -f video4linux2 -s 320x240 -r 15 '+         //video options
+            'ffmpeg -f video4linux2 -s '+S.width+'x'+S.height+' -r 15 '+         //video options
             '-i '+ this.vSource +                               //video source
             ' -f alsa -ac 1 ' +                                 //audio options
             '-i '+ this.aSource +                               //audio source
-            '-acodec libvo_aacenc -f flv ' +                    //output audio/video options
+            ' -acodec libvo_aacenc -f flv ' +                    //output audio/video options
             this.rtmpHost + '/rovervideo/' + this.app           //destination
             );
     },
-                
+    
+    // for mobile devices.  Append to video command.
+    canvas: function(){
+        return(
+            'ffmpeg -s 640x480 -f video4linux2 ' +
+            '-i ' + this.vSource +
+            ' -an -f mpeg1video -b 800k -r 30 ' +
+            'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
+               );    
+    },
     /*
         Run the streams
         @option fullStream - run audio & video in single stream for better sync
@@ -58,24 +73,19 @@ var Stream = {
         options = options || {};
         console.log('Starting streams . . .');
         if (options.fullStream) {
-            var vid = terminal.exec(this.fullStream());
-            console.log(this.fullStream());
+            var vid = this.fullStream();
         }else{
-            var vid = terminal.exec(this.video());
-            console.log(this.video());
+            var vid = this.canvas();
             if (options.audio == undefined || options.audio) {
                 var aud = terminal.exec(this.audio());
                 console.log(this.audio());
-                aud.on('error', function(err){
-                    console.log('Error streaming audio : ', err);
-                });
             }
         }
+
+        console.log(vid);
+        terminal.exec(vid);
         this.running = true;
-        vid.on('error', function(err){
-            console.log('Error streaming video : ', err);
-            Stream.running = false;
-        });
+        
     },
     
     kill: function(){
@@ -84,7 +94,7 @@ var Stream = {
     
     /*
         Reset stream and get feedback.
-        same options for run.
+        same options for run().
     */
     reset: function(options){
         console.log('Resetting stream.');

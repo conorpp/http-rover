@@ -9,6 +9,10 @@ var Settings = {
     command_port:4000,
     http_port:8000,
     redis_port:6379,
+    canvasClient:8084,
+    canvasSource:8082,
+    width:640,
+    height:480
     
 };
 

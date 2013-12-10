@@ -1,12 +1,22 @@
 
-
 // rtmp://184.173.103.51:31002/rovervideo/mystream 
 // source: http://osmf.org/dev/2.0gm/setup.html 
 link(rel='stylesheet', href='/css/main.css')
 // video
-| <div id="video">
-| <object width="470" height="320"> <param name="wmode" value="transparent"><param name="movie" value="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf"></param><param name="flashvars" value="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Frovervideo%2Fmystream&autoPlay=true"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="direct"></param><embed src="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="direct" width="470" height="320" flashvars="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Frovervideo%2Fmystream&autoPlay=true"></embed></object>
-| </div>
+//| <div id="video">
+//| <object width="470" height="320"> <param name="wmode" value="transparent"><param name="movie" value="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf"></param><param name="flashvars" value="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Frovervideo%2Fmystream&autoPlay=true"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="direct"></param><embed src="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="direct" width="470" height="320" flashvars="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Frovervideo%2Fmystream&autoPlay=true"></embed></object>
+//| </div>
+| <canvas id="videoCanvas" width="640" height="480">
+|	<p>
+|		Please use a browser that supports the Canvas Element, like
+|		<a href="http://www.google.com/chrome">Chrome</a>,
+|		<a href="http://www.mozilla.com/firefox/">Firefox</a>,
+|		<a href="http://www.apple.com/safari/">Safari</a> or Internet Explorer 10
+|	</p>
+|</canvas>
+script(src='/js/settings.js')
+script(src='/canvas/jsmpg.js')
+script(src='/canvas/control.js')
 // audio
 | <div class="abs" id="audio">
 | <object width="470" height="320"> <param name="movie" value="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf"></param><param name="flashvars" value="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Froveraudio%2Fmystream&autoPlay=true"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><param name="wmode" value="direct"></param><embed src="http://osmf.org/dev/2.0gm/StrobeMediaPlayback.swf" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" wmode="direct" width="470" height="320" flashvars="src=rtmp%3A%2F%2F184.173.103.51%3A31002%2Froveraudio%2Fmystream&autoPlay=true"></embed></object>
