@@ -162,6 +162,7 @@ footer{
 }
 
 /* MOBILE */
-@media all and (max-width: 420px) {
-    .command{font-size: 3em}
+@media all and (max-width: 480px) {
+    #controlBar .btn-group button{font-size: 4em}
+    #controlBar button.join{font-size: 1.5em}
 }
