@@ -55,7 +55,7 @@ var Stream = {
     // for mobile devices.  Append to video command.
     canvas: function(){
         return(
-            'ffmpeg -s 640x480 -f video4linux2 ' +
+            'ffmpeg -s '+S.width+'x'+S.height+' -f video4linux2 ' +
             '-i ' + this.vSource +
             ' -an -f mpeg1video -b 800k -r 30 ' +
             'http://' + S.host + ':' + S.canvasSource +'/'+ this.password

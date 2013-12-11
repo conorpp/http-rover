@@ -10,8 +10,8 @@ var Settings = {
     redis_port:14177,
     canvasClient:27376,
     canvasSource:11963,
-    width:640,
-    height:480
+    width:320,
+    height:240
 };
 
 try{

@@ -99,7 +99,6 @@ $(document).ready(function(){
         if (!Command.inCommand) return;
         Command.keyupUnbind();
         Command.keyupListen();
-        clearInterval(intervalId);
     });
     
      

@@ -7,3 +7,4 @@ ctx.fillText('Loading...', canvas.width/2-30, canvas.height/3);
 // Setup the WebSocket connection and start the player
 var client = new WebSocket( 'ws://'+Settings.host+':'+Settings.canvasClient+'/' );
 var player = new jsmpeg(client, {canvas:canvas});
+
