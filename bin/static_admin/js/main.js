@@ -89,10 +89,17 @@ $(document).ready(function(){
             Command.write(id);
         },10);
     });
-    $('body').on('click mouseup touchend touchcancel', function(e){
+    $('body').on('click mouseup touchend touchcancel', function(){
         console.log('mouse left');
         clearInterval(intervalId);
        // alert('mouse up event test');
+    });
+    
+    $('#stop').on('click mouseup touchend', function(){
+        if (!Command.inCommand) return;
+        Command.keyupUnbind();
+        Command.keyupListen();
+        clearInterval(intervalId);
     });
     
      
@@ -100,6 +107,7 @@ $(document).ready(function(){
         UI.popup('Enter a name', UI.T.nameTemplate);
         $('input.name').focus();
     });
+    
      
     $(document).on('click', '.joinSubmit', function(){
         var name = $.trim($(this).siblings('input.name').val());

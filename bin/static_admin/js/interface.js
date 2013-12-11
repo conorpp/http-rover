@@ -85,8 +85,31 @@ var Command = {
                  'You have '+secs+' seconds.',
                  {millis:2500});
         UI.timer(millis);
-        
+        this.keyupUnbind();
+        this.keyupListen();
         this.inCommand = true;
+
+    },
+    
+    /*
+        Remove timer and command id. Send UI for no longer in command
+    */
+    demote: function(hidePopup){
+        console.log('you have been demoted.');
+        hidePopup = hidePopup || false;
+        if (!hidePopup) 
+            UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!'+
+                     '<br>Tell us what you think at '+
+                     '<span style="color:rgb(141, 140, 255);" >conorpp@vt.edu<span>');
+        Cookie.del('commandId');
+        $('#time').html('');
+        this.id = null;
+        this.inCommand = false;
+        this.keyupUnbind();
+    
+    },
+    
+    keyupListen: function(){
         $('html,body').keydown(function(e){
             Command.keys[e.which] = true;
             var c = Command.getCommand();
@@ -107,21 +130,9 @@ var Command = {
         });
     },
     
-    /*
-        Remove timer and command id. Send UI for no longer in command
-    */
-    demote: function(hidePopup){
-        console.log('you have been demoted.');
-        hidePopup = hidePopup || false;
-        if (!hidePopup) 
-            UI.popup('Game over', 'Time is up.  Thanks for commanding the rover!'+
-                     '<br>Tell us what you think at '+
-                     '<span style="color:rgb(141, 140, 255);" >conorpp@vt.edu<span>');
-        Cookie.del('commandId');
-        $('#time').html('');
-        this.id = null;
-        this.inCommand = false;
+    keyupUnbind: function(){
         $('html,body').unbind('keydown keyup');
+        this.keys = {};
     },
     
     /*
