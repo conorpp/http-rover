@@ -86,8 +86,12 @@ function ajaxCommand(func){
     });
 }
 
+/*
+    For kicking out someone by name
+    or everyone.
+*/
 function kick(name, everyone){
-    data = {name:name};
+    var data = {name:name};
     if (everyone) {
         data.everyone = everyone
     }

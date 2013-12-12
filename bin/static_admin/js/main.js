@@ -83,22 +83,54 @@ $(document).ready(function(){
                  'Reconnecting you now . . .', {millis:3000, error:true});
     }
     var intervalId;
-    $('.command').on('mousedown', function(){
-        var id = this.id;
-        intervalId = setInterval(function(){
-            Command.write(id);
-        },10);
-    });
+    
+    
+    //Event listeners put into functions
+    //to try to solve buttons sticking on mobile.
+    var stop = false;
+    function bindButtons(){
+        $('.command').on('mousedown touchstart', function(e){
+            if (e.type == 'touchstart') {
+                $(this).unbind('mousedown');
+            }
+            var id = this.id;
+            clearInterval(intervalId);
+            //extra precautions taken to make sure this interval doesn't
+            //get stuck.
+            stop = false;
+            intervalId = setInterval(function(){
+                if (stop) {
+                    clearInterval(intervalId);
+                    return;
+                }
+                Command.write(id);
+            },10);
+        });
+    }
+    
+    bindButtons();
+    
+    function unbindButtons() {
+        $('.command').unbind('touchstart');
+    }
+    
     $('body').on('click mouseup touchend touchcancel', function(){
         console.log('mouse left');
         clearInterval(intervalId);
-       // alert('mouse up event test');
+       // hopefully prevent button sticking.
+        unbindButtons();
+        bindButtons();
+        stop = true;
     });
     
     $('#stop').on('click mouseup touchend', function(){
         if (!Command.inCommand) return;
-        Command.keyupUnbind();
-        Command.keyupListen();
+        clearInterval(intervalId);
+
+        // hopefully prevent button sticking.
+        unbindButtons();
+        bindButtons();
+        stop = true;
     });
     
      
@@ -106,7 +138,11 @@ $(document).ready(function(){
         UI.popup('Enter a name', UI.T.nameTemplate);
         $('input.name').focus();
     });
-    
+    $('#refresh').click(function(){    //refresh the stream
+        var url = $('#stream').attr('src');
+        $('#stream').attr('src','');
+        $('#stream').attr('src',url);
+    });
      
     $(document).on('click', '.joinSubmit', function(){
         var name = $.trim($(this).siblings('input.name').val());
@@ -136,9 +172,14 @@ function join(name){
                 UI.popup('Error', data.error, {error:true, millis:3800});
                 return;
             }
-            console.log('got command id , ', data.id);
+            console.log('got in queue , ', data);
             Command.id = data.id;
             Command.socket.emit('join', {id:data.id, name:data.name});
+            
+            if (data.position > 1) {
+                UI.popup('In queue', 'Check your position in the queue below.  We will ' +
+                         'remember you if the page refreshes.', {millis:8000});
+            }
         },
         
     });

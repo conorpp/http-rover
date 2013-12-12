@@ -2,9 +2,6 @@
   Interface for video and audio live streaming
   on the rover.
   $ ffmpeg <video options> -i <video source> <audio options> -i <audio source> <output options> <output destination>
-
-webm testing command:
-ffmpeg -f video4linux2 -s 320x240 -r 15 -i /dev/video1 -acodec libvo_aacenc -f flv rtmp://184.173.103.51:31002/rovervideo/mystream
 */
 
 var Stream = {
@@ -15,7 +12,7 @@ var Stream = {
     
     app:'mystream',
     
-    vSource:'/dev/video1',
+    vSource:'/dev/video0',
     
     aSource:'hw:1,0',
     
@@ -64,7 +61,7 @@ var Stream = {
     /*
         Run the streams
         @option fullStream - run audio & video in single stream for better sync
-                            slower.  default false. Gauruntees audio.
+                            slower.  default false. Gauruntees audio. Deprecated
                             
         @option audio - run with or without audio.  Chance for better speed.
                         default true

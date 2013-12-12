@@ -59,12 +59,20 @@ var live = {
         }, live.time);
         
         //logging purposes.
-      /*  clearInterval(this.logInterval);
+        /*clearInterval(this.logInterval);
         var copyTime = Math.floor(this.time/1000);
         console.log('current queue time - ', copyTime);
         this.logInterval = setInterval(function(){
+            
+            if(live.queue[0].start){
+                
+                var timeleft = live.time - (new Date().getTime() - live.queue[0].start);
+                console.log('secs left : ', Math.floor(timeleft/1000));
+            }
+            //live.time;
             copyTime--;
-            console.log('current queue time - ', copyTime);
+            
+            //console.log('current queue time - ', copyTime);
             if (copyTime <= 0)  clearInterval(live.logInterval);
             
         },1000);*/
@@ -115,9 +123,12 @@ var live = {
             this.commandId = data.id;
             this.commandCount++;
         }else{
+            console.log('promote function given empty data, checking next in line.');
             if (this.queue.length) {
                 this.queue.splice(0,1);
+                console.log('queue spliced.  ');
                 if (this.queue.length) {
+                    console.log('queue moved on.  ');
                     this.promote(this.queue[0]);
                 }
             }

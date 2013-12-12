@@ -10,7 +10,7 @@ redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
 db = require('./database'),
 live = require('./live'),
-canvas = require('./canvas-server'),
+//canvas = require('./canvas-server'),
 crypto = require('crypto'),
 app = express();
 SECRET = 'wow such secret.';
@@ -32,4 +32,4 @@ app.listen(S.http_port);
 views.listen(app);
 live.socket.listen(S.command_port).redis.listen(S.redis_port, S.host);
 db.listen(S.redis_port, S.host);
-canvas.stream();
+//canvas.stream();

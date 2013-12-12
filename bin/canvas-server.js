@@ -3,8 +3,9 @@
 	Responible for distributing ffmpeg stream via websockets
 	I took this code else where and barely know how it works.
 */
-var canvas = {
-	stream: function(){
+var S = require('./static_admin/js/settings').Settings;
+//var canvas = {
+	//stream: function(){
 		var STREAM_SECRET = 'abc',
 			STREAM_PORT = S.canvasSource,
 			WEBSOCKET_PORT = S.canvasClient,
@@ -24,10 +25,10 @@ var canvas = {
 			streamHeader.writeUInt16BE(height, 6);
 			socket.send(streamHeader, {binary:true});
 		
-			console.log( 'New WebSocket Connection ('+socketServer.clients.length+' total)' );
+			console.log( 'New WebSocket Connection (' + socketServer.clients.length + ' total)' );
 			
 			socket.on('close', function(code, message){
-				console.log( 'Disconnected WebSocket ('+socketServer.clients.length+' total)' );
+				console.log( 'Disconnected WebSocket (' + socketServer.clients.length + ' total)' );
 			});
 		});
 		
@@ -52,6 +53,11 @@ var canvas = {
 				request.on('data', function(data){
 					socketServer.broadcast(data, {binary:true});
 				});
+				//streamServer.close();
+				//streamServer.close();
+				//console.log(streamServer);
+				console.log('stream connections - ',streamServer.connections);
+
 			}
 			else {
 				console.log(
@@ -64,7 +70,7 @@ var canvas = {
 		
 		console.log('Listening for MPEG Stream on http://127.0.0.1:'+S.canvasSource+'/<secret>/<width>/<height>');
 		console.log('Awaiting WebSocket connections on ws://127.0.0.1:'+S.canvasClient+'/');
-	}
-};
+	//}
+//};
 
-module.exports = canvas;
+//module.exports = canvas;

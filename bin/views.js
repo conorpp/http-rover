@@ -104,7 +104,8 @@ var views = {
                 db.store.get('commandCount', function(err, id){
                     var hash = crypto.createHmac('sha1', SECRET).update(id).digest('hex');
                     res.cookie('commandId', id+':'+hash, {maxAge:expire});
-                    var rData ={id:id, time:queueSecs, position:live.queue.length, name:name};
+                    //Not in queue until socket request made.
+                    var rData ={id:id, time:queueSecs, position:live.queue.length+1, name:name};
                     res.end(JSON.stringify(rData));
                 });
             }
