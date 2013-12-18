@@ -21,7 +21,7 @@ console.log('Starting up rover.  Here are settings ', S);
 terminal = require('child_process');
 pub = redis.createClient(S.redis_port, S.host);
 sub = redis.createClient(S.redis_port, S.host);
-serial = new serialPort("/dev/ttyUSB0", {
+serial = new serialPort("/dev/ttyUSB1", {
     baudrate: 9600
 });
 /********************************************************/
@@ -52,11 +52,9 @@ process.on('SIGINT', function() {
     process.exit();
 });
 
+//Start dependent scripts.
 Rover.connect();
 if (process.argv.indexOf('nostream') == -1) {
-    
-    if (process.argv.indexOf('fullstream') != -1) var full = true;
-    else var full = false;
-    
-    Stream.run({fullStream: full});
+    Stream.run();
 }
+
