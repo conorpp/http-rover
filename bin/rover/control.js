@@ -15,13 +15,18 @@ if (process.argv.indexOf('deploy') != -1){
     S = require('./../static_admin/js/settings').Settings;
 }
 
+var i = process.argv.indexOf('-usb');	//usb addr for board.
+if (i!=-1) {
+    var addr = process.argv[i+1];
+}else var addr = '/dev/ttyUSB1'
+
 console.log('Starting up rover.  Here are settings ', S);
 
 /* Global variables for rover.  Do not reuse these names */
 terminal = require('child_process');
 pub = redis.createClient(S.redis_port, S.host);
 sub = redis.createClient(S.redis_port, S.host);
-serial = new serialPort("/dev/ttyUSB1", {
+serial = new serialPort(addr, {
     baudrate: 9600
 });
 /********************************************************/
