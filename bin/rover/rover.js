@@ -109,20 +109,20 @@ var Rover = {
 		break;
 		case 'left':
 		    Rover.moving();
-		    Rover.write(21,235);
+		    Rover.write(107,158);
 		break;
 		case 'right':
 		    Rover.moving();
-		    Rover.write(107,158);
+		    Rover.write(21,235);
 		break;
 		case 'forwardleft':
 		    Rover.moving();
-		    Rover.write(1,160);
+		    Rover.write(31,128);
 		    
 		break;
 		case 'forwardright':
 		    Rover.moving();
-		    Rover.write(31,128);
+		    Rover.write(1,160);
 		break;
 		case 'stop':
 		    Rover.stop();
