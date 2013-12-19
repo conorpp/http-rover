@@ -105,7 +105,7 @@ var Rover = {
 		
 		case 'forward':
 		    Rover.moving();
-		    Rover.write(1,128);
+		    Rover.write(127,255);
 		break;
 		case 'left':
 		    Rover.moving();
@@ -129,7 +129,7 @@ var Rover = {
 		break;
 		case 'reverse':
 		    Rover.moving();
-		    Rover.write(127,255);
+		    Rover.write(1,128);
 		break;
 
 		default:
