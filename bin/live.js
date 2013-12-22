@@ -6,11 +6,13 @@ var live = {
     // data
     clientCount:0,
     queue:[],
-    time:1000*60,          //ms
+    time:1000*60,           //ms
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     commandId:null,
-    commandCount:0,       //total of people commanded rover.
+    commandCount:0,         //total of people commanded rover.
+    pings:0,                //init track of unresponded pings to rover
+    maxPings:2,             //max of consecutive unresponded pings to send distress popup
     
     
     /* for attempting to reload queue in quick server restarts. */
@@ -249,6 +251,18 @@ var live = {
                     //nobody in queue code.
                 }
             },10*1000);
+            
+            /* for checking the rovers connection */
+            setInterval(function(){
+                live.pings++;           //reset in redis pub.
+                live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
+                if (live.pings >= live.maxPings) {
+                    console.log('Rover may be disconnected . . . ');
+                    live.socket.io.sockets.emit('announce', {title:'Rover lost', message:'The rover may '+
+                                                'may have lost connection.  It will attempt reconnecting and ' +
+                                                'we\'ll let you know when it comes back.  Sorry'});
+                }
+            },3*1000);
         },
         
     },
@@ -272,6 +286,15 @@ var live = {
                     case 'reset':
                         console.log('resetting clients');
                         live.socket.io.sockets.emit('reset');
+                    break;
+                    case 'ping':    //recieve rover ping.
+                        if (live.pings >= live.maxPings) {
+                            live.socket.io.sockets.emit('announce', {title:'Rover is back',
+                                                        message:'Internet has been returned to the rover.'});
+                            console.log('Rover is alive. ',new Date());
+                        }
+                        live.pings = 0;
+                        
                     break;
                 default:
                     console.log('no cases met in redis case statement.');

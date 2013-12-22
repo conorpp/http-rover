@@ -99,6 +99,7 @@ var Rover = {
     listen: function(){
 	console.log('listening for commands . . .');
 	sub.on('message', function(channel, data){
+	    if (channel!='rover') return;
 	    data = JSON.parse(data);
 	    console.log('Command : ',data.func);
 	    switch (data.func) {
@@ -133,7 +134,7 @@ var Rover = {
 		break;
 
 		default:
-		    console.log('No cases were met on rover pubsub.');
+		console.log('No cases were met on rover pubsub.');
 	    }
 	});
     }

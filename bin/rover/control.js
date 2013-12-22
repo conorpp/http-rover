@@ -24,7 +24,7 @@ console.log('Starting up rover.  Here are settings ', S);
 
 /* Global variables for rover.  Do not reuse these names */
 terminal = require('child_process');
-pub = redis.createClient(S.redis_port, S.host);
+pub = redis.createClient(S.redis_port, S.host);		//feedback channel
 sub = redis.createClient(S.redis_port, S.host);
 serial = new serialPort(addr, {
     baudrate: 9600
@@ -45,6 +45,9 @@ sub.on('message', function(channel, data){
             console.log('Resetting stream . . .');
             Stream.reset();
         break;
+	case 'ping':
+	    pub.publish('feedback', JSON.stringify({func:'ping'}));
+	break;
         default:
 	    if (channel=='roverAdmin') {
 		console.log('No cases met on admin channel.');
