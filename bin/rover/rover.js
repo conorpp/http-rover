@@ -43,7 +43,7 @@ var Rover = {
     /* writes all args to serial port. */
     write: function(){
         if (!this.ready) { 
-            console.log('Board not ready yet.');
+            C.log('Board not ready yet.', {color:'red', background:'black'});
             return;
         }
         for (var i = 0; i < arguments.length; i++) {
@@ -75,7 +75,7 @@ var Rover = {
     blink: function(on){},
     
     stop: function(){
-        console.log('stopping');
+        C.log('stopping', {newline:false, color:'red',background:'white'});
         this.write(0,0);
         setTimeout(function(){      //safety
             Rover.write(0,0);    
@@ -101,7 +101,7 @@ var Rover = {
 	sub.on('message', function(channel, data){
 	    if (channel!='rover') return;
 	    data = JSON.parse(data);
-	    console.log('Command : ',data.func);
+	    C.log('Command : ' + data.func, {color:'green', newline:false});
 	    switch (data.func) {
 		
 		case 'forward':

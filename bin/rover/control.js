@@ -26,6 +26,7 @@ console.log('Starting up rover.  Here are settings ', S);
 terminal = require('child_process');
 pub = redis.createClient(S.redis_port, S.host);		//feedback channel
 sub = redis.createClient(S.redis_port, S.host);
+C = require('./lib/colorLog');
 serial = new serialPort(addr, {
     baudrate: 9600
 });
@@ -42,7 +43,7 @@ sub.on('message', function(channel, data){
 		console.log('unauthorized attempt for ' + data.func + 'command');
 		return;
 	    }
-            console.log('Resetting stream . . .');
+            C.log('Resetting stream . . .', {color:'blue', newline:false});
             Stream.reset();
         break;
 	case 'ping':
@@ -50,7 +51,7 @@ sub.on('message', function(channel, data){
 	break;
         default:
 	    if (channel=='roverAdmin') {
-		console.log('No cases met on admin channel.');
+		C.log('No cases met on admin channel.', {color:red});
 	    }
     }
 });
@@ -65,4 +66,8 @@ Rover.connect();
 if (process.argv.indexOf('nostream') == -1) {
     Stream.run();
 }
+
+
+
+
 
