@@ -2,6 +2,8 @@
 /*
 	Responible for distributing ffmpeg stream via websockets
 	I took this code else where and barely know how it works.
+	
+	Will work on phones!
 */
 var S = require('./static_admin/js/settings').Settings;
 //var canvas = {
@@ -10,9 +12,10 @@ var S = require('./static_admin/js/settings').Settings;
 			STREAM_PORT = S.canvasSource,
 			WEBSOCKET_PORT = S.canvasClient,
 			STREAM_MAGIC_BYTES = 'jsmp'; // Must be 4 bytes
-		
+			
 		var width = S.width,
-			height = S.height;
+		    height = S.height;
+
 		
 		// Websocket Server
 		var socketServer = new (require('ws').Server)({port: WEBSOCKET_PORT});
@@ -42,8 +45,19 @@ var S = require('./static_admin/js/settings').Settings;
 		// HTTP Server to accept incomming MPEG Stream
 		var streamServer = require('http').createServer( function(request, response) {
 			var params = request.url.substr(1).split('/');
-			width = S.width|0;
-			height = S.height|0;
+			
+			try {
+				if (params[1] && params[2]){
+					width = parseInt(params[1]) || width;
+					height = parseInt(params[2]) || height;
+					console.log('Height and width overwritten. ', params);
+				}
+			}catch(e){}
+			
+			width = width|0;
+			height = height|0;
+			console.log('width ', width);
+			console.log('height ', height);
 		
 			if( params[0] == STREAM_SECRET ) {
 				console.log(
