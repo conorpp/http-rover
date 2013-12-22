@@ -76,13 +76,13 @@ var C = {
             bgBase += 60;
         }
         if (this.options.color) {
-            code += '\033[1;'+ (colorBase+this.color(this.options.color)) + 'm';
+            code += '\033[10;'+ (colorBase+this.color(this.options.color)) + 'm';
         }
         if (this.options.background) {
-            code += '\033[1;'+ (bgBase+this.color(this.options.background)) + 'm';
+            code += '\033[10;'+ (bgBase+this.color(this.options.background)) + 'm';
         }
         if (this.options.font) {
-            code += '\033[1;' +this.font(this.options.font)+ 'm';
+            code += '\033[10;' +this.font(this.options.font)+ 'm';
         }
 
         //console.log()
