@@ -32,19 +32,17 @@ var views = {
         /* admin details.  check if admin cookie else login. */
         this.app.get('/admin', function(req, res){
             if (views.authent(req)) {
-                var stats = views.stats();
-                db.store.get('adminPopup', function(err, popup){
-                    console.log('admin popup : ', popup);
-                    if (popup) {
-                        popup = JSON.parse(popup);
-                        var message = popup.message,
-                            title = popup.title,
-                            checked=true;
-                    }else var message = '',
-                            title = '',
-                            checked = false;
-                    res.render('admin', {stats:stats, popup:popup, title:title, message:message, checked:checked});
-                });
+                var stats = views.stats(function(info){
+                    console.log('info for adim ', info);
+                    res.render('admin', {stats:stats.sync,
+                               popup:info.adminPopup,
+                               title: info.adminPopup ? info.adminPopup.title : null,
+                               message:info.adminPopup ? info.adminPopup.message : null,
+                               checked:info.adminPopup ? true : false,
+                               ifconfig:info.ifconfig
+                            });
+                 });
+                //});
             }else{
                 res.render('login');
             }
@@ -53,7 +51,8 @@ var views = {
         this.app.post('/admin', function(req, res){
             if(views.login(req)){
                 var days3 = 1000*60*60*24*3;
-                res.cookie('admin', views.adminStatus, {maxAge:days3, signed:true});
+                var hash = crypto.createHmac('sha1', SECRET).update('admin').digest('hex');
+                res.cookie('admin', hash, {maxAge:days3});
                 res.redirect('/admin');
             }else{
                 var data = {error:'Invalid credentials dude'};
@@ -146,6 +145,16 @@ var views = {
             }
             res.end();
         });
+        
+        /* command sent to rover terminal */
+        this.app.post('/execute', function(req, res){
+            console.log('execting  ', req.body.command);
+            if (!views.authent(req)) return;
+            var command = req.body.command;
+            live.redis.pub.publish('roverAdmin',
+                                   JSON.stringify({func:'execute', command:command}));
+            res.end();
+        });
     },
     
     /*
@@ -157,16 +166,54 @@ var views = {
                  req.body.username == this.username);
     },
     authent: function(req){
-        return (req.signedCookies.admin == this.adminStatus);
+        //return (req.signedCookies.admin == this.adminStatus);
+        var id = req.admin ? req.admin : req.cookies.admin;
+        if (id){        
+            var hash = crypto.createHmac('sha1', SECRET).update('admin').digest('hex');
+            return (id == hash);
+        }else return false;
     },
-    /* returns sync live stats about server for admin */
-    stats: function(){
-
-        return {
-            'Connected users': live.clientCount,
-            'Queue length': live.queue.length,
-            'Command total': live.commandCount
+    
+    /* returns sync && async live stats about server for admin */
+    storeVals:['adminPopup', 'ifconfig'],       //add redis values here.
+    stats: function(callback){
+        
+        this._data = {
+            sync:{
+                'Connected users': live.clientCount,    //add sync values here.
+                'Queue length': live.queue.length,
+                'Command total': live.commandCount
+                }
+            
             };
+        this._chain(callback);
+        for (var i in this.storeVals) {
+            db.store.get(this.storeVals[i], function(err, val){
+                try{
+                    if (val) views._data[views.storeVals[i]] = JSON.parse(val);
+                    else views._data[views.storeVals[i]] = val;
+                }catch(e){
+                   views._data[views.storeVals[i]] = val; 
+                }
+                views._chainStart--;
+                //C.log('got val ',val, {color:'purple'});
+                //C.log('err? ',err, {color:'red'});
+            });
+        }
+        return this._data;
+    },
+    _chainStart:0,
+    _chainInter:null,
+    _chain: function(callback){
+        this._chainStart = views.storeVals.length;
+        clearInterval(this._chainInter);
+        this._chainInter = setInterval(function(){
+            if (views._chainStart <= 0) {
+                clearInterval(views._chainInter);
+                callback(views._data);
+            }
+        },5);
+        
     }
     
 };

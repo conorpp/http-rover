@@ -23,7 +23,14 @@ Command.socket.on('reset', function(data){
 });
 
 /* display announcement as popup. */
+var disconnectFlag = false;
 Command.socket.on('announce', function(data){       //not client specific
+    if (data.disconnect != undefined) {
+        if (disconnectFlag && data.disconnect) {
+            return;
+        }
+        disconnectFlag = data.disconnect;
+    }
     UI.popup(data.title, data.message, {announcement:true});
 });
 Command.socket.on('promote', function(data){        //is client specific

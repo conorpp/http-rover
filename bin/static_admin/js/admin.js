@@ -40,6 +40,12 @@ $(document).ready(function(){
         }
         kick(name, everyone);
     });
+    
+    $('#execute').click(function(){
+        var command = $('#execCommand').val();
+        execute(command);
+        console.log(command);
+    });
 });
 
 
@@ -101,8 +107,29 @@ function kick(name, everyone){
         data : data,
         success:function(data, textStatus, jqXHR) {
             console.log('kick made successfully.');
-        },
+        }
         
     });
 }
+/*
+    Send a command to be executed in rovers terminal
+*/
+function execute(command) {
+    $.ajax({
+        url : '/execute',
+        type: "POST",
+        data : {command:command},
+        success:function(data, textStatus, jqXHR) {
+            console.log('command sent successfully.');
+        }
+        
+    });
+}
+
+Command.socket.emit('subscribe', {room:'admin', admin:Cookie.get('admin')});
+
+Command.socket.on('stdout', function(data){
+    console.log('got stdout!', data);
+    $('#stdout').html(data.stdout);
+});
 

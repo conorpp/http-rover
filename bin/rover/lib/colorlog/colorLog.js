@@ -4,7 +4,6 @@
     
     -added color and font features
     -allowed infinite args to be printed
-    TODO: add log levels.
     
     usage example:
         var options = {
@@ -60,11 +59,7 @@ var C = {
         }
         
         for (var i = 0; i < length; i++){
-            var arg = arguments[i];
-            if (typeof arg == 'object') {
-                arg = JSON.stringify(arg);
-            }
-            var text = this.format(arg);
+            var text = this.format(arguments[i]);
             logger(text);
         }
     },

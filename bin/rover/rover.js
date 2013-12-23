@@ -137,6 +137,27 @@ var Rover = {
 		console.log('No cases were met on rover pubsub.');
 	    }
 	});
+    },
+    /*	retrieve info about network for web server.
+	returns info obj
+	
+	@param emit - set to false to prevent emitting to webserver automatically.
+     */
+    info: function(params, callback){
+	params = params || {},
+	callback = callback || function(){};
+	params.emit = params.emit == undefined ? true : params.emit;
+	var info = {func:'ifconfig'};
+	terminal.exec('ifconfig', function(err, stdout, stderr){
+	    if (err) C.log('err in info ', err, {color:'red'});
+	    info.ifconfig = stdout;
+	    callback(info);
+	    if (params.emit) {
+		C.log('sending config ', {color:'green'});
+		pub.publish('feedback', JSON.stringify(info));
+	    }
+	});
+
     }
     
 };

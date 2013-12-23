@@ -7,7 +7,7 @@ block content
     form(method='post' , action='/logout', id='logout' class="inline")
         input(type='submit', value='log out')
     h2.color0.head Stats
-    | - current info for application - 
+    | - current info for application -
     each val, key in stats
         p.color0.left15 #{key} : #{val}
     
@@ -32,6 +32,18 @@ block content
     lable
         input(type='checkbox', class='checkbox inline', id='kickEveryone', checked=checked)
         | Everyone.
-    input(type='text', placeholder='Or by name', class='block form-control mar5', id='kickName', value=title)
+    input(type='text', placeholder='Or by name', class='block form-control mar5 width2', id='kickName', value=title)
     button(id='kick' class='btn btn-danger') Kick
+    
+    h2.head Current Rover Network config
+    | - good for checking the last known network status of the rover. - <br />
+    p #{ifconfig}
+    
+    h2.head Send console command
+    | - Send a command to be executed in the rover terminal.  stdout will be displayed below. *CAREFUL!- <br />
+    input(id='execCommand', class='block form-control mar5', placeholder=' Command')
+    button(class='btn btn-primary', id='execute') Execute
+    div#stdout.pad10
+        
+    
     

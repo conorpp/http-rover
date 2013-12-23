@@ -91,6 +91,10 @@ footer{
 .fleft{float:left; left:0px;}
 .fright{float:right; right:0px;}
 
+.width1{max-width: 300px;}
+.width2{max-width: 400px;}
+.width3{max-width: 500px;}
+
 .shadow{box-shadow: -2px 2px 20px 1px #000;}
 
 .head{
@@ -166,6 +170,10 @@ footer{
 }
 
 #forward{
+}
+#stdout{
+    color:rgb(124, 124, 255);
+    background: rgb(36, 36, 36);
 }
 
 /* MOBILE devices < 480px wide */

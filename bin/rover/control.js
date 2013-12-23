@@ -37,6 +37,7 @@ sub.subscribe('roverAdmin');
 //Administrative commands.
 sub.on('message', function(channel, data){
     data = JSON.parse(data);
+    //C.log('got data', data, {color:'red'});
     switch (data.func) {
         case 'reset':
 	    if (channel != 'roverAdmin') {
@@ -48,6 +49,15 @@ sub.on('message', function(channel, data){
         break;
 	case 'ping':
 	    pub.publish('feedback', JSON.stringify({func:'ping'}));
+	break;
+	case 'execute':
+	    console.log('about to exec ', data);
+	    terminal.exec(data.command, function(err, stdout, stdin){
+		var error = err || stdin;
+		C.log('in callback ', {color:'blue'});
+		pub.publish('feedback',
+			    JSON.stringify({func:'stdout',stdout:stdout, error:error, command:data.command}));
+	    });
 	break;
         default:
 	    if (channel=='roverAdmin') {
@@ -67,7 +77,7 @@ if (process.argv.indexOf('nostream') == -1) {
     Stream.run();
 }
 
-
+Rover.info();
 
 
 

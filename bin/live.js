@@ -239,7 +239,10 @@ var live = {
                             console.log('Command seized!!');
                         }
                 });
-                
+                socket.on('subscribe', function(data){
+                    if (!views.authent(data) && data.room == 'admin') return;
+                    socket.join(data.room);
+                });
             });
             
             /* for keeping times synced with all clients */
@@ -260,7 +263,7 @@ var live = {
                     console.log('Rover may be disconnected . . . ');
                     live.socket.io.sockets.emit('announce', {title:'Rover lost', message:'The rover may '+
                                                 'may have lost connection.  It will attempt reconnecting and ' +
-                                                'we\'ll let you know when it comes back.  Sorry'});
+                                                'we\'ll let you know when it comes back.  Sorry', disconnect:true});
                 }
             },3*1000);
         },
@@ -290,11 +293,19 @@ var live = {
                     case 'ping':    //recieve rover ping.
                         if (live.pings >= live.maxPings) {
                             live.socket.io.sockets.emit('announce', {title:'Rover is back',
-                                                        message:'Internet has been returned to the rover.'});
+                                                        message:'Internet has been returned to the rover.',
+                                                        disconnect:false});
                             console.log('Rover is alive. ',new Date());
                         }
                         live.pings = 0;
-                        
+                    break;
+                    case 'ifconfig':        //set latest network stats
+                        db.store.set('ifconfig', data.ifconfig);
+                       // console.log('got ifconfig ', data);
+                    break;
+                    case 'stdout':      //return stdout from rover
+                        C.log('stdout ',data, {color:'blue', background:'white', backgroundIntense:true});
+                        live.socket.io.sockets.in('admin').emit('stdout', data);
                     break;
                 default:
                     console.log('no cases met in redis case statement.');

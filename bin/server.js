@@ -10,6 +10,7 @@ redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
 db = require('./database'),
 live = require('./live'),
+C= require('./rover/lib/colorLog'),
 //canvas = require('./canvas-server'),
 crypto = require('crypto'),
 app = express();
