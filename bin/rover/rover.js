@@ -38,6 +38,7 @@ var Rover = {
 	process.stdin.on('data', function(data){
 	    Rover.write(data);
 	});
+	this.info();
     },
     
     /* writes all args to serial port. */
@@ -101,7 +102,7 @@ var Rover = {
 	sub.on('message', function(channel, data){
 	    if (channel!='rover') return;
 	    data = JSON.parse(data);
-	    C.log('Command : ' + data.func, {color:'green', newline:false});
+	    C.log('Command : ' + data.func, {color:'green'});
 	    switch (data.func) {
 		
 		case 'forward':

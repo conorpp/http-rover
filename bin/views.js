@@ -33,7 +33,7 @@ var views = {
         this.app.get('/admin', function(req, res){
             if (views.authent(req)) {
                 var stats = views.stats(function(info){
-                    console.log('info for adim ', info);
+                    C.log('info for adim ', info, {color:'blue', logLevel:-1});
                     res.render('admin', {stats:stats.sync,
                                popup:info.adminPopup,
                                title: info.adminPopup ? info.adminPopup.title : null,
@@ -95,6 +95,7 @@ var views = {
             if (req.cookies.commandId && live.queue.length) {
                 var rData = {error:'You\'re already in the queue'};
                 res.end(JSON.stringify(rData));
+                C.log('Rejected join request because commander cookie exists ', {color:'blue'});
             }else{
                 var expire = (live.time * (live.queue.length+1)) + live.time*.1;    
                 var queueSecs = Math.floor(live.time/1000);
@@ -126,14 +127,14 @@ var views = {
         /* for admins sending commands from ajax. */
         this.app.post('/command', function(req, res){
             if (views.authent(req)) {
-                console.log('admin command: ', req.body.func);
+                C.log('admin command: ', req.body.func, {color:'blue'});
                 live.redis.pub.publish('roverAdmin', JSON.stringify(req.body));
-            }else console.log('admin command denied. : ', req.body.func);
+            }else C.log('admin command denied. : ', req.body.func, {color:'red'});
         });
         
         /* admin kicking */
         this.app.post('/kick', function(req, res){
-            console.log('kicking.  everyone :  ', req.body.everyone);
+            C.log('kicking.  everyone :  ', req.body.everyone, {color:'yellow'});
             if (!views.authent(req)) return;
             if (req.body.everyone) {
                 live.socket.io.sockets.emit('kick');
@@ -148,7 +149,7 @@ var views = {
         
         /* command sent to rover terminal */
         this.app.post('/execute', function(req, res){
-            console.log('execting  ', req.body.command);
+            C.log('sending terminal command to rover: ', req.body.command, {color:'blue'});
             if (!views.authent(req)) return;
             var command = req.body.command;
             live.redis.pub.publish('roverAdmin',
@@ -196,8 +197,6 @@ var views = {
                    views._data[views.storeVals[i]] = val; 
                 }
                 views._chainStart--;
-                //C.log('got val ',val, {color:'purple'});
-                //C.log('err? ',err, {color:'red'});
             });
         }
         return this._data;

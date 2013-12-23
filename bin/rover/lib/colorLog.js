@@ -19,7 +19,7 @@
         options
             newline
                 set to false to disable the newline after each log.
-                default false.
+                default true.
             color
                 'red', 'blue', 'purple', 'cyan', 'white', 'black', 'green'
             background
@@ -33,11 +33,31 @@
             font
                 'bold', 'faint', 'underline', 'blink', 'blinkFast',
                 'italic', 'inverse', 'cross', 'conceal', 'normal'
+            logLevel
+                number that will make log excluded if it's below
+                logLevel attribute. Default 0.
+    setup:
+        C.set({
+            logLevel: 1  //Excludes all logs with logLevel less than 1. Default 0.
+        });
                 
 */
 var C = {
     
     options:{},
+    
+    logLevel:0,
+    
+    /* Settings for logger
+        @param logLevel
+    */
+    set: function(params){
+        params = params || {};
+        if (params.logLevel) {
+            this.logLevel = parseInt(params.logLevel);
+        }
+        this.log('Log level set to ', this.logLevel, {color:'cyan'});
+    },
     
     log: function(){
         //look for options
@@ -48,25 +68,23 @@ var C = {
             this.options = {};
             var length = arguments.length;
         }
-        //see newline
-        if (this.options.newline ) {
-            var logger = function(a){
-                process.stdout.write(a+'\n','utf-8');
-            }
-        }else {
-            var logger = function(a){
-                process.stdout.write(a,'utf-8');
-            }
-        }
         
+        this.options.logLevel = this.options.logLevel != undefined ?
+                                this.options.logLevel : 0;
+                                
+        if (this.options.logLevel < this.logLevel) return;
+        
+        var args = '';
         for (var i = 0; i < length; i++){
             var arg = arguments[i];
             if (typeof arg == 'object') {
-                arg = JSON.stringify(arg);
+                arg = JSON.stringify(arg,undefined, 2);
             }
             var text = this.format(arg);
-            logger(text);
+            args += text;
         }
+        if (this.options.newline || this.options.newline == undefined) args += '\n';
+        process.stdout.write(args,'utf-8');
     },
     
     format: function(raw){
@@ -85,13 +103,15 @@ var C = {
         }
         if (this.options.background) {
             code += '\033[10;'+ (bgBase+this.color(this.options.background)) + 'm';
+        }else if (this.options.bg) {
+            code += '\033[10;'+ (bgBase+this.color(this.options.bg)) + 'm'; 
         }
         if (this.options.font) {
             code += '\033[10;' +this.font(this.options.font)+ 'm';
         }
 
         //console.log()
-        return code + raw + '\033[0m\n';   //end with reset code.
+        return code + raw + '\033[0m';   //end with reset code.
     },
     
     //return color code
@@ -150,7 +170,7 @@ var C = {
             case 'blink':
                 return 5;
             break;
-            case 'blinkFast':
+            case 'blinkfast':
                 return 6;
             break;
             case 'inverse':

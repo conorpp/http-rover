@@ -30,9 +30,9 @@ var live = {
             position: this.queue.length +1,
             socket:socket
         });
-        console.log('queue added to. length: '+this.queue.length);
+        C.log('queue added to. length:', this.queue.length, {color:'green'});
         if (live.queue.length == 1) {
-            console.log('interval started.');
+            C.log('Queue interval started.', {color:'green'});
             this.changeCommand(true);   //true indicates to promote
             this.beginQueue();
         }
@@ -52,7 +52,7 @@ var live = {
     logInterval:null,
     beginQueue: function(){
         live.queueInterval = setInterval(function(){
-            console.log('interval executed. length - ', live.queue.length);
+            C.log('Interval executed. Changing command.  Length - ', live.queue.length, {color:'green', logLevel:1});
             
             live.changeCommand();
             
@@ -83,6 +83,8 @@ var live = {
     
     //for getting a queue member by an attribute
     //return 0 if none.  Adds index as an attribute.
+    // usage: this.getQueue(name:'dude');
+    // or:    this.getQueue(id: 45);
     getQueue: function(filter){
         for (i in filter) {
             var key = i;
@@ -108,7 +110,7 @@ var live = {
             this.demote(this.queue[0]);
             if (this.queue.length) {
                 this.promote(this.queue[0]);
-            }else console.log('queue depleted.');
+            }else C.log('Queue depleted. ', {color:'yellow'});
         }
         for (q in this.queue) {
             this.queue[q].position = this.queue.indexOf(this.queue[q])+1;
@@ -120,31 +122,31 @@ var live = {
     // it will move to next in line.
     promote: function(data){
         if (data.socket) {
+            C.log('Promoting next in queue ', {color:'green'});
             data.socket.emit('promote', {millis:this.time, name:data.name});
             data.start = new Date().getTime();
             this.commandId = data.id;
             this.commandCount++;
         }else{
-            console.log('promote function given empty data, checking next in line.');
+            C.log('promote function given empty data, checking next in line.', {color:'red'});
             if (this.queue.length) {
                 this.queue.splice(0,1);
-                console.log('queue spliced.  ');
                 if (this.queue.length) {
-                    console.log('queue moved on.  ');
+                    C.log('Queue member found. moving on.  ', {color:'yellow'});
                     this.promote(this.queue[0]);
-                }
+                }else C.log('Queue is now empty. ', {color:'yellow'});
             }
         }
     },
     
     demote: function(data, position, kick){
-        console.log('demoting . . .', position + 0);
+        C.log('Demoting position ', position, ' in queue.', {color:'green'} );
         if (data && data.socket) {        
             data.socket.emit('demote', {kick:kick});
             live.socket.io.sockets.emit('removeQueue', {position:position || 1});
             this.queue.splice(position - 1, 1);
             this.commandId = null;
-        }
+        } else C.log('Demoting position ', position, ' failed. Invalid socket.', {color:'red'});
     },
     
     //validate
@@ -155,7 +157,10 @@ var live = {
                 val = split[0];
             var hash = crypto.createHmac('sha1', SECRET).update(val).digest('hex');
             return (sign == hash && this.commandId == val);
-        }else return false;
+        }else{
+            C.log('Commander validation failed. ' , {color:'yellow'});
+            return false;
+        }
     },
     
     socket:{
@@ -185,11 +190,11 @@ var live = {
                 
                 socket.rooms = [];
                 live.clientCount++;
-                console.log('User connected.  total: ', live.clientCount);
+                C.log('User connected.  total: ', live.clientCount, {color:'blue'});
                 
                 
                 socket.on('leave', function(data){
-                    console.log('user left room', data.pk);
+                    C.log('user left room', data, {color:'blue'});
                     this.leave(data.pk);
                     var i = this.rooms.indexOf(data.pk);
                     this.rooms.splice(i,1);
@@ -197,7 +202,7 @@ var live = {
                 
                 socket.on('disconnect', function(data){
                     live.clientCount--;
-                    console.log('User disconnected. total: ', live.clientCount);
+                    C.log('User disconnected. total: ', live.clientCount, {color:'blue'});
                     if (this.commandId) {   //lose queue
                        /* for(var i in live.queue){
                             if (live.queue[i].id == this.commandId) {
@@ -210,9 +215,9 @@ var live = {
                 
                 socket.on('command', function(data){
                     if (live.isCommander(data.id)) {
-                        console.log('command: ', data.func);
+                        C.log('command: ', data.func, {color:'blue'});
                         live.redis.pub.publish('rover', JSON.stringify(data));
-                    }else console.log('Command Denied.  ('+data.func+')');
+                    }else C.log('Command Denied.  ('+data.func+')', {color:'yellow'});
                 });
                 
                 socket.on('join', function(data){
@@ -221,7 +226,7 @@ var live = {
                 });
                 
                 socket.on('seizeCommand', function(data){   //attempt to give command back to socket.
-                    console.log('attempting to reseize command...');
+                    C.log('Attempting to reseize command for client...', {color:'blue'});
                     var id = data.id.split(':')[0];
                     socket.commandId = id;
                     var member = live.getQueue({id:id});
@@ -236,12 +241,14 @@ var live = {
                                 name:member.name,
                                 millis: millis
                             });
-                            console.log('Command seized!!');
-                        }
+                            if (first)C.log('Client returned to command ', {color:'green'});
+                            else C.log('Client returned to queue. ', {color:'green'});
+                    }else{C.log('Failed to return command for client ', {color:'red'})}
                 });
                 socket.on('subscribe', function(data){
                     if (!views.authent(data) && data.room == 'admin') return;
                     socket.join(data.room);
+                    C.log('Client joined room ', data.room, {color:'blue'});
                 });
             });
             
@@ -253,6 +260,7 @@ var live = {
                 }else if (!live.queue.length) {
                     //nobody in queue code.
                 }
+                C.log('Syncing time ', {color:'teal', logLevel:-1})
             },10*1000);
             
             /* for checking the rovers connection */
@@ -260,7 +268,7 @@ var live = {
                 live.pings++;           //reset in redis pub.
                 live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
                 if (live.pings >= live.maxPings) {
-                    console.log('Rover may be disconnected . . . ');
+                    C.log('Rover may be disconnected ', {color:'red'});
                     live.socket.io.sockets.emit('announce', {title:'Rover lost', message:'The rover may '+
                                                 'may have lost connection.  It will attempt reconnecting and ' +
                                                 'we\'ll let you know when it comes back.  Sorry', disconnect:true});
@@ -287,7 +295,7 @@ var live = {
             
                 switch (data.func) {
                     case 'reset':
-                        console.log('resetting clients');
+                        C.log('Resetting video stream for all clients', {color:'blue'});
                         live.socket.io.sockets.emit('reset');
                     break;
                     case 'ping':    //recieve rover ping.
@@ -295,20 +303,21 @@ var live = {
                             live.socket.io.sockets.emit('announce', {title:'Rover is back',
                                                         message:'Internet has been returned to the rover.',
                                                         disconnect:false});
-                            console.log('Rover is alive. ',new Date());
+                            C.log('Rover is alive. ',new Date(), {color:'green', font:'bold'});
                         }
                         live.pings = 0;
                     break;
                     case 'ifconfig':        //set latest network stats
                         db.store.set('ifconfig', data.ifconfig);
-                       // console.log('got ifconfig ', data);
+                        C.log('Recieved ifconfig from rover.', {color:'green'});
+                        C.log('ifconfig: ', {color:'green', logLevel:-1});
                     break;
                     case 'stdout':      //return stdout from rover
-                        C.log('stdout ',data, {color:'blue', background:'white', backgroundIntense:true});
+                        C.log('stdout ',data, {color:'blue'});
                         live.socket.io.sockets.in('admin').emit('stdout', data);
                     break;
                 default:
-                    console.log('no cases met in redis case statement.');
+                    C.log('no cases met in redis case statement.',{color:'red'});
                 }
             });
         }

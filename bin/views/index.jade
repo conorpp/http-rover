@@ -3,29 +3,32 @@ block title
     | The Rover
 block content
     #navBar.abs
-        button(id='refresh' class='btn btn-primary fright mar20') Refresh
+        button(id='refresh', class='btn btn-primary fright mar20') Refresh
         
     #streamWrap.center
         
         table
             tr
                 td
-                    #time.fs18 
-                    iframe(src='/video' id='stream')
+                    #time.fs18
+                        | 
+                    iframe(src='/video', id='stream')
                     #controlBar
-                        button(id='join' class='btn btn-success right15') Control
-                        .btn-group
-                            button(id='left' class='btn btn-default command') 
-                                | <span class="glyphicon glyphicon-chevron-left"></span>
-                            button(id='reverse' class='btn btn-default command')
-                                | <span class="glyphicon glyphicon-arrow-down"></span>
-                            button(id='forward' class='btn btn-default command')
-                                | <span class="glyphicon glyphicon-arrow-up"></span>
-                            button(id='right' class='btn btn-default command')
-                                | <span class="glyphicon glyphicon-chevron-right"></span>
+                        button(id='join', class='btn btn-success right15') Control
+                        div.btn-group
+                            | 
+                            button(id='left', class='btn btn-default command')
+                                |<span class="glyphicon glyphicon-chevron-left"></span>
+                            button(id='reverse' ,class='btn btn-default command')
+                                |<span class="glyphicon glyphicon-arrow-down"></span>
+                            button(id='forward' ,class='btn btn-default command')
+                                |<span class="glyphicon glyphicon-arrow-up"></span>
+                            button(id='right', class='btn btn-default command')
+                                |<span class="glyphicon glyphicon-chevron-right"></span>
 
-                        button(id='stop' class='btn btn-danger command hide') 
-                            | <span class="glyphicon glyphicon-remove-circle"></span>
+                        button(id='stop' class='btn btn-danger command hide')
+                        
+                            |<span class="glyphicon glyphicon-remove-circle"></span>
                         .info
                             | you can use arrow keys too
             tr

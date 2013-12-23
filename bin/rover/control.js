@@ -8,25 +8,25 @@ var redis = require('socket.io/node_modules/redis'),
     Rover = require('./rover'),
     serialPort = require("serialport").SerialPort;
 
-//Handle terminal args.  *S is global.
+//Handle terminal args.  *  S and C are global.
 if (process.argv.indexOf('deploy') != -1){
     S = require('./deployment/settings').Settings;
 }else{
     S = require('./../static_admin/js/settings').Settings;
 }
+C = require('./lib/colorLog');
 
 var i = process.argv.indexOf('-usb');	//usb addr for board.
 if (i!=-1) {
     var addr = process.argv[i+1];
 }else var addr = '/dev/ttyUSB1'
 
-console.log('Starting up rover.  Here are settings ', S);
+C.log('Starting up rover.  Here are settings ', S, {color:'green'});
 
 /* Global variables for rover.  Do not reuse these names */
 terminal = require('child_process');
 pub = redis.createClient(S.redis_port, S.host);		//feedback channel
 sub = redis.createClient(S.redis_port, S.host);
-C = require('./lib/colorLog');
 serial = new serialPort(addr, {
     baudrate: 9600
 });
@@ -41,20 +41,26 @@ sub.on('message', function(channel, data){
     switch (data.func) {
         case 'reset':
 	    if (channel != 'roverAdmin') {
-		console.log('unauthorized attempt for ' + data.func + 'command');
+		C.log('unauthorized attempt for ' + data.func + 'command', {color:'red', logLevel:1});
 		return;
 	    }
-            C.log('Resetting stream . . .', {color:'blue', newline:false});
+            C.log('Resetting stream', {color:'blue'});
             Stream.reset();
         break;
 	case 'ping':
 	    pub.publish('feedback', JSON.stringify({func:'ping'}));
 	break;
 	case 'execute':
-	    console.log('about to exec ', data);
+	    if (channel != 'roverAdmin') {
+		C.log('unauthorized attempt for ' + data.func + 'command', {color:'red', logLevel:1});
+		return;
+	    }
+	    C.log('about to exec command ', data, {color:'yellow'});
 	    terminal.exec(data.command, function(err, stdout, stdin){
 		var error = err || stdin;
-		C.log('in callback ', {color:'blue'});
+		if (error && error != '') {
+		    C.log('Error with exec command : ', error, {color:'red', logLevel:1});
+		}
 		pub.publish('feedback',
 			    JSON.stringify({func:'stdout',stdout:stdout, error:error, command:data.command}));
 	    });
@@ -73,11 +79,16 @@ process.on('SIGINT', function() {
 
 //Start dependent scripts.
 Rover.connect();
+
 if (process.argv.indexOf('nostream') == -1) {
     Stream.run();
 }
+if (process.argv.indexOf('debug') != -1) {
+  C.set({logLevel: -1});
+}else{
+  C.set({logLevel: 0});
+}
 
-Rover.info();
 
 
 

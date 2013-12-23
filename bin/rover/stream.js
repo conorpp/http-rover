@@ -68,19 +68,29 @@ var Stream = {
     */
     run: function(options){
         options = options || {};
-        console.log('Starting streams . . .');
+        C.log('Starting streams . . .', {color:'cyan'});
         if (options.fullStream) {
             var vid = this.fullStream();
         }else{
             var vid = this.canvas();
             if (options.audio == undefined || options.audio) {
-                var aud = terminal.exec(this.audio());
-                console.log(this.audio());
+                var aud = terminal.exec(this.audio(), function(err, stdout, stderr){
+                    var error = err || stderr;
+                    if (error && error != '') {
+                        C.log('Error with audio stream : ', err, stderr, {color:'red', logLevel:-1});
+                    }
+                });
+                C.log(this.audio(), {color:'blue'});
             }
         }
 
-        console.log(vid);
-        terminal.exec(vid);
+        C.log(vid, {color:'blue'});
+        terminal.exec(vid, function(err, stdout, stderr){
+                    var error = err || stderr;
+                    if (error && error != '') {
+                        C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-1});
+                    }
+                });
         this.running = true;
         
     },
@@ -94,7 +104,7 @@ var Stream = {
         same options for run().
     */
     reset: function(options){
-        console.log('Resetting stream.');
+        C.log('Resetting stream.', {color:'blue'});
         this.kill();
         setTimeout(function(){
             Stream.run(options);

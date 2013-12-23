@@ -6,6 +6,7 @@
 	Will work on phones!
 */
 var S = require('./static_admin/js/settings').Settings;
+var C = require('./rover/lib/colorLog');    //globals
 //var canvas = {
 	//stream: function(){
 		var STREAM_SECRET = 'abc',
@@ -28,10 +29,10 @@ var S = require('./static_admin/js/settings').Settings;
 			streamHeader.writeUInt16BE(height, 6);
 			socket.send(streamHeader, {binary:true});
 		
-			console.log( 'New WebSocket Connection (' + socketServer.clients.length + ' total)' );
+			C.log( 'New video client connection (' + socketServer.clients.length + ' total)', {color:'blue', logLevel:-1});
 			
 			socket.on('close', function(code, message){
-				console.log( 'Disconnected WebSocket (' + socketServer.clients.length + ' total)' );
+				C.log( 'Disconnected video client connection (' + socketServer.clients.length + ' total)', {color:'blue', logLevel:-1});
 			});
 		});
 		
@@ -50,19 +51,20 @@ var S = require('./static_admin/js/settings').Settings;
 				if (params[1] && params[2]){
 					width = parseInt(params[1]) || width;
 					height = parseInt(params[2]) || height;
-					console.log('Height and width overwritten. ', params);
+					C.log('Height and width overwritten for video stream. ', params, {color:'yellow'});
 				}
 			}catch(e){}
 			
 			width = width|0;
 			height = height|0;
-			console.log('width ', width);
-			console.log('height ', height);
+			C.log('video stream width ', width, {color:'blue'});
+			C.log('video stream height ', height, {color:'blue'});
 		
 			if( params[0] == STREAM_SECRET ) {
-				console.log(
+				C.log(
 					'Stream Connected: ' + request.socket.remoteAddress + 
-					':' + request.socket.remotePort + ' size: ' + width + 'x' + height
+					':' + request.socket.remotePort + ' size: ' + width + 'x' + height,
+					{color:'green'}
 				);
 				request.on('data', function(data){
 					socketServer.broadcast(data, {binary:true});
@@ -74,16 +76,17 @@ var S = require('./static_admin/js/settings').Settings;
 
 			}
 			else {
-				console.log(
+				C.log(
 					'Failed Stream Connection: '+ request.socket.remoteAddress + 
-					request.socket.remotePort + ' - wrong secret.'
+					request.socket.remotePort + ' - wrong secret.',
+					{color:'green'}
 				);
 				response.end();
 			}
 		}).listen(S.canvasSource);
 		
-		console.log('Listening for MPEG Stream on http://127.0.0.1:'+S.canvasSource+'/<secret>/<width>/<height>');
-		console.log('Awaiting WebSocket connections on ws://127.0.0.1:'+S.canvasClient+'/');
+		C.log('Listening for MPEG Stream on http://127.0.0.1:'+S.canvasSource+'/<secret>/<width>/<height>', {color:'blue'});
+		C.log('Awaiting WebSocket connections on ws://127.0.0.1:'+S.canvasClient+'/', {color:'blue'});
 	//}
 //};
 
