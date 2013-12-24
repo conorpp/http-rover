@@ -13,6 +13,8 @@ lib-cov
 pids
 logs
 results
+node.sh
+npm.sh
 
 npm-debug.log
 node_modules
