@@ -65,7 +65,7 @@ Command.socket.on('info', function(data){       //not client specific
     if (!data.gps) {
         return;
     }
-    UI.marker.setLatLng([data.gps.lat, data.gps.lng]);
+    if (UI.marker)UI.marker.setLatLng([data.gps.lat, data.gps.lng]);
 });
 Command.socket.on('kick', function(data){           //not client specific
     console.log('Kicked out');

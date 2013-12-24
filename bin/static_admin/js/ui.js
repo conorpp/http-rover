@@ -148,6 +148,11 @@ var UI = {
     },
     
     createMap: function(){
+        try {
+        if (!L) {return;}
+        } catch(e) {
+            return;
+        }
         UI.map = L.map('map',{
             center: Settings.home,
             zoom: 17,
