@@ -13,14 +13,15 @@ var GPS = {
     ready:false,
     home:[44.64682833, -68.95867],
     
+    /*
+        Begin connection and reading from GPS module.
+    */
     connect: function(){
         serial_gps.on('open',function () {
             C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
             GPS.ready = true;
             serial_gps.on('data', function(data) {
-               //C.log(data.toString('ascii'), {color:'yellow'});
                 var h = data.toString('ascii');
-                //hist += h;
                 if (h == '$') {
                     GPS.started = true;
                 }
@@ -31,12 +32,7 @@ var GPS = {
                         GPS.add(h);
                     }
                 }
-        
-                /*i++;
-                if (i > 500) {
-                    C.log(hist, {color:'yellow'});
-                    i=0;
-                }*/
+
             });
         });
         Number.prototype.toRad = function() {
@@ -54,7 +50,7 @@ var GPS = {
     },
     /*
         Event handler implementation
-        'data' - passes new data to callback.
+        event 'data' - passes new data to callback.
     */
     newDataEvents:[],
     on: function(event, callback){
@@ -75,6 +71,11 @@ var GPS = {
         else return 0;
     },
     
+    /*
+        Adds an ascii character from GPS module to string record.
+        
+        Current record standards supported : GPRMC
+    */
     add: function(h){
         this.gprmc+=h;
         if (this.gprmc.length >= 6) {
@@ -87,7 +88,7 @@ var GPS = {
     end:function(){
         var record = this.parse(this.gprmc);
         C.log('New record ', record, {color:'green', logLevel:-1});
-        for (var i in this.newDataEvents) this.newDataEvents[i](record);
+        if (record.valid) for (var i in this.newDataEvents) this.newDataEvents[i](record);
         this.records.push(record);
         this.redo();
         while (this.records.length > this.maxRecords) {
@@ -96,6 +97,9 @@ var GPS = {
         C.log('current record amount - ', this.records.length, ' (max: '+ this.maxRecords +')',{color:'blue', logLevel:-1});
     },
     
+    /*
+        Turns a GPRMC string into an obj
+    */
     parse: function(record){
         record = record.split(',');
         
@@ -124,21 +128,27 @@ var GPS = {
         
     },
     
+    /*
+        Prints out the records recorded from GPS
+    */
     print: function(){
         for (var i in this.records) {
             C.log(this.records[i], {color:'yellow'});
         }
     },
-    
+    //Wipes current string record.  For when non supported standard is read.
     redo: function(){
         this.gprmc = '';
         this.started = false;
     },
     
-    //returns distance between to coords using haversines formula
-    distance: function(lat1, lon1, lat2, lon2){
+    /*returns distance between to coords using haversines formula
+        Miles is default unit
+        C - optional constant to multiply answer by
+     */
+    distance: function(lat1, lon1, lat2, lon2, C){
         //C.log(lat1, lon1, lat2, lon2);
-        var R = 3958.75; // mi
+        var R = C || 3958.75; // mi
         var dLat = (lat2-lat1).toRad();
         var dLon = (lon2-lon1).toRad();
         lat1 = lat1.toRad();

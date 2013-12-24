@@ -54,7 +54,7 @@ var database = {
                 clearInterval(database._chainInter);
                 callback(database._data);
             }
-        },5);
+        },1);
         
     }
     
