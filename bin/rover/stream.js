@@ -68,7 +68,7 @@ var Stream = {
     */
     run: function(options){
         options = options || {};
-        C.log('Starting streams . . .', {color:'cyan'});
+        C.log('Stream commands: ', {color:'cyan'});
         if (options.fullStream) {
             var vid = this.fullStream();
         }else{

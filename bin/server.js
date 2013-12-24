@@ -35,7 +35,6 @@ if (process.argv.indexOf('superdebug') != -1) {
 C.log('Listening for http requests on ', S.http_port, {logLevel:1, color:'blue'});
 C.log('Listening for commands on ', S.command_port, {logLevel:1, color:'blue'});
 C.log('Redis connected to '+S.host+':'+S.redis_port, {logLevel:1, color:'blue'});
-C.log('Database connected to '+S.host+':'+S.redis_port, {logLevel:1, color:'blue'});
 app.listen(S.http_port);
 views.listen(app);
 live.socket.listen(S.command_port).redis.listen(S.redis_port, S.host);

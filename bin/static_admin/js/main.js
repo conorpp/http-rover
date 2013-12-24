@@ -60,7 +60,10 @@ Command.socket.on('syncTime', function(data){       //not client specific
     console.log('got time sync data , ', data);
     UI.syncTime(data.queueTime);
 });
-
+Command.socket.on('info', function(data){       //not client specific
+    console.log('got info , ', data);
+    UI.marker.setLatLng([data.gps.lat, data.gps.lng]);
+});
 Command.socket.on('kick', function(data){           //not client specific
     console.log('Kicked out');
     UI.popup('Queue emptied','The queue has been emptied by an admin.  Sorry if this is inconvenient', {millis:6500});
@@ -81,7 +84,7 @@ Command.socket.on('commandSeized', function (data) {
     }
 });
 $(document).ready(function(){
-    
+    UI.createMap();
     getData();  //init queue, popup, ect.
     
     if (Command.id) {     //attempt to seize command

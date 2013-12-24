@@ -56,7 +56,6 @@ var C = {
         if (params.logLevel) {
             this.logLevel = parseInt(params.logLevel);
         }
-        this.log('Log level set to ', this.logLevel, {color:'cyan'});
     },
     
     log: function(){

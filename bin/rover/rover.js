@@ -17,15 +17,17 @@ var Rover = {
 		console.log('Warning: board might already be connected.');
 	}
 	this.listen();
-	serial.on('open',function () {
+	serial_rover.on('open',function () {
+		C.log('Rover Ready', {color:'green', font:'bold', logLevel:1});
 		Rover.ready = true;
 		process.stdin.resume();
-		serial.on('data', function(data) {
+		serial_rover.on('data', function(data) {
 			//handle feedback here.
+			//C.log(data);
 		});
 		var buf = new Buffer(1);
 		buf.writeUInt8(0x0,0);
-		serial.write(buf, function(err, results) {
+		serial_rover.write(buf, function(err, results) {
 			if (err) {
 				console.error('Error connecting : ' , err );
 			}else{
@@ -38,7 +40,8 @@ var Rover = {
 	process.stdin.on('data', function(data){
 	    Rover.write(data);
 	});
-	this.info();
+	setInterval(function(){Rover.info();}, 3000);
+	this.GPSListen();
     },
     
     /* writes all args to serial port. */
@@ -57,7 +60,7 @@ var Rover = {
             var hex = num.toString(16);
             var buf = new Buffer(1);
             buf.writeUInt8('0x'+hex,0);
-            serial.write(buf, function(err, results){
+            serial_rover.write(buf, function(err, results){
                 if (err) console.error('Error writing to serial : ', err);
             });
         }
@@ -98,7 +101,6 @@ var Rover = {
 	Right R slowest - 195
     */
     listen: function(){
-	console.log('listening for commands . . .');
 	sub.on('message', function(channel, data){
 	    if (channel!='rover') return;
 	    data = JSON.parse(data);
@@ -148,17 +150,35 @@ var Rover = {
 	params = params || {},
 	callback = callback || function(){};
 	params.emit = params.emit == undefined ? true : params.emit;
-	var info = {func:'ifconfig'};
+	var info = {func:'info'};
 	terminal.exec('ifconfig', function(err, stdout, stderr){
 	    if (err) C.log('err in info ', err, {color:'red'});
 	    info.ifconfig = stdout;
+	    info.gps = GPS.read();
 	    callback(info);
 	    if (params.emit) {
-		C.log('sending config ', {color:'green'});
+		C.log('sending config ', {color:'green', logLevel:-1});
+		C.log('Sending info ', info.gps, {color:'green'});
 		pub.publish('feedback', JSON.stringify(info));
 	    }
 	});
 
+    },
+    
+    GPSListen: function(){
+	GPS.on('data', function(data){
+	    if (!data.valid) {
+		C.log('GPS data is not valid', {color:'red'});
+		return;
+	    }
+	   // C.log('Distance:  ',
+		//data.distance,
+		//{color:'blue'});
+	   //C.log('Lat: ', data.lat, ' Lng: ', data.lng);
+	    if (data.distance > 0.0032) {
+		//C.log('OUT OF RANGE! ', {color:'red', font:'bold'});
+	    }
+	});
     }
     
 };

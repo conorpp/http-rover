@@ -141,6 +141,29 @@ var UI = {
     */
     syncTime: function(millis){
         $('#pos1').find('td.timer').html(Math.floor(millis/1000)); //convert ms to s
+    },
+    
+    showGPS: function(){
+        
+    },
+    
+    createMap: function(){
+        UI.map = L.map('map',{
+            center: Settings.home,
+            zoom: 17,
+            zoomControl:false
+        });
+        L.mapbox.tileLayer('examples.map-y7l23tes').addTo(UI.map);
+        UI.map.addControl(new L.Control.Zoom({ position: 'topright' }));
+        UI.marker = L.marker(Settings.home);
+        UI.marker.setIcon(L.icon({
+                iconUrl:'/images/marker.png',
+                iconAnchor:[15, 35],
+                popupAnchor:[0, -35],
+            }));
+        UI.marker.addTo(UI.map);
+        UI.marker.bindPopup('<h4 class="color1">The rover</h4>').openPopup();
+        //UI.marker.setLatLng();
     }
 };
 //get templates.

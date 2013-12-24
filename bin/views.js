@@ -32,9 +32,9 @@ var views = {
         /* admin details.  check if admin cookie else login. */
         this.app.get('/admin', function(req, res){
             if (views.authent(req)) {
-                var stats = views.stats(function(info){
+                views.stats(function(info){
                     C.log('info for adim ', info, {color:'blue', logLevel:-1});
-                    res.render('admin', {stats:stats.sync,
+                    res.render('admin', {stats:info.sync,
                                popup:info.adminPopup,
                                title: info.adminPopup ? info.adminPopup.title : null,
                                message:info.adminPopup ? info.adminPopup.message : null,
@@ -117,9 +117,11 @@ var views = {
         */
         this.app.get('/data', function(req, res){
             app.render('templates/queue', {queue:live.queue}, function(err, html){
-                db.store.get('adminPopup', function(err2, popup){
-                    if (err || err2) console.log('queue get error '+ err+'\n'+err2);
-                    res.end(JSON.stringify({html:html, popup:popup}));
+                db.get(['adminPopup', 'gps'], function(data){
+                    if (err) {
+                        C.log('Error rendering html for queue ', {color:'red', logLevel:1});
+                    }
+                    res.end(JSON.stringify({html:html, popup:data.adminPopup, gps:data.gps}));
                 });
             });
         });
@@ -147,15 +149,7 @@ var views = {
             res.end();
         });
         
-        /* command sent to rover terminal */
-        this.app.post('/execute', function(req, res){
-            C.log('sending terminal command to rover: ', req.body.command, {color:'blue'});
-            if (!views.authent(req)) return;
-            var command = req.body.command;
-            live.redis.pub.publish('roverAdmin',
-                                   JSON.stringify({func:'execute', command:command}));
-            res.end();
-        });
+
     },
     
     /*
@@ -176,44 +170,17 @@ var views = {
     },
     
     /* returns sync && async live stats about server for admin */
-    storeVals:['adminPopup', 'ifconfig'],       //add redis values here.
     stats: function(callback){
-        
-        this._data = {
-            sync:{
+        db.get(['adminPopup', 'ifconfig'], function(data){
+            data.sync = {
                 'Connected users': live.clientCount,    //add sync values here.
                 'Queue length': live.queue.length,
                 'Command total': live.commandCount
-                }
-            
-            };
-        this._chain(callback);
-        for (var i in this.storeVals) {
-            db.store.get(this.storeVals[i], function(err, val){
-                try{
-                    if (val) views._data[views.storeVals[i]] = JSON.parse(val);
-                    else views._data[views.storeVals[i]] = val;
-                }catch(e){
-                   views._data[views.storeVals[i]] = val; 
-                }
-                views._chainStart--;
-            });
-        }
-        return this._data;
+                };
+            callback(data);
+        });
     },
-    _chainStart:0,
-    _chainInter:null,
-    _chain: function(callback){
-        this._chainStart = views.storeVals.length;
-        clearInterval(this._chainInter);
-        this._chainInter = setInterval(function(){
-            if (views._chainStart <= 0) {
-                clearInterval(views._chainInter);
-                callback(views._data);
-            }
-        },5);
-        
-    }
+
     
 };
 

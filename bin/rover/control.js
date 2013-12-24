@@ -16,19 +16,34 @@ if (process.argv.indexOf('deploy') != -1){
 }
 C = require('./lib/colorLog');
 
-var i = process.argv.indexOf('-usb');	//usb addr for board.
+var i = process.argv.indexOf('-rover');	//usb addr for rover.
 if (i!=-1) {
-    var addr = process.argv[i+1];
-}else var addr = '/dev/ttyUSB1'
+    var rover = process.argv[i+1];
+}else var rover = S.roverAddr;
+
+i = process.argv.indexOf('-gps');	//usb addr for gps.
+if (i!=-1) {
+    var gps = process.argv[i+1];
+}else var gps = S.gpsAddr;
 
 C.log('Starting up rover.  Here are settings ', S, {color:'green'});
 
 /* Global variables for rover.  Do not reuse these names */
 terminal = require('child_process');
+GPS = require('./gps'),
 pub = redis.createClient(S.redis_port, S.host);		//feedback channel
 sub = redis.createClient(S.redis_port, S.host);
-serial = new serialPort(addr, {
+serial_rover = new serialPort(rover, {
     baudrate: 9600
+}, true, function(err){
+    if (!err) return;
+    C.log('Rover not connected', {color:'red', font:'bold'});
+});
+serial_gps = new serialPort(gps, {
+    baudrate: 9600
+}, true, function(err){
+    if (!err) return;
+    C.log('GPS not connected', {color:'red', font:'bold'});
 });
 /********************************************************/
 sub.subscribe('rover');			//communication channels
@@ -79,6 +94,7 @@ process.on('SIGINT', function() {
 
 //Start dependent scripts.
 Rover.connect();
+GPS.connect();
 
 if (process.argv.indexOf('nostream') == -1) {
     Stream.run();
@@ -86,9 +102,9 @@ if (process.argv.indexOf('nostream') == -1) {
 if (process.argv.indexOf('debug') != -1) {
   C.set({logLevel: -1});
 }else{
-  C.set({logLevel: 0});
+  C.set({logLevel: S.logLevel});
 }
-
+GPS.set({home: S.home});
 
 
 

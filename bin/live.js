@@ -13,6 +13,7 @@ var live = {
     commandCount:0,         //total of people commanded rover.
     pings:0,                //init track of unresponded pings to rover
     maxPings:2,             //max of consecutive unresponded pings to send distress popup
+    roverAlive:false,
     
     
     /* for attempting to reload queue in quick server restarts. */
@@ -250,6 +251,18 @@ var live = {
                     socket.join(data.room);
                     C.log('Client joined room ', data.room, {color:'blue'});
                 });
+        
+                /* command sent to rover terminal */
+                socket.on('execute', function(data){
+                    C.log('sending terminal command to rover: ', data.command, {color:'blue'});
+                    if (!views.authent(data)) return;
+                    var command = data.command;
+                    live.redis.pub.publish('roverAdmin',
+                                           JSON.stringify({func:'execute', command:command}));
+                    if (!live.roverAlive) {
+                        socket.emit('announce', {title:'No rover', message:'The rover is not connected.'});
+                    }
+                });
             });
             
             /* for keeping times synced with all clients */
@@ -269,6 +282,7 @@ var live = {
                 live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
                 if (live.pings >= live.maxPings) {
                     C.log('Rover may be disconnected ', {color:'red'});
+                    live.roverAlive = false;
                     live.socket.io.sockets.emit('announce', {title:'Rover lost', message:'The rover may '+
                                                 'may have lost connection.  It will attempt reconnecting and ' +
                                                 'we\'ll let you know when it comes back.  Sorry', disconnect:true});
@@ -304,13 +318,16 @@ var live = {
                                                         message:'Internet has been returned to the rover.',
                                                         disconnect:false});
                             C.log('Rover is alive. ',new Date(), {color:'green', font:'bold'});
+                            live.roverAlive = true;
                         }
                         live.pings = 0;
                     break;
-                    case 'ifconfig':        //set latest network stats
-                        db.store.set('ifconfig', data.ifconfig);
-                        C.log('Recieved ifconfig from rover.', {color:'green'});
-                        C.log('ifconfig: ', {color:'green', logLevel:-1});
+                    case 'info':        //set latest network stats
+                        db.store.set('ifconfig', JSON.stringify(data.ifconfig));
+                        db.store.set('gps', JSON.stringify(data.gps));
+                        C.log('Recieved info from rover.', {color:'green'});
+                        C.log('GPS : ', data.gps, {color:'green'});
+                        live.socket.io.sockets.emit('info', {gps:data.gps});
                     break;
                     case 'stdout':      //return stdout from rover
                         C.log('stdout ',data, {color:'blue'});

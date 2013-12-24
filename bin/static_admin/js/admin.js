@@ -115,16 +115,10 @@ function kick(name, everyone){
     Send a command to be executed in rovers terminal
 */
 function execute(command) {
-    $.ajax({
-        url : '/execute',
-        type: "POST",
-        data : {command:command},
-        success:function(data, textStatus, jqXHR) {
-            console.log('command sent successfully.');
-        }
-        
-    });
+
+    Command.socket.emit('execute', {command:command, admin: Cookie.get('admin')});
 }
+
 
 Command.socket.emit('subscribe', {room:'admin', admin:Cookie.get('admin')});
 

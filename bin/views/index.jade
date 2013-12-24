@@ -1,6 +1,12 @@
 extend layout
 block title
     | The Rover
+block header
+  |<link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.css' rel='stylesheet' />
+  |<!--[if lte IE 8]>
+  |<link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.ie.css' rel='stylesheet' >
+  |<![endif]-->
+  |<script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
 block content
     #navBar.abs
         button(id='refresh', class='btn btn-primary fright mar20') Refresh
@@ -39,5 +45,8 @@ block content
                             th position
                             th user
                             th seconds left
+            tr
+                td
+                    div#map
  
                 
