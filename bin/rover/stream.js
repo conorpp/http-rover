@@ -71,7 +71,9 @@ var Stream = {
                     max = num;
                 }
             }
-            this.vSource = '/dev/video'+max;
+            C.log('THe max is ',max);
+            
+            Stream.vSource = '/dev/video'+max;
             callback(err,stdout, stderr);
         });
     },

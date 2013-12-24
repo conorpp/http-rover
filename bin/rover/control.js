@@ -88,6 +88,7 @@ sub.on('message', function(channel, data){
 });
 
 process.on('SIGINT', function() {
+    C.log('Shutting down merrily . . .', {color:'red', font:'bold'});
     Stream.kill();
     process.exit();
 });
