@@ -40,7 +40,7 @@ var Rover = {
 	process.stdin.on('data', function(data){
 	    Rover.write(data);
 	});
-	setInterval(function(){Rover.info();}, 3000);
+	setInterval(function(){Rover.info();}, 1200);
 	this.GPSListen();
     },
     
@@ -167,7 +167,7 @@ var Rover = {
     
     GPSListen: function(){
 	GPS.on('data', function(data){
-	    if (!data.valid) {
+	    if (!data || !data.valid) {
 		C.log('GPS data is not valid', {color:'red'});
 		return;
 	    }

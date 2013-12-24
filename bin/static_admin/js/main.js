@@ -62,6 +62,9 @@ Command.socket.on('syncTime', function(data){       //not client specific
 });
 Command.socket.on('info', function(data){       //not client specific
     console.log('got info , ', data);
+    if (!data.gps) {
+        return;
+    }
     UI.marker.setLatLng([data.gps.lat, data.gps.lng]);
 });
 Command.socket.on('kick', function(data){           //not client specific
