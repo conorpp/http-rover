@@ -3,7 +3,7 @@
 */
 //GOT UPDATES!!!
 //Requirements
-var redis = require('socket.io/node_modules/redis'),
+var redis = require('socket.io/node_modules/redisPPPP'),
     Stream = require('./stream'),
     Rover = require('./rover'),
     serialPort = require("serialport").SerialPort;
