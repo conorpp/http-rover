@@ -11,7 +11,11 @@ var Settings = {
     canvasClient:27376,
     canvasSource:11963,
     width:160,
-    height:120
+    height:120,
+    roverAddr:'/dev/ttyUSB1',
+    gpsAddr:'/dev/ttyUSB0',
+    logLevel:0,
+    home:[44.646875, -68.95869]
 };
 
 try{

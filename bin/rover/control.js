@@ -97,7 +97,9 @@ Rover.connect();
 GPS.connect();
 
 if (process.argv.indexOf('nostream') == -1) {
-    Stream.run();
+    Stream.detectAddr(function(){
+	Stream.run();
+    });
 }
 if (process.argv.indexOf('debug') != -1) {
   C.set({logLevel: -1});

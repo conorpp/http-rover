@@ -158,7 +158,7 @@ var Rover = {
 	    callback(info);
 	    if (params.emit) {
 		C.log('sending config ', {color:'green', logLevel:-1});
-		C.log('Sending info ', info.gps, {color:'green'});
+		//C.log('Sending info ', info.gps, {color:'green'});
 		pub.publish('feedback', JSON.stringify(info));
 	    }
 	});
