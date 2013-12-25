@@ -13,18 +13,24 @@
         var options = {
             color:'red',
             font:'bold',
-            newline:false
+            newline:true
         };
         C.log('This is my first print', 'second arg', 45, options);
+        C.log('   second log', options);
+        >> This is my first printsecondarg      //red and bold print.
+        >>     second log
+
         //options not required but must be last arg to work.
         
     documentation:
-        options
+        .log - the logging function.  Specify any number of args to dump
+                and optional options for the print at end.
+        .log options:
             newline
                 set to false to disable the newline after each log.
                 default true.
             color
-                'red', 'blue', 'purple', 'cyan', 'white', 'black', 'green'
+                'red', 'blue', 'purple', 'cyan', 'white', 'black', 'green', 'random'
             background
                 *same as color
             colorIntense
@@ -35,13 +41,13 @@
                 default false.
             font
                 'bold', 'faint', 'underline', 'blink', 'blinkFast',
-                'italic', 'inverse', 'cross', 'conceal', 'normal'
+                'italic', 'inverse', 'cross', 'conceal', 'normal', 'random'
             logLevel
                 number that will make log excluded if it's below
                 logLevel attribute. Default 0.
         .err - same as .log but takes no options and uses {color:'red', logLevel:errLevel},
                 where errLevel is 1 by default
-        .err - same as .err but yellow.
+        .warn - same as .err but yellow.
     setup:
         C.set({
             logLevel: 1  //Excludes all logs with logLevel less than 1. Default 0.
