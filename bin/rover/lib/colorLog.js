@@ -39,9 +39,12 @@
             logLevel
                 number that will make log excluded if it's below
                 logLevel attribute. Default 0.
+        .err - same as log but takes no options and uses {color:'red', logLevel:errLevel},
+                where errLevel is 1 by default
     setup:
         C.set({
             logLevel: 1  //Excludes all logs with logLevel less than 1. Default 0.
+            errLevel: 1  //the default level .err sets logs to.
         });
                 
 */
@@ -51,6 +54,8 @@ var C = {
     
     logLevel:0,
     
+    errLevel:1,
+    
     /* Settings for logger
         @param logLevel
     */
@@ -59,6 +64,13 @@ var C = {
         if (params.logLevel) {
             this.logLevel = parseInt(params.logLevel);
         }
+        if (params.errLevel) {
+            this.errLevel = parseInt(params.errLevel);
+        }
+    },
+    
+    err: function(){
+        this.log(arguments, {color:'red', font:'bold', logLevel:this.errLevel});
     },
     
     log: function(){

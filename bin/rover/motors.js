@@ -7,9 +7,9 @@
 
 var Rover = {
 	
-    ready:false,					//connection indicator
-    isMoving:false,					//moving indicator
-    stopInter:260,					//responsiveness vs jitteryness
+    ready:false,		//connection indicator
+    isMoving:false,		//moving indicator
+    stopInter:260,		//responsiveness vs jitteryness
     serial:null,
     
     /*
@@ -18,9 +18,8 @@ var Rover = {
     */
     connect: function(){
 	if (this.ready) {
-		console.log('Warning: board might already be connected.');
+		C.log('Warning: board might already be connected.', {color:'yellow'});
 	}
-	this.listen();
 	
         Serial.link('motor',function(err, _data){
             if (_data && _data.serial) {
@@ -44,30 +43,12 @@ var Rover = {
                 C.log('Motors Failed', {color:'red', font:'bold', logLevel:1});
             }
         });
-	/*serial_rover.on('open',function () {
-		C.log('Rover Ready', {color:'green', font:'bold', logLevel:1});
-		Rover.ready = true;
-		process.stdin.resume();
-		serial_rover.on('data', function(data) {
-			//handle feedback here.
-			//C.log(data);
-		});
-		var buf = new Buffer(1);
-		buf.writeUInt8(0x0,0);
-		serial_rover.write(buf, function(err, results) {
-			if (err) {
-				console.error('Error connecting : ' , err );
-			}else{
-				console.log('Board connected successfully.');
-			}
-		});
-	});*/
+
 	/* accept a decimal number on range 0-255 
 	   writes the hex conversion to usb.  STDIN.   */
 	process.stdin.on('data', function(data){
 	    Rover.write(data);
 	});
-	setInterval(function(){Rover.info();}, 1200);
 	this.GPSListen();
     },
     
@@ -127,70 +108,8 @@ var Rover = {
 	Right R fastest - 255
 	Right R slowest - 195
     */
-    listen: function(){
-	sub.on('message', function(channel, data){
-	    if (channel!='rover') return;
-	    data = JSON.parse(data);
-	    C.log('Command : ' + data.func, {color:'green'});
-	    switch (data.func) {
-		
-		case 'forward':
-		    Rover.moving();
-		    Rover.write(127,255);
-		break;
-		case 'left':
-		    Rover.moving();
-		    Rover.write(107,158);
-		break;
-		case 'right':
-		    Rover.moving();
-		    Rover.write(21,235);
-		break;
-		case 'forwardleft':
-		    Rover.moving();
-		    Rover.write(31,128);
-		    
-		break;
-		case 'forwardright':
-		    Rover.moving();
-		    Rover.write(1,160);
-		break;
-		case 'stop':
-		    Rover.stop();
-		break;
-		case 'reverse':
-		    Rover.moving();
-		    Rover.write(1,128);
-		break;
 
-		default:
-		console.log('No cases were met on rover pubsub.');
-	    }
-	});
-    },
-    /*	retrieve info about network for web server.
-	returns info obj
-	
-	@param emit - set to false to prevent emitting to webserver automatically.
-     */
-    info: function(params, callback){
-	params = params || {},
-	callback = callback || function(){};
-	params.emit = params.emit == undefined ? true : params.emit;
-	var info = {func:'info'};
-	terminal.exec('ifconfig', function(err, stdout, stderr){
-	    if (err) C.log('err in info ', err, {color:'red'});
-	    info.ifconfig = stdout;
-	    info.gps = GPS.read();
-	    callback(info);
-	    if (params.emit) {
-		C.log('sending config ', {color:'green', logLevel:-1});
-		//C.log('Sending info ', info.gps, {color:'green'});
-		pub.publish('feedback', JSON.stringify(info));
-	    }
-	});
 
-    },
     
     GPSListen: function(){
 	GPS.on('data', function(data){

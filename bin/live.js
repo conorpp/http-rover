@@ -308,9 +308,9 @@ var live = {
                 data = JSON.parse(data);
             
                 switch (data.func) {
-                    case 'reset':
+                    case 'popup':
                         C.log('Resetting video stream for all clients', {color:'blue'});
-                        live.socket.io.sockets.emit('reset');
+                        live.socket.io.sockets.emit('announce', data);
                     break;
                     case 'ping':    //recieve rover ping.
                         if (live.pings >= live.maxPings) {
@@ -323,8 +323,9 @@ var live = {
                         live.pings = 0;
                     break;
                     case 'info':        //set latest network stats
-                        db.store.set('ifconfig', JSON.stringify(data.ifconfig));
-                        db.store.set('gps', JSON.stringify(data.gps));
+                        for (key in data) {
+                            db.store.set(data[key], JSON.stringify(data[key]));
+                        }
                         C.log('Recieved info from rover.', {color:'green'});
                         C.log('GPS : ', data.gps, {color:'green'});
                         live.socket.io.sockets.emit('info', {gps:data.gps});

@@ -1,14 +1,13 @@
 /*
     Top level entity for rover.
-    Handles requirements, scripts, and terminal args.
+    Handles scripts, settings, globals and terminal args.
     
     requirements:
 	nodejs - child_process
-	npm - redis
 	custom lib - colorLog, serial
 	
     scripts:
-	stream, motors, gps, admin
+	stream, motors, gps, admin, comm
 */
 
 //Determine which settings file to use.
@@ -19,28 +18,19 @@ if (process.argv.indexOf('deploy') != -1){
 }
 console.log('Startin up rover.  Here are the settings', S);
 
-var redis = require('socket.io/node_modules/redis'),
-    Stream = require('./stream'),
-    Rover = require('./motors');
-    
-C = require('./lib/colorLog');
 
 /* Global variables.  Do not reuse these names */
-terminal = require('child_process');
+terminal = require('child_process'),
+C = require('./lib/colorLog'),
+Serial = require('./lib/serial'),
 GPS = require('./gps'),
-Serial = require('./lib/serial');
-pub = redis.createClient(S.redis_port, S.host);	//to server	
-sub = redis.createClient(S.redis_port, S.host);	//from server
-/********************************************************/
-
-//communication channels
-sub.subscribe('rover');
-sub.subscribe('roverAdmin');
+Stream = require('./stream'),
+Rover = require('./motors'),
+Emit = require('./comm');
 
 //Start dependent scripts.
 Rover.connect();
 GPS.connect();
-require('./admin');
 
 if (process.argv.indexOf('nostream') == -1) {
     Stream.connect();
@@ -57,9 +47,9 @@ if (idebug != -1) {
 		   'specified.  0 is default.', {color:'yellow'});
 }
 
-//Kill necessary processes before exciting.  Necessary for ffmpeg & webcam.wow.
+//Kill necessary processes before exciting.  Necessary for ffmpeg & webcam. wow.
 process.on('SIGINT', function() {
-    var words = [' merrily', ' gracefully', ' sullenly', ' asap', '. wow such force', ' tomorrow (jk)', ' with you', ' in style', '. Good bye.', ' bye', ' k?', ' goodnight', ' wahh', 'town'];
+    var words = [' merrily', ' gracefully', ' sullenly', ' asap', '. wow such force', ' tomorrow (jk)', ' with you', ' in style', '. Good bye.', ' bye', ' k?', ' goodnight', ' wahh', 'town', ' your application for you', ' again', ''];
     var index = words.length-1;
     var word = words[Math.floor(Math.random() * index)];
     C.log('           Shutting down'+word+'                 ',
@@ -67,3 +57,4 @@ process.on('SIGINT', function() {
     Stream.kill();
     process.exit();
 });
+

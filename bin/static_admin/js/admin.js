@@ -124,6 +124,10 @@ Command.socket.emit('subscribe', {room:'admin', admin:Cookie.get('admin')});
 
 Command.socket.on('stdout', function(data){
     console.log('got stdout!', data);
-    $('#stdout').html(data.stdout);
+    var text = data.stdout != '' ? data.stdout : data.error;
+    if (typeof text == 'object') {
+        text = JSON.stringify(text);
+    }
+    $('#stdout').html(text);
 });
 

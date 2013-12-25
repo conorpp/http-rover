@@ -135,8 +135,8 @@ var Stream = {
         setTimeout(function(){
             Stream.run(options);
         },120);
-        var data = JSON.stringify({func:'reset'});
-        pub.publish('feedback', data);
+        Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
+                   '  It may take up to 30 seconds for it to come back.', global:true});
     }
     
 }
