@@ -39,8 +39,9 @@
             logLevel
                 number that will make log excluded if it's below
                 logLevel attribute. Default 0.
-        .err - same as log but takes no options and uses {color:'red', logLevel:errLevel},
+        .err - same as .log but takes no options and uses {color:'red', logLevel:errLevel},
                 where errLevel is 1 by default
+        .err - same as .err but yellow.
     setup:
         C.set({
             logLevel: 1  //Excludes all logs with logLevel less than 1. Default 0.
@@ -69,34 +70,57 @@ var C = {
         }
     },
     
+    level: function(){
+        var logLevel = this.options.logLevel != undefined ?
+                                this.options.logLevel : 0;
+        return (logLevel < this.logLevel);
+    },
+    
     err: function(){
         this.log(arguments, {color:'red', font:'bold', logLevel:this.errLevel});
     },
+
+    warn: function(){
+        this.log(arguments, {color:'yellow', font:'bold', logLevel:this.errLevel});
+    },
+    //all of the choices for options.  For option detection. (except logLevel)
+    choices:['intense','color', 'background', 'bg', 'font', 'newline', 'logLevel'],
     
     log: function(){
+        var length = arguments.length;
         //look for options
         if (typeof arguments[arguments.length-1] == "object" ){
+            
             this.options = arguments[arguments.length-1];
-            var length = arguments.length-1;
+            if (this.level()) return;
+            
+            var isOptions = false;
+            
+            for (key in this.choices) {
+                if (this.options[this.choices[key]] != undefined) {
+                    isOptions = true;
+                    break;
+                }
+            }
+            if (isOptions)
+                length--;
+            else
+                this.options = {};
+            
         }else{
             this.options = {};
-            var length = arguments.length;
+            if (this.level()) return;
         }
-        
-        this.options.logLevel = this.options.logLevel != undefined ?
-                                this.options.logLevel : 0;
-                                
-        if (this.options.logLevel < this.logLevel) return;
-        
+                
         var args = '';
         for (var i = 0; i < length; i++){
-            var arg = arguments[i];
-            if (typeof arg == 'object') {
-                arg = JSON.stringify(arg,undefined, 2);
+            if (typeof arguments[i] == 'object') {
+                args += JSON.stringify(arguments[i],undefined, 2);
+            }else{
+                args += arguments[i];
             }
-            var text = this.format(arg);
-            args += text;
         }
+        args = this.format(args);
         if (this.options.newline || this.options.newline == undefined) args += '\n';
         process.stdout.write(args,'utf-8');
     },
@@ -106,11 +130,10 @@ var C = {
         var code = '';
         colorBase = 30;
         bgBase = 40;
-        if (this.options.colorIntense) {
+
+        if (this.options.intense) {
+            bgBase += 60,
             colorBase += 60;
-        }
-        if (this.options.backgroundIntense) {
-            bgBase += 60;
         }
         if (this.options.color) {
             code += '\033[10;'+ (colorBase+this.color(this.options.color)) + 'm';
@@ -124,7 +147,6 @@ var C = {
             code += '\033[10;' +this.font(this.options.font)+ 'm';
         }
 
-        //console.log()
         return code + raw + '\033[0m';   //end with reset code.
     },
     
@@ -162,8 +184,17 @@ var C = {
             case 'white':
                 return 7;
             break;
+            case 'random':
+                var current = Math.floor(Math.random() * 7.9);
+                if (this.last == current) {
+                    if (current!=0)current = Math.floor(Math.random() * this.last);
+                    else current = 8 - Math.floor(Math.random() * 6.9) -1;
+                }
+                this.last = current;
+                return current;
+            break;
         }
-        return '';
+        return parseInt(color);
     },
     
     font: function(font){
@@ -199,8 +230,17 @@ var C = {
             case 'normal':
                 return 10;
             break;
+            case 'random':
+                var rand = Math.floor(Math.random() * 9.9) + 1;
+                if (rand == 10) 
+                    rand = Math.floor(Math.random() * 8.9) + 1;
+                
+                if (rand == 8) 
+                    rand = Math.floor(Math.random() * 6.9) + 1;
+                return rand;
+            break;
         }
-        return 10;
+        return parseInt(font);
     }
 };
 

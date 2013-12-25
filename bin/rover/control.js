@@ -53,7 +53,7 @@ process.on('SIGINT', function() {
     var index = words.length-1;
     var word = words[Math.floor(Math.random() * index)];
     C.log('           Shutting down'+word+'                 ',
-	  {color:'green', font:'bold',bg:'red'});
+	  {color:'random', font:'random', bg:'random', intense:true});
     Stream.kill();
     process.exit();
 });
