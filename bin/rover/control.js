@@ -8,7 +8,7 @@
 	custom lib - colorLog, serial
 	
     scripts:
-	stream, rover, gps, admin
+	stream, motors, gps, admin
 */
 
 //Determine which settings file to use.
@@ -21,7 +21,7 @@ console.log('Startin up rover.  Here are the settings', S);
 
 var redis = require('socket.io/node_modules/redis'),
     Stream = require('./stream'),
-    Rover = require('./rover');
+    Rover = require('./motors');
     
 C = require('./lib/colorLog');
 
@@ -62,7 +62,8 @@ process.on('SIGINT', function() {
     var words = [' merrily', ' gracefully', ' sullenly', ' asap', '. wow such force', ' tomorrow (jk)', ' with you', ' in style', '. Good bye.', ' bye', ' k?', ' goodnight', ' wahh', 'town'];
     var index = words.length-1;
     var word = words[Math.floor(Math.random() * index)];
-    C.log('Shutting down'+word, {color:'green', font:'bold',bg:'red'});
+    C.log('           Shutting down'+word+'                 ',
+	  {color:'green', font:'bold',bg:'red'});
     Stream.kill();
     process.exit();
 });
