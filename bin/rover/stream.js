@@ -88,7 +88,7 @@ var Stream = {
         }else{
             var vid = this.canvas();
             if (options.audio == undefined || options.audio) {
-                var aud = terminal.exec(this.audio(), function(err, stdout, stderr){
+                var aud = Terminal.exec(this.audio(), function(err, stdout, stderr){
                     var error = err || stderr;
                     if (error && error != '') {
                         C.log('Error with audio stream : ', err, stderr, {color:'red', logLevel:-2});
@@ -102,7 +102,7 @@ var Stream = {
 
         C.log(vid, {color:'blue', logLevel:-1});
         this.running = true;
-        terminal.exec(vid, function(err, stdout, stderr){
+        Terminal.exec(vid, function(err, stdout, stderr){
             if (err || stderr) {
                 C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-2});
                 C.log('Video Failed', {color:'red', font:'bold', logLevel:1});
@@ -122,7 +122,7 @@ var Stream = {
     },
     
     kill: function(){
-        terminal.exec('pkill -s INT ffmpeg');
+        Terminal.exec('pkill -s INT ffmpeg');
     },
     
     /*

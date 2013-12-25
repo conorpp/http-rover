@@ -20,7 +20,7 @@ console.log('Startin up rover.  Here are the settings', S);
 
 
 /* Global variables.  Do not overwrite these names! */
-terminal = require('child_process'),
+Terminal = require('child_process'),
 C = require('./lib/colorLog'),
 Serial = require('./lib/serial'),
 GPS = require('./gps'),
@@ -49,10 +49,8 @@ if (idebug != -1) {
 
 //Kill necessary processes before exciting.  Necessary for ffmpeg & webcam. wow.
 process.on('SIGINT', function() {
-    var words = [' merrily', ' gracefully', ' sullenly', ' asap', '. wow such force', ' tomorrow (jk)', ' with you', ' in style', '. Good bye.', ' bye', ' k?', ' goodnight', ' wahh', 'town', ' your application for you', ' again', ''];
-    var index = words.length-1;
-    var word = words[Math.floor(Math.random() * index)];
-    C.log('           Shutting down'+word+'                 ',
+    var words = [' merrily', ' gracefully', ' sullenly', ' asap', '. wow such force', ' tomorrow (jk)', ' with you', ' in style', '. Good bye.', ' bye', ' k?', ' goodnight', ' wahh', 'town', ' your application for you', ' again',' baby',' such speed.', ' wow.','<3',''];
+    C.log('           Shutting down'+words[Math.floor(Math.random() * (words.length-1))]+'                 ',
 	  {color:'random', font:'random', bg:'random', intense:true});
     Stream.kill();
     process.exit();

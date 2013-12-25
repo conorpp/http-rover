@@ -111,7 +111,7 @@ var serial = {
             
             find: function(addr, params){
                 params.connect = params.connect == undefined ? true : params.connect;
-                terminal.exec('ls -s /dev | grep '+addr, function(err, stdout, stderr){
+                Terminal.exec('ls -s /dev | grep '+addr, function(err, stdout, stderr){
                     D.devices = stdout.match(/ttyUSB[0-9]/g),//new RegExp('/'+ addr +'[0-9]/g')),
                     D._devices = D.devices;
                     

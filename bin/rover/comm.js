@@ -47,7 +47,7 @@ module.exports = (function(){
                     break;
                     case 'execute':
                         C.log('about to exec command ', data, {color:'yellow', logLevel:-1});
-                        terminal.exec(data.command, function(err, stdout, stderr){
+                        Terminal.exec(data.command, function(err, stdout, stderr){
                             var error = stderr;
                             if (error && error != '') {
                                 C.log('Error with exec command : ', error, {color:'red', logLevel:1});
@@ -129,7 +129,7 @@ module.exports = (function(){
         */
         info: function(){
             var data = {func:'info'};
-            terminal.exec('ifconfig', function(err, stdout, stderr){
+            Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
                 data.ifconfig = stdout;
                 data.gps = GPS.read();
