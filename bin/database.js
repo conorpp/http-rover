@@ -1,5 +1,10 @@
 
-/* module for storing/getting data */
+/*
+    module for storing/getting data
+
+    Requirements:
+        redis (see server.js)
+*/
 
 var database = {
     

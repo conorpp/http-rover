@@ -4,7 +4,10 @@
     
     -added color and font features
     -allowed infinite args to be printed
-    TODO: add log levels.
+    -added log levels
+    
+    Requirements:
+        none
     
     usage example:
         var options = {

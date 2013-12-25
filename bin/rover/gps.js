@@ -1,8 +1,10 @@
-
-
-//serialPort = require("serialport").SerialPort;
-//C = require('./lib/colorLog');
-
+/*
+    Responsible for reading GPS data and providing methods for
+    disseminating that data.
+    
+    Requirements:
+        custom lib - serial, colorLog (in server.js)
+*/
 
 var GPS = {
     
@@ -17,24 +19,32 @@ var GPS = {
         Begin connection and reading from GPS module.
     */
     connect: function(){
-        serial_gps.on('open',function () {
-            C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
-            GPS.ready = true;
-            serial_gps.on('data', function(data) {
-                var h = data.toString('ascii');
-                if (h == '$') {
-                    GPS.started = true;
-                }
-                if (GPS.started) {
-                    if (h == '\n') {
-                        GPS.end();
-                    }else{
-                        GPS.add(h);
-                    }
-                }
 
-            });
+        Serial.link('gps',function(err, _data){
+            if (_data && _data.serial) {
+                _data.serial.open(function(){
+                    C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
+                    GPS.ready = true;
+                    _data.serial.on('data', function(data){
+                        //console.log('dater', data);
+                        var h = data.toString('ascii');
+                        if (h == '$') {
+                            GPS.started = true;
+                        }
+                        if (GPS.started) {
+                            if (h == '\n') {
+                                GPS.end();
+                            }else{
+                                GPS.add(h);
+                            }
+                        }  
+                    });
+                });
+            }else{
+                C.log('GPS Failed', {color:'red', font:'bold', logLevel:1});
+            }
         });
+
         Number.prototype.toRad = function() {
           return this * Math.PI / 180;
         }

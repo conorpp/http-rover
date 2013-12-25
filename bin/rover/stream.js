@@ -1,7 +1,11 @@
 /*
-  Interface for video and audio live streaming
-  on the rover.
-  $ ffmpeg <video options> -i <video source> <audio options> -i <audio source> <output options> <output destination>
+    Interface for video and audio live streaming
+    on the rover.
+    $ ffmpeg <video options> -i <video source> <audio options> -i <audio source> <output options> <output destination>
+    
+    Requirements:
+        ffmpeg
+        custom lib - colorLog, serial (in server.js)
 */
 
 var Stream = {
@@ -60,35 +64,25 @@ var Stream = {
                );    
     },
     
-    detectAddr: function(callback){
+    /*
+        Autodetect video addr and starts webcam
+    */
+    connect: function(){
         //detect webcam addr automatically.
-        terminal.exec('ls -s /dev | grep video', function(err, stdout, stderr){
-            var vidAddr = stdout.match(/video[0-9]/g);
-            var max = 0;
-            for (var i in vidAddr) {
-                num = parseInt(vidAddr[i].substr(vidAddr.length-1, 1));
-                if (num > max) {
-                    max = num;
-                }
+        Serial.link('webcam', function(err, data){
+            if (err){
+                C.log('Error detecting webcam: ', err, {color:'red', font:'bold'});
+            }else{
+                Stream.vSource = data.addr;
+                Stream.run();
             }
-            C.log('THe max is ',max);
-            
-            Stream.vSource = '/dev/video'+max;
-            callback(err,stdout, stderr);
         });
     },
-    
-    /*
-        Run the streams
-        @option fullStream - run audio & video in single stream for better sync
-                            slower.  default false. Gauruntees audio. Deprecated
-                            
-        @option audio - run with or without audio.  Chance for better speed.
-                        default true
-    */
+
     run: function(options){
         options = options || {};
-        C.log('Stream commands: ', {color:'cyan'});
+        var audioRunning = true;
+        C.log('Stream commands: ', {color:'cyan', logLevel:-1});
         if (options.fullStream) {
             var vid = this.fullStream();
         }else{
@@ -97,21 +91,33 @@ var Stream = {
                 var aud = terminal.exec(this.audio(), function(err, stdout, stderr){
                     var error = err || stderr;
                     if (error && error != '') {
-                        C.log('Error with audio stream : ', err, stderr, {color:'red', logLevel:-1});
+                        C.log('Error with audio stream : ', err, stderr, {color:'red', logLevel:-2});
+                        C.log('Audio Failed', {color:'red', font:'bold', logLevel:1});
+                        audioRunning = false;
                     }
                 });
-                C.log(this.audio(), {color:'blue'});
+                C.log(this.audio(), {color:'blue', logLevel:-1});
             }
         }
 
-        C.log(vid, {color:'blue'});
-        terminal.exec(vid, function(err, stdout, stderr){
-                    var error = err || stderr;
-                    if (error && error != '') {
-                        C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-1});
-                    }
-                });
+        C.log(vid, {color:'blue', logLevel:-1});
         this.running = true;
+        terminal.exec(vid, function(err, stdout, stderr){
+            if (err || stderr) {
+                C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-2});
+                C.log('Video Failed', {color:'red', font:'bold', logLevel:1});
+                Stream.running = false;
+            }
+        });
+        var inter = setTimeout(function(){
+            if (Stream.running) {
+                C.log('Video Ready',{color:'green', font:'bold', logLevel:1});
+            }
+            if (audioRunning) {
+                C.log('Audio Ready', {color:'red', font:'bold', logLevel:1});
+            }
+            clearTimeout(inter);
+        },2500);
         
     },
     

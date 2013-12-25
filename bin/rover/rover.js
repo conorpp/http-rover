@@ -1,5 +1,8 @@
 /*
-	Module for driving rover.
+	Module for controlling motor driver.
+	
+	Requirements:
+		custom lib - serial, colorLog (in server.js)
 */
 
 var Rover = {
@@ -7,6 +10,7 @@ var Rover = {
     ready:false,					//connection indicator
     isMoving:false,					//moving indicator
     stopInter:260,					//responsiveness vs jitteryness
+    serial:null,
     
     /*
 	Connect to rover and allow writing to it.
@@ -17,7 +21,30 @@ var Rover = {
 		console.log('Warning: board might already be connected.');
 	}
 	this.listen();
-	serial_rover.on('open',function () {
+	
+        Serial.link('motor',function(err, _data){
+            if (_data && _data.serial) {
+                _data.serial.open(function(){
+                    C.log('Rover Ready', {color:'green', font:'bold', logLevel:1});
+		    Rover.serial = _data.serial;
+                    Rover.ready = true;
+		    process.stdin.resume();
+                    _data.serial.on('data', function(data){
+			//Handle feedback from board here
+                    });
+		    var buf = new Buffer(1);
+		    buf.writeUInt8(0x0,0);
+		    _data.serial.write(buf, function(err, results) {
+		       	if (err) {
+				C.log('Error connecting rover: ' , err );
+			}
+ 		    });
+                });
+            }else{
+                C.log('Motors Failed', {color:'red', font:'bold', logLevel:1});
+            }
+        });
+	/*serial_rover.on('open',function () {
 		C.log('Rover Ready', {color:'green', font:'bold', logLevel:1});
 		Rover.ready = true;
 		process.stdin.resume();
@@ -34,7 +61,7 @@ var Rover = {
 				console.log('Board connected successfully.');
 			}
 		});
-	});
+	});*/
 	/* accept a decimal number on range 0-255 
 	   writes the hex conversion to usb.  STDIN.   */
 	process.stdin.on('data', function(data){
@@ -60,7 +87,7 @@ var Rover = {
             var hex = num.toString(16);
             var buf = new Buffer(1);
             buf.writeUInt8('0x'+hex,0);
-            serial_rover.write(buf, function(err, results){
+            Rover.serial.write(buf, function(err, results){
                 if (err) console.error('Error writing to serial : ', err);
             });
         }

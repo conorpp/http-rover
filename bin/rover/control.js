@@ -1,113 +1,68 @@
 /*
     Top level entity for rover.
+    Handles requirements, scripts, and terminal args.
+    
+    requirements:
+	nodejs - child_process
+	npm - redis
+	custom lib - colorLog, serial
+	
+    scripts:
+	stream, rover, gps, admin
 */
-//GOT UPDATES!!!
-//Requirements
-var redis = require('socket.io/node_modules/redis'),
-    Stream = require('./stream'),
-    Rover = require('./rover'),
-    serialPort = require("serialport").SerialPort;
 
-//Handle terminal args.  *  S and C are global.
-if (process.argv.indexOf('deploy') != -1){
+//Determine which settings file to use.
+if (process.argv.indexOf('deploy') != -1){		
     S = require('./deployment/settings').Settings;
 }else{
     S = require('./../static_admin/js/settings').Settings;
 }
+console.log('Startin up rover.  Here are the settings', S);
+
+var redis = require('socket.io/node_modules/redis'),
+    Stream = require('./stream'),
+    Rover = require('./rover');
+    
 C = require('./lib/colorLog');
 
-var i = process.argv.indexOf('-rover');	//usb addr for rover.
-if (i!=-1) {
-    var rover = process.argv[i+1];
-}else var rover = S.roverAddr;
-
-i = process.argv.indexOf('-gps');	//usb addr for gps.
-if (i!=-1) {
-    var gps = process.argv[i+1];
-}else var gps = S.gpsAddr;
-
-C.log('Starting up rover.  Here are settings ', S, {color:'green'});
-
-/* Global variables for rover.  Do not reuse these names */
+/* Global variables.  Do not reuse these names */
 terminal = require('child_process');
 GPS = require('./gps'),
-pub = redis.createClient(S.redis_port, S.host);		//feedback channel
-sub = redis.createClient(S.redis_port, S.host);
-serial_rover = new serialPort(rover, {
-    baudrate: 9600
-}, true, function(err){
-    if (!err) return;
-    C.log('Rover not connected', {color:'red', font:'bold'});
-});
-serial_gps = new serialPort(gps, {
-    baudrate: 9600
-}, true, function(err){
-    if (!err) return;
-    C.log('GPS not connected', {color:'red', font:'bold'});
-});
+Serial = require('./lib/serial');
+pub = redis.createClient(S.redis_port, S.host);	//to server	
+sub = redis.createClient(S.redis_port, S.host);	//from server
 /********************************************************/
-sub.subscribe('rover');			//communication channels
+
+//communication channels
+sub.subscribe('rover');
 sub.subscribe('roverAdmin');
-
-//Administrative commands.
-sub.on('message', function(channel, data){
-    data = JSON.parse(data);
-    //C.log('got data', data, {color:'red'});
-    switch (data.func) {
-        case 'reset':
-	    if (channel != 'roverAdmin') {
-		C.log('unauthorized attempt for ' + data.func + 'command', {color:'red', logLevel:1});
-		return;
-	    }
-            C.log('Resetting stream', {color:'blue'});
-            Stream.reset();
-        break;
-	case 'ping':
-	    pub.publish('feedback', JSON.stringify({func:'ping'}));
-	break;
-	case 'execute':
-	    if (channel != 'roverAdmin') {
-		C.log('unauthorized attempt for ' + data.func + 'command', {color:'red', logLevel:1});
-		return;
-	    }
-	    C.log('about to exec command ', data, {color:'yellow'});
-	    terminal.exec(data.command, function(err, stdout, stdin){
-		var error = err || stdin;
-		if (error && error != '') {
-		    C.log('Error with exec command : ', error, {color:'red', logLevel:1});
-		}
-		pub.publish('feedback',
-			    JSON.stringify({func:'stdout',stdout:stdout, error:error, command:data.command}));
-	    });
-	break;
-        default:
-	    if (channel=='roverAdmin') {
-		C.log('No cases met on admin channel.', {color:red});
-	    }
-    }
-});
-
-process.on('SIGINT', function() {
-    C.log('Shutting down merrily . . .', {color:'red', font:'bold'});
-    Stream.kill();
-    process.exit();
-});
 
 //Start dependent scripts.
 Rover.connect();
 GPS.connect();
+require('./admin');
 
 if (process.argv.indexOf('nostream') == -1) {
-    Stream.detectAddr(function(){
-	Stream.run();
-    });
+    Stream.connect();
 }
-if (process.argv.indexOf('debug') != -1) {
-  C.set({logLevel: -1});
-}else{
-  C.set({logLevel: S.logLevel});
-}
+
+//Set addition settings
 GPS.set({home: S.home});
 
+var idebug = process.argv.indexOf('-debug');
+if (idebug != -1) {
+	var level = process.argv[idebug+1];
+	if (level) C.set({logLevel: parseInt(level)});
+	else C.log('Warning: "-debug" flag given but no value '+
+		   'specified.  0 is default.', {color:'yellow'});
+}
 
-
+//Kill necessary processes before exciting.  Necessary for ffmpeg & webcam.wow.
+process.on('SIGINT', function() {
+    var words = [' merrily', ' gracefully', ' sullenly', ' asap', '. wow such force', ' tomorrow (jk)', ' with you', ' in style', '. Good bye.', ' bye', ' k?', ' goodnight', ' wahh', 'town'];
+    var index = words.length-1;
+    var word = words[Math.floor(Math.random() * index)];
+    C.log('Shutting down'+word, {color:'green', font:'bold',bg:'red'});
+    Stream.kill();
+    process.exit();
+});
