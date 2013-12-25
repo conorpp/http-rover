@@ -195,7 +195,7 @@ var serial = {
                 data.serial.on('data', function(d){
                     track.push(d);
                     C.log('Checking GPS . . . ', {color:'purple', logLevel:-2});
-                    if (track.length > 15 && (new Date().getTime() - start < time)) {
+                    if (track.length > 5 && (new Date().getTime() - start < time)) {
                         callback(err, data);
                     }else if ((new Date().getTime() - start > time)) {
                         C.log('Wrong serial port for GPS.  Skipping . . .',{logLevel:-2});
