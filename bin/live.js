@@ -318,8 +318,8 @@ var live = {
                                                         message:'Internet has been returned to the rover.',
                                                         disconnect:false});
                             C.log('Rover is alive. ',new Date(), {color:'green', font:'bold'});
-                            live.roverAlive = true;
                         }
+                        live.roverAlive = true;
                         live.pings = 0;
                     break;
                     case 'info':        //set latest network stats
