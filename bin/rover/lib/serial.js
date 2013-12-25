@@ -190,12 +190,12 @@ var serial = {
                     return;
                 }
                 var track = [];
-                var time = 6500;
+                var time = 8000;
                 var start = new Date().getTime();
                 data.serial.on('data', function(d){
                     track.push(d);
                     C.log('Checking GPS . . . ', {color:'purple', logLevel:-2});
-                    if (track.length > 5 && (new Date().getTime() - start < time)) {
+                    if (track.length > 8 && (new Date().getTime() - start < time)) {
                         callback(err, data);
                     }else if ((new Date().getTime() - start > time)) {
                         C.log('Wrong serial port for GPS.  Skipping . . .',{logLevel:-2});
@@ -214,12 +214,12 @@ var serial = {
                     return;
                 }
                 var track = [];
-                var time = 2500;
+                var time = 8000;
                 var start = new Date().getTime();
                 data.serial.on('data', function(d){
                     track.push(d);
                     C.log('Checking Motors . . . ', {color:'purple', logLevel:-2});
-                    if (track.length < 10 && (new Date().getTime() - start > time)) {
+                    if (track.length < 8 && (new Date().getTime() - start > time)) {
                         callback(err, data);
                     }else if (track.length > 10) {
                         C.log('Wrong serial port for Motors.  Skipping . . .', {color:'purple', logLevel:-2});
