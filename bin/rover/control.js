@@ -19,7 +19,7 @@ if (process.argv.indexOf('deploy') != -1){
 console.log('Startin up rover.  Here are the settings', S);
 
 
-/* Global variables.  Do not reuse these names */
+/* Global variables.  Do not overwrite these names! */
 terminal = require('child_process'),
 C = require('./lib/colorLog'),
 Serial = require('./lib/serial'),

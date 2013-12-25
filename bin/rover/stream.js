@@ -5,7 +5,7 @@
     
     Requirements:
         ffmpeg
-        custom lib - colorLog, serial (in server.js)
+        custom lib - colorLog, serial 
 */
 
 var Stream = {

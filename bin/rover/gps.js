@@ -3,7 +3,7 @@
     disseminating that data.
     
     Requirements:
-        custom lib - serial, colorLog (in server.js)
+        custom lib - serial, colorLog 
 */
 
 var GPS = {

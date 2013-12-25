@@ -3,7 +3,8 @@
     Communication for rover.
     
     Requirements:
-        npm - redis 
+        npm - redis
+        custom lib - colorLog
         
     TODO: 
 */
