@@ -58,9 +58,32 @@ process.on('SIGINT', function() {
     Stream.kill();
     process.exit();
 });
-}//end setup
 
-if (process.argv.indexOf('now') != -1) {
+//testing
+//var usb = require('usb');
+//C.log('finding by ids ', usb.findByIds('046d:0990'),{color:'purple'});
+//C.log('List \n',usb.getDeviceList(), {color:'purple'});
+//C.log('libusb \n',usb, {color:'purple'});
+//console.log(usb);
+//
+
+var serialport = require('serialport');
+serialport.list(function (err, ports) {
+    console.log('the err ', err);
+    console.log('the ports ', ports);
+  ports.forEach(function(port) {
+    console.log(port.comName);
+    console.log(port.pnpId);
+    console.log(port.manufacturer);
+  });
+});
+//var video = new serialport.SerialPort('/dev/video19');
+
+}//end setup
+//046d:0990
+
+//SETUP actually runs everything above.
+if (process.argv.indexOf('now') != -1 || process.argv.indexOf('deploy') == -1) {
     SETUP();
 }else{
     setTimeout(function(){

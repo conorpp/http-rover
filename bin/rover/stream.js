@@ -111,9 +111,41 @@ var Stream = {
         this.running = false;
         callback = callback || function(){};
         Terminal.exec('sudo pkill -SIGINT ffmpeg', function(){
-            //Serial.killUSB('QuickCam', function(){
-                C.log('Reset webcam.');
-                callback();
+            Terminal.exec('lsusb',function(err, stdout, stderr){
+                var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
+                var device;
+                for (var i in devices) {
+                    var dev = devices[i].split(' ');
+                    //check id of device.  See lsusb.
+                    if (dev[5] == '046d:0990') {
+                        device = {
+                            bus:dev[1],
+                            device:dev[3].replace(':',''),
+                            id:dev[5]
+                        };
+                    }
+                }
+
+                if (!device) {
+                    callback('No webcam ', {});
+                }
+                C.log('about to reset this devices ', device, {color:'yellow'});
+                var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'
+                            +device.bus+'/'+device.device;
+                C.log('used this cmd ', cmd, {color:'blue'});
+                Terminal.exec(cmd, function(err, stdout, stderr){
+                    if (!err) {
+                        C.log('Reset webcam device', {color:'green'});
+                        callback(null, device);
+                    }else{
+                        //C.err('Error reseting device', err, stdout);
+                        callback(err, {});
+                        
+                    }
+                });
+            });
+                //C.log('Reset webcam.');
+                //callback();
            // });
         });
 
@@ -125,7 +157,11 @@ var Stream = {
     */
     reset: function(options){
         C.log('Resetting stream.', {color:'blue'});
-        this.kill(function(){
+        this.kill(function(err, device){
+            if (err && err.killed) {
+                C.log('Error resetting cam ', err, {color:'red'});
+                C.log('');
+            }
             Stream.connect(options);
             Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
                        '  It may take up to 30 seconds for it to come back.', global:true});
