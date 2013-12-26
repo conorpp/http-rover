@@ -54,7 +54,7 @@ var GPS = {
                         var h = data.toString('ascii');
                         GPS.hist += h;
                         GPS.i++;
-                        if (i>200) {
+                        if (GPS.i>200) {
                             GPS.check();
                         }
                         /*if (GPS.started) {
