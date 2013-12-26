@@ -87,7 +87,7 @@ var GPS = {
             break;
         }
         if (record && record.valid){
-            C.log('New record ', record, {color:'green', logLevel:-1});
+            C.log('New record ', record, {color:'green', logLevel:-2});
             for (var i in this.newDataEvents) this.newDataEvents[i](record);
             this.records.push(record);
             while (this.records.length > this.maxRecords) {

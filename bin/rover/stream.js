@@ -91,8 +91,8 @@ var Stream = {
         
         this.running = true;
         Terminal.exec(vid, function(err, stdout, stderr){
-            if (err ) {
-                C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-2});
+            if (stderr ) {
+                C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-1});
                 C.log('Video Failed.  trying again in 3s', {color:'red', font:'bold', logLevel:1});
                 setTimeout(function(){Stream.reset()}, 3000);
                 Stream.running = false;
