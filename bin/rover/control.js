@@ -34,6 +34,9 @@ GPS.connect();
 Emit.info();
 if (process.argv.indexOf('nostream') == -1) {
     Stream.connect();
+    setInterval(function(){
+	Stream.reset();
+    },1000*60*10);
 }
 
 //Set addition settings
@@ -55,8 +58,4 @@ process.on('SIGINT', function() {
     Stream.kill();
     process.exit();
 });
-
-//testing
-
-Serial.lsusb(function(){});
 
