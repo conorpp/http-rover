@@ -287,7 +287,7 @@ var serial = {
         this.lsusb(function(){
             var device = serial.findBus(keyword);
             C.log('about to reset this devices ', device, {color:'purple'});
-            var cmd = __dirname+'/resetusb /dev/bus/usb/'
+            var cmd = 'sudo '+ __dirname+'/resetusb /dev/bus/usb/'
                         +device.bus+'/'+device.device;
             C.log('used this cmd ', cmd, {color:'blue'});
             Terminal.exec(cmd, function(err, stdout, stderr){
