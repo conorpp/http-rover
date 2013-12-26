@@ -129,7 +129,7 @@ var GPS = {
             date:new Date(),
             mph:parseFloat(record[7]) * 1.15078,
             valid:record[2] == 'A' ? true : false, //V = void, A=valid
-            angle: parseFloat(record[8]), //degrees
+            direction: parseFloat(record[8]), //degrees
             distance: this.distance(this.home[0], this.home[1], lat, lng)
         };
         
@@ -164,7 +164,7 @@ var GPS = {
             altitude:parseFloat(record[8])
         };
         
-    },//----------0direc--1true--2,3mag----4knots--5------6kilos
+    },//----------1direc--2true--3,4mag----5knots--6------7kilos
     //$GPVTG,    21.75,    T,    ,M      ,0.02    ,N    ,0.03    ,K   ,A*0D
     parse_GPVTG: function(record){
         record = record.split(',');
@@ -175,9 +175,9 @@ var GPS = {
         console.log('vtg arr',record);
         return {
             date:new Date(),
-            mph:parseFloat(record[4]) * 1.15078,
-            kmph:parseFloat(record[6]),
-            direction: parseFloat(record[0]),
+            mph:parseFloat(record[5]) * 1.15078,
+            kmph:parseFloat(record[7]),
+            direction: parseFloat(record[1]),
             valid:true
         };
         
