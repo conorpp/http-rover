@@ -47,7 +47,7 @@ var GPS = {
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
                     _data.serial.on('data', function(data){
-                        //console.log('dater', data);
+                        console.log('GPS DATA!', data);
                         var h = data.toString('ascii');
                         if (h == '$') {
                             GPS.started = true;
