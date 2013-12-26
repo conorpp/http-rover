@@ -53,7 +53,7 @@ var GPS = {
                         var h = data.toString('ascii');
                         
                         if (GPS.started) {
-                            if (h == '\n' ) {
+                            if (h == '\n' || h=='$') {
                                 //console.log('ENDED ', h);
                                 GPS.end();
                             }else{
