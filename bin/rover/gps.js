@@ -53,7 +53,7 @@ var GPS = {
                         var h = data.toString('ascii');
                         
                         if (GPS.started) {
-                            if (h == '\n' || h=='\r') {
+                            if (h == '\n' ) {
                                 console.log('ENDED ', h);
                                 GPS.end();
                             }else{
@@ -123,12 +123,12 @@ var GPS = {
     */
     add: function(h){
         this.gprmc+=h;
-       // if (this.gprmc.length >= 6) {
+        if (this.gprmc.length >= 6) {
             if (this.gprmc.substr(0,6) != '$GPRMC') {
                 this.redo();
             }
             console.log('progress ', this.gprmc);
-      // }
+       }
         //if (i>79) {
         //    console.log('raw 2 GPS :', this.gprmc);
        // }
