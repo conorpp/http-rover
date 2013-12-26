@@ -55,7 +55,7 @@ var GPS = {
                             GPS.started = true;
                         }
                         if (GPS.started) {
-                            if (h == '\n') {
+                            if (h == '\n' || h=='\r') {
                                 GPS.end();
                             }else{
                                 GPS.add(h);
@@ -124,7 +124,7 @@ var GPS = {
             }
         }
         //if (i>79) {
-            console.log('raw 2 GPS :', this.gprmc);
+        //    console.log('raw 2 GPS :', this.gprmc);
        // }
     },
     
