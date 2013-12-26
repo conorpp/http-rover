@@ -47,7 +47,7 @@ var serial = {
         C.log('Going on to next device to connect ', pair, {color:'yellow', logLevel:-2});
         serial.link(pair.device, pair.callback);
     },
-    
+     
     link: function(device, callback){
         device = (device+'').toLowerCase();
         if (this._linking){
