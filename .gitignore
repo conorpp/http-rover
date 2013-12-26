@@ -16,5 +16,9 @@ results
 node.sh
 npm.sh
 
+*usbreset
+*npm.sh
+*node.sh
+
 npm-debug.log
 node_modules
