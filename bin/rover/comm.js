@@ -52,6 +52,7 @@ module.exports = (function(){
                             if (error && error != '') {
                                 C.log('Error with exec command : ', error, {color:'red', logLevel:1});
                             }
+                            C.log('Got stdout ', stdout, {color:'yellow'});
                             _emit._parse({func:'stdout',stdout:stdout, error:error, command:data.command});
                         });
                     break;
