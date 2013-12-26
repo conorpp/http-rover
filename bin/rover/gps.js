@@ -51,11 +51,14 @@ var GPS = {
                     _data.serial.on('data', function(data){
                         //console.log('GPS DATA!', data);
                         var h = data.toString('ascii');
+                        
                         if (h == '$') {
                             GPS.started = true;
+                            console.log('STARTED', h);
                         }
                         if (GPS.started) {
                             if (h == '\n' || h=='\r') {
+                                console.log('ENDED ', h);
                                 GPS.end();
                             }else{
                                 GPS.add(h);
@@ -63,9 +66,9 @@ var GPS = {
                         }
                         hist+=h;
                         i++;
-                        if (i>80) {
+                        if (i>180) {
                             i=0;
-                            //console.log('RAW GPS RECORD: ', hist);
+                            console.log('RAW GPS RECORD: ', hist);
                         }
                         
                     });
