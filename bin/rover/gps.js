@@ -10,6 +10,8 @@ var GPS = {
     
     records:[],
     gprmc:'',
+    hist:'',
+    i:0,
     started:false,
     maxRecords:100,
     ready:false,
@@ -46,13 +48,16 @@ var GPS = {
                 _data.serial.open(function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
-                    var hist = '';
                     i = 0;
                     _data.serial.on('data', function(data){
                         //console.log('GPS DATA!', data);
                         var h = data.toString('ascii');
-                        
-                        if (GPS.started) {
+                        GPS.hist += h;
+                        GPS.i++;
+                        if (i>200) {
+                            GPS.check();
+                        }
+                        /*if (GPS.started) {
                             if (h == '\n' || h=='$') {
                                 //console.log('ENDED ', h);
                                 GPS.end();
@@ -71,7 +76,7 @@ var GPS = {
                         //if (i>180) {
                          //   i=0;
                          //   console.log('RAW GPS RECORD: ', hist);
-                       // }
+                       // }*/
                         
                     });
                 });
@@ -101,6 +106,17 @@ var GPS = {
     on: function(event, callback){
         if (event == 'data') {
             this.newDataEvents.push(callback);
+        }
+    },
+    
+    check: function(){
+        var recs = this.hist.match(/[^\n]+(?:\n|$)/g); //split by newlines
+        console.log('THE MATCHES ARE ', recs);
+        for (var i in recs) {
+            if (recs[i].substr(0,6) == '$GPRMC') {
+                console.log('PARSING ', recs[i]);
+                this.parse(recs[i]);
+            }
         }
     },
     /* Returns last read data from GPS
