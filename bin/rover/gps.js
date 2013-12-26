@@ -46,8 +46,10 @@ var GPS = {
                 _data.serial.open(function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
+                    var hist = '';
+                    var i = 0;
                     _data.serial.on('data', function(data){
-                        console.log('GPS DATA!', data);
+                        //console.log('GPS DATA!', data);
                         var h = data.toString('ascii');
                         if (h == '$') {
                             GPS.started = true;
@@ -58,7 +60,14 @@ var GPS = {
                             }else{
                                 GPS.add(h);
                             }
-                        }  
+                        }
+                        hist+=h;
+                        i++;
+                        if (i>60) {
+                            i=0;
+                            console.log('RAW GPS RECORD: ', hist);
+                        }
+                        
                     });
                 });
             }else{
