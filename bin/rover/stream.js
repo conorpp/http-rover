@@ -160,7 +160,11 @@ var Stream = {
         this.kill(function(err, device){
             if (err && err.killed) {
                 C.log('Error resetting cam ', err, {color:'red'});
-                C.log('');
+                C.log('trying again');
+                setTimeout(function(){
+                    Stream.reset();
+                },3500);
+                return;
             }
             Stream.connect(options);
             Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
