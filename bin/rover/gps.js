@@ -116,10 +116,12 @@ var GPS = {
                 console.log('PARSING ', recs[i]);
                 var record = this.parse(recs[i]);
                 C.log('New record ', record, {color:'green', logLevel:-1});
-                if (record.valid) for (var i in this.newDataEvents) this.newDataEvents[i](record);
-                this.records.push(record);
-                while (this.records.length > this.maxRecords) {
-                    this.records.shift();
+                if (record.valid){
+                    for (var i in this.newDataEvents) this.newDataEvents[i](record);
+                    this.records.push(record);
+                    while (this.records.length > this.maxRecords) {
+                        this.records.shift();
+                    }
                 }
             }
         }
