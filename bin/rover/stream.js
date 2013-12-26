@@ -111,10 +111,10 @@ var Stream = {
         this.running = false;
         callback = callback || function(){};
         Terminal.exec('pkill -s INT ffmpeg', function(){
-            Serial.killUSB('QuickCam', function(){
+            //Serial.killUSB('QuickCam', function(){
                 C.log('Reset webcam.');
                 callback();
-            });
+           // });
         });
 
     },
