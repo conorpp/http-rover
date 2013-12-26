@@ -51,10 +51,9 @@ var GPS = {
                     i = 0;
                     _data.serial.on('data', function(data){
                         //console.log('GPS DATA!', data);
-                        var h = data.toString('ascii');
-                        GPS.hist += h;
+                        GPS.hist += data.toString();
                         GPS.i++;
-                        if (GPS.i>400) {
+                        if (GPS.i>350) {
                             GPS.check();
                         }
                         /*if (GPS.started) {
@@ -179,7 +178,7 @@ var GPS = {
         record = record.split(',');
         if (record.length < 7) {
             console.log('Not parsing GPRMC record because its incomplete');
-            return null;
+            return {valid:false};
         }
         var _lat = record[3],
             latSign = (record[4] == 'N') ? 1 : -1, //N = +, S=-
