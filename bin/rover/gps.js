@@ -21,10 +21,11 @@ var GPS = {
         Begin connection and reading from GPS module.
     */
     connect: function(){
-        var SER = require("serialport").SerialPort;
+        var _SER = require("serialport")
+        var SER = _SER.SerialPort;
         var SERIAL = new SER('/dev/ttyUSB1', {
                         baudrate: 9600,
-                        parser: serialport.parsers.readline("\n")
+                        parser: _SER.parsers.readline("\n")
                     });
         SERIAL.on('open', function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
