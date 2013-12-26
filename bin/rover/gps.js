@@ -52,16 +52,18 @@ var GPS = {
                         //console.log('GPS DATA!', data);
                         var h = data.toString('ascii');
                         
-                        if (h == '$') {
-                            GPS.started = true;
-                            console.log('STARTED', h);
-                        }
                         if (GPS.started) {
                             if (h == '\n' || h=='\r') {
                                 console.log('ENDED ', h);
                                 GPS.end();
                             }else{
+                                
                                 GPS.add(h);
+                            }
+                        }else{
+                            if (h == '$') {
+                                GPS.started = true;
+                                console.log('STARTED', h);
                             }
                         }
                         hist+=h;
@@ -121,11 +123,12 @@ var GPS = {
     */
     add: function(h){
         this.gprmc+=h;
-        if (this.gprmc.length >= 6) {
-            if (this.gprmc.substr(0,6) !== '$GPRMC') {
+       // if (this.gprmc.length >= 6) {
+            if (this.gprmc.substr(0,6) != '$GPRMC') {
                 this.redo();
             }
-        }
+            console.log('progress ', this.gprmc);
+      // }
         //if (i>79) {
         //    console.log('raw 2 GPS :', this.gprmc);
        // }
@@ -185,6 +188,7 @@ var GPS = {
     },
     //Wipes current string record.  For when non supported standard is read.
     redo: function(){
+        console.log('REDO!');
         this.gprmc = '';
         this.started = false;
     },
