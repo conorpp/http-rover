@@ -123,9 +123,9 @@ var GPS = {
                 this.redo();
             }
         }
-        if (i>79) {
+        //if (i>79) {
             console.log('raw 2 GPS :', this.gprmc);
-        }
+       // }
     },
     
     end:function(){
