@@ -47,7 +47,7 @@ var GPS = {
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
                     var hist = '';
-                    var i = 0;
+                    i = 0;
                     _data.serial.on('data', function(data){
                         //console.log('GPS DATA!', data);
                         var h = data.toString('ascii');
@@ -63,9 +63,9 @@ var GPS = {
                         }
                         hist+=h;
                         i++;
-                        if (i>60) {
+                        if (i>80) {
                             i=0;
-                            console.log('RAW GPS RECORD: ', hist);
+                            //console.log('RAW GPS RECORD: ', hist);
                         }
                         
                     });
@@ -123,9 +123,13 @@ var GPS = {
                 this.redo();
             }
         }
+        if (i>79) {
+            console.log('raw 2 GPS :', this.gprmc);
+        }
     },
     
     end:function(){
+        console.log('END CALLED!');
         var record = this.parse(this.gprmc);
         C.log('New record ', record, {color:'green', logLevel:-1});
         if (record.valid) for (var i in this.newDataEvents) this.newDataEvents[i](record);
