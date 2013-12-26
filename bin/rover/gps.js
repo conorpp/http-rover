@@ -56,31 +56,31 @@ var GPS = {
     },
     
     parse: function(line){
-        console.log( line);
-            var start = line.substr(0,6);
-            var record;
-            switch (start) {
-                case '$GPRMC':
-                    record = this.parse_RMC(line);
-                break;
-                case '$GPGGA':
-                    record = this.parse_GGA(line);
-                break;
-                case '$GPVTG':
-                    record = this.parse_VTG(line);
-                break;
-                default:
-                    //not supported format.
-                break;
+        //console.log( line);
+        var start = line.substr(0,6);
+        var record;
+        switch (start) {
+            case '$GPRMC':
+                record = this.parse_RMC(line);
+            break;
+            case '$GPGGA':
+                record = this.parse_GGA(line);
+            break;
+            case '$GPVTG':
+                record = this.parse_VTG(line);
+            break;
+            default:
+                //not supported format.
+            break;
+        }
+        if (record && record.valid){
+            C.log('New record ', record, {color:'green', logLevel:-1});
+            for (var i in this.newDataEvents) this.newDataEvents[i](record);
+            this.records.push(record);
+            while (this.records.length > this.maxRecords) {
+                this.records.shift();
             }
-            if (record && record.valid){
-                C.log('New record ', record, {color:'green', logLevel:-1});
-                for (var i in this.newDataEvents) this.newDataEvents[i](record);
-                this.records.push(record);
-                while (this.records.length > this.maxRecords) {
-                    this.records.shift();
-                }
-            }
+        }
 
     },
     /* Returns last read data from GPS
