@@ -172,7 +172,7 @@ var GPS = {
             C.err('Not parsing GPVTG record because its incomplete');
             return {valid:false};
         }
-
+        console.log('vtg arr',record);
         return {
             date:new Date(),
             mph:parseFloat(record[4]) * 1.15078,
