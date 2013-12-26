@@ -17,17 +17,31 @@ var GPS = {
         Begin connection and reading from GPS module.
     */
     connect: function(){
-        var _SER = require("serialport");
-        var SER = _SER.SerialPort;
-        var SERIAL = new SER('/dev/ttyUSB1', {
-            baudrate: 9600,
-            parser: _SER.parsers.readline("\n")
-        });
-        SERIAL.on('open', function(){
-            C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
-            GPS.ready = true;
-            SERIAL.on('data', function(data){
-                GPS.parse(data);
+        var _serialport = require("serialport");
+        var _serialConstr = _serialport.SerialPort;
+
+        _serialport.list(function (err, ports) {
+            var addr;
+            ports.forEach(function(port) {
+                C.log(port.comName, {color:'yellow'});
+                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0'){
+                    addr = port.comName;
+                }
+            });
+            if (!addr) {
+                C.log('GPS Fail', {color:'red', font:'bold', logLevel:1});
+                return;
+            }
+            var serial = new _serialConstr(addr, {
+                baudrate: 9600,
+                parser: _serialport.parsers.readline("\n")
+            });
+            serial.on('open', function(){
+                C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
+                GPS.ready = true;
+                serial.on('data', function(data){
+                    GPS.parse(data);
+                });
             });
         });
 
@@ -169,7 +183,6 @@ var GPS = {
             C.err('Not parsing GPVTG record because its incomplete');
             return {valid:false};
         }
-        console.log('vtg arr',record);
         return {
             type:'VTG',
             date:new Date(),

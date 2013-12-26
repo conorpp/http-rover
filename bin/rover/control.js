@@ -58,4 +58,3 @@ process.on('SIGINT', function() {
     Stream.kill();
     process.exit();
 });
-
