@@ -31,60 +31,9 @@ var GPS = {
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
                     SERIAL.on('data', function(data){
-                        console.log('GPS data ', data);
-                       /* var h = data.toString('ascii');
-                        if (h == '$') {
-                            GPS.started = true;
-                        }
-                        if (GPS.started) {
-                            if (h == '\n') {
-                                GPS.end();
-                            }else{
-                                GPS.add(h);
-                            }
-                        }  */
+                        GPS.parse('GPS data ', data);
                     });
-        });/*
-        Serial.link('gps',function(err, _data){
-            if (_data && _data.serial) {
-                _data.serial.open(function(){
-                    C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
-                    GPS.ready = true;
-                    i = 0;
-                    _data.serial.on('data', function(data){
-                        //console.log('GPS DATA!', data);
-                        GPS.hist += data.toString();
-                        GPS.i++;
-                        if (GPS.i>350) {
-                            GPS.check();
-                        }
-                        /*if (GPS.started) {
-                            if (h == '\n' || h=='$') {
-                                //console.log('ENDED ', h);
-                                GPS.end();
-                            }else{
-                                
-                                GPS.add(h);
-                            }
-                        }else{
-                            if (h == '$') {
-                                GPS.started = true;
-                                //console.log('STARTED', h);
-                            }
-                        }
-                       // hist+=h;
-                        //i++;
-                        //if (i>180) {
-                         //   i=0;
-                         //   console.log('RAW GPS RECORD: ', hist);
-                       // }
-                        
-                    });
-                });
-            }else{
-                C.log('GPS Failed', {color:'red', font:'bold', logLevel:1});
-            }
-        });*/
+        });
 
         Number.prototype.toRad = function() {
           return this * Math.PI / 180;
@@ -110,14 +59,10 @@ var GPS = {
         }
     },
     
-    check: function(){
-        var recs = this.hist.match(/[^\n]+(?:\n|$)/g); //split by newlines
-        console.log('THE MATCHES ARE ', recs);
-        for (var i in recs) {
-            var start = recs[i].substr(0,6);
-            if (start == '$GPRMC' || start=='GPRMC' || start=='PRMC') {
-                console.log('PARSING ', recs[i]);
-                var record = this.parse(recs[i]);
+    parse: function(line){
+            var start = line.substr(0,6);
+            if (start == '$GPRMC') {
+                var record = this.parse_GPRMC(line);
                 C.log('New record ', record, {color:'green', logLevel:-1});
                 if (record.valid){
                     for (var i in this.newDataEvents) this.newDataEvents[i](record);
@@ -127,7 +72,6 @@ var GPS = {
                     }
                 }
             }
-        }
         this.i=0;
         this.hist='';
     },
@@ -145,41 +89,9 @@ var GPS = {
     },
     
     /*
-        Adds an ascii character from GPS module to string record.
-        
-        Current record standards supported : GPRMC
-    */
-    add: function(h){
-        this.gprmc+=h;
-            console.log('progress ', this.gprmc);
-            console.log('length? ', this.gprmc.length);
-        if (this.gprmc.length >= 5) {
-            if (this.gprmc.substr(0,5) != 'GPRMC') {
-                this.redo();
-            }
-       }
-        //if (i>79) {
-        //    console.log('raw 2 GPS :', this.gprmc);
-       // }
-    },
-    
-    end:function(){
-        console.log('END CALLED!');
-        var record = this.parse(this.gprmc);
-        C.log('New record ', record, {color:'green', logLevel:-1});
-        if (record.valid) for (var i in this.newDataEvents) this.newDataEvents[i](record);
-        this.records.push(record);
-        this.redo();
-        while (this.records.length > this.maxRecords) {
-            this.records.shift();
-        }
-        C.log('current record amount - ', this.records.length, ' (max: '+ this.maxRecords +')',{color:'blue', logLevel:-1});
-    },
-    
-    /*
         Turns a GPRMC string into an obj
     */
-    parse: function(record){
+    parse_GPRMC: function(record){
         record = record.split(',');
         if (record.length < 7) {
             console.log('Not parsing GPRMC record because its incomplete');
@@ -226,12 +138,6 @@ var GPS = {
         for (var i in this.records) {
             C.log(this.records[i], {color:'yellow'});
         }
-    },
-    //Wipes current string record.  For when non supported standard is read.
-    redo: function(){
-        console.log('REDO!');
-        this.gprmc = '';
-        this.started = false;
     },
     
     /*returns distance between to coords using haversines formula
