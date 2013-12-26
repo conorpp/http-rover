@@ -69,7 +69,7 @@ var Stream = {
     */
     connect: function(){
         //detect webcam addr automatically.
-        Serial.link('webcam', function(err, data){
+        this.detectAddr(function(err, data){
             if (err){
                 C.log('Error detecting webcam: ', err, {color:'red', font:'bold'});
             }else{
@@ -130,6 +130,27 @@ var Stream = {
             Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
                        '  It may take up to 30 seconds for it to come back.', global:true});
         });
+    },
+    
+    detectAddr: function(callback){
+        
+        Terminal.exec('ls -s /dev | grep video', function(err, stdout, stderr){
+            var devices = stdout.match(/video[0-9]*/g);
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            var max = 0;
+            for (var i in devices) {
+                num = parseInt(devices[i].replace('video',''));
+                if (num > max) {
+                    max = num;
+                }
+            }
+            C.log('The max is ',max,' for webcam addr',{logLevel:-1});
+            callback(err, {addr:'/dev/video'+max});
+        });
+
     }
     
 }
