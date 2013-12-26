@@ -64,13 +64,25 @@ var GPS = {
             var start = line.substr(0,6);
             if (start == '$GPRMC') {
                 var record = this.parse_GPRMC(line);
+            }
+            var record;
+            switch (start) {
+                case '$GPRMC':
+                    record = this.parse_GPRMC(line);
+                break;
+                case '$GPGGA':
+                    record = this.parse_GPGGA(line);
+                break;
+                default:
+                    //not supported format.
+                break;
+            }
+            if (record && record.valid){
                 C.log('New record ', record, {color:'green', logLevel:-1});
-                if (record.valid){
-                    for (var i in this.newDataEvents) this.newDataEvents[i](record);
-                    this.records.push(record);
-                    while (this.records.length > this.maxRecords) {
-                        this.records.shift();
-                    }
+                for (var i in this.newDataEvents) this.newDataEvents[i](record);
+                this.records.push(record);
+                while (this.records.length > this.maxRecords) {
+                    this.records.shift();
                 }
             }
         this.i=0;
@@ -111,23 +123,62 @@ var GPS = {
             lngMinutes = parseFloat(_lng.substr(3,8)),
             lng = (lng + lngMinutes/60) * lngSign;
             
-        try{
-            var mph =parseFloat(record[7]) * 1.15078,
-            angle = parseFloat(record[8]);
-        }catch(e){
-            var mph = null,
-            angle = null;
-        }
-        //C.log('Knots: ', record[7], {color:'yellow'});
-        console.log();
         return {
             lat:lat,
             lng:lng,
             date:new Date(),
-            mph:mph,
+            mph:parseFloat(record[7]) * 1.15078,
             valid:record[2] == 'A' ? true : false, //V = void, A=valid
-            angle: angle, //degrees
+            angle: parseFloat(record[8]), //degrees
             distance: this.distance(this.home[0], this.home[1], lat, lng)
+        };
+        
+    },
+    //------date0--------lat1----------lng3--------valid5--#satel.6--dil.7--alt.8
+    //GPGGA,045103.000,4438.8155,N,06857.5148,W,     1,     11     ,0.89,   95.4,M,-30.6,M,,*6A
+    parse_GPGGA: function(record){
+        record = record.split(',');
+        if (record.length < 9) {
+            C.err('Not parsing GPGGA record because its incomplete');
+            return {valid:false};
+        }
+        var _lat = record[1],
+            latSign = (record[2] == 'N') ? 1 : -1, //N = +, S=-
+            _lng = record[3],
+            lngSign =(record[4] == 'E') ? 1 : -1;  //E = +, W=-
+            
+        var lat = parseInt(_lat.substr(0,2)),
+            latMinutes = parseFloat(_lat.substr(2,8)),
+            lat = (lat + latMinutes/60) * latSign;
+            
+        var lng = parseInt(_lng.substr(0,3)),
+            lngMinutes = parseFloat(_lng.substr(3,8)),
+            lng = (lng + lngMinutes/60) * lngSign;
+            
+        return {
+            lat:lat,
+            lng:lng,
+            date:new Date(),
+            valid:record[5] != '0' ? true : false, //V = void, A=valid
+            distance: this.distance(this.home[0], this.home[1], lat, lng),
+            altitude:parseInt(record[8])
+        };
+        
+    },//----------0direc--1true--2,3mag----4knots--5------6kilos
+    //$GPVTG,    21.75,    T,    ,M      ,0.02    ,N    ,0.03    ,K   ,A*0D
+    parse_GPVTG: function(record){
+        record = record.split(',');
+        if (record.length < 7) {
+            C.err('Not parsing GPVTG record because its incomplete');
+            return {valid:false};
+        }
+
+        return {
+            date:new Date(),
+            mph:parseFloat(record[4]) * 1.15078,
+            kmph:parseFloat(record[6]),
+            direction: parseFloat(record[0]),
+            valid:true
         };
         
     },
