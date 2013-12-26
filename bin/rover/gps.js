@@ -20,7 +20,7 @@ var GPS = {
     */
     connect: function(){
         var SER = require("serialport").SerialPort;
-        var SERIAL = new SER('/dev/ttyUSB0', {
+        var SERIAL = new SER('/dev/ttyUSB1', {
                         baudrate: 9600
                     });
         SERIAL.on('open', function(){

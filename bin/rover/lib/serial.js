@@ -287,6 +287,11 @@ var serial = {
         callback = callback || function(){};
         this.lsusb(function(){
             var device = serial.findBus(keyword);
+            if (!device) {
+                C.err('device by keword', keyword,'doesnt exist.');
+                callback({});
+                return;
+            }
             C.log('about to reset this devices ', device, {color:'purple'});
             var cmd = 'sudo '+ __dirname+'/resetusb /dev/bus/usb/'
                         +device.bus+'/'+device.device;
