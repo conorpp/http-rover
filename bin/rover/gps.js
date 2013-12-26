@@ -70,8 +70,6 @@ var GPS = {
     },
     
     parse: function(line){
-        //console.log( line);
-        console.log('DATA ', line);
         var start = line.substr(0,6);
         var record;
         switch (start) {
