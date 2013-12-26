@@ -54,7 +54,7 @@ var GPS = {
                         var h = data.toString('ascii');
                         GPS.hist += h;
                         GPS.i++;
-                        if (GPS.i>200) {
+                        if (GPS.i>400) {
                             GPS.check();
                         }
                         /*if (GPS.started) {
@@ -118,6 +118,8 @@ var GPS = {
                 this.parse(recs[i]);
             }
         }
+        this.i=0;
+        this.hist='';
     },
     /* Returns last read data from GPS
         returns 0 if nothing yet.
@@ -169,7 +171,10 @@ var GPS = {
     */
     parse: function(record){
         record = record.split(',');
-        
+        if (record.length < 7) {
+            console.log('Not parsing GPRMC record because its incomplete');
+            return null;
+        }
         var _lat = record[3],
             latSign = (record[4] == 'N') ? 1 : -1, //N = +, S=-
             _lng = record[5],
@@ -182,14 +187,22 @@ var GPS = {
         var lng = parseInt(_lng.substr(0,3)),
             lngMinutes = parseFloat(_lng.substr(3,8)),
             lng = (lng + lngMinutes/60) * lngSign;
+            
+        try{
+            var mph =parseFloat(record[7]) * 1.15078,
+            angle = parseFloat(record[8]);
+        }catch(e){
+            var mph = null,
+            angle = null;
+        }
         //C.log('Knots: ', record[7], {color:'yellow'});
         return {
             lat:lat,
             lng:lng,
             date:new Date(),
-            mph:parseFloat(record[7]) * 1.15078,
+            mph:mph,
             valid:record[2] == 'A' ? true : false, //V = void, A=valid
-            angle: parseFloat(record[8]), //degrees
+            angle: angle, //degrees
             distance: this.distance(this.home[0], this.home[1], lat, lng)
         };
         
