@@ -110,7 +110,7 @@ var Stream = {
     kill: function(callback){
         this.running = false;
         callback = callback || function(){};
-        Terminal.exec('pkill -s INT ffmpeg', function(){
+        Terminal.exec('sudo pkill -s INT ffmpeg', function(){
             //Serial.killUSB('QuickCam', function(){
                 C.log('Reset webcam.');
                 callback();
