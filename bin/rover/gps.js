@@ -54,7 +54,7 @@ var GPS = {
                         
                         if (GPS.started) {
                             if (h == '\n' ) {
-                                console.log('ENDED ', h);
+                                //console.log('ENDED ', h);
                                 GPS.end();
                             }else{
                                 
@@ -63,15 +63,15 @@ var GPS = {
                         }else{
                             if (h == '$') {
                                 GPS.started = true;
-                                console.log('STARTED', h);
+                                //console.log('STARTED', h);
                             }
                         }
-                        hist+=h;
-                        i++;
-                        if (i>180) {
-                            i=0;
-                            console.log('RAW GPS RECORD: ', hist);
-                        }
+                       // hist+=h;
+                        //i++;
+                        //if (i>180) {
+                         //   i=0;
+                         //   console.log('RAW GPS RECORD: ', hist);
+                       // }
                         
                     });
                 });
