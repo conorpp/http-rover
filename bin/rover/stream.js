@@ -36,7 +36,7 @@ var Stream = {
         return (
             'ffmpeg -f alsa -ac 1 ' +                           //audio options
             '-i '+ this.aSource +                               //audio source
-            ' -acodec libvo_aacenc -f flv ' +                   //output options
+            ' -acodec libvo_aacen -f flv ' +                   //output options
             this.rtmpHost + '/roveraudio/' + this.app           //destination
             );
     },
@@ -81,31 +81,20 @@ var Stream = {
 
     run: function(options){
         options = options || {};
-        var audioRunning = true;
         C.log('Stream commands: ', {color:'cyan', logLevel:-1});
-        if (options.fullStream) {
-            var vid = this.fullStream();
-        }else{
-            var vid = this.canvas();
-            if (options.audio == undefined || options.audio) {
-                var aud = Terminal.exec(this.audio(), function(err, stdout, stderr){
-                    var error = err || stderr;
-                    if (error && error != '') {
-                        C.log('Error with audio stream : ', err, stderr, {color:'red', logLevel:-2});
-                        C.log('Audio Failed', {color:'red', font:'bold', logLevel:1});
-                        audioRunning = false;
-                    }
-                });
-                C.log(this.audio(), {color:'blue', logLevel:-1});
-            }
-        }
-
+        
+        var vid = this.canvas();
+        
+        Terminal.exec(this.audio());
+        C.log(this.audio(), {color:'blue', logLevel:-1});
         C.log(vid, {color:'blue', logLevel:-1});
+        
         this.running = true;
         Terminal.exec(vid, function(err, stdout, stderr){
-            if (err || stderr) {
+            if (err ) {
                 C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-2});
-                C.log('Video Failed', {color:'red', font:'bold', logLevel:1});
+                C.log('Video Failed.  trying again in 3s', {color:'red', font:'bold', logLevel:1});
+                setTimeout(function(){Stream.reset()}, 3000);
                 Stream.running = false;
             }
         });
@@ -113,16 +102,21 @@ var Stream = {
             if (Stream.running) {
                 C.log('Video Ready',{color:'green', font:'bold', logLevel:1});
             }
-            if (audioRunning) {
-                C.log('Audio Ready', {color:'red', font:'bold', logLevel:1});
-            }
             clearTimeout(inter);
-        },2500);
+        },3500);
         
     },
     
-    kill: function(){
-        Terminal.exec('pkill -s INT ffmpeg');
+    kill: function(callback){
+        this.running = false;
+        callback = callback || function(){};
+        Terminal.exec('pkill -s INT ffmpeg', function(){
+            Serial.killUSB('QuickCam', function(){
+                C.log('Reset webcam.');
+                callback();
+            });
+        });
+
     },
     
     /*
@@ -131,12 +125,11 @@ var Stream = {
     */
     reset: function(options){
         C.log('Resetting stream.', {color:'blue'});
-        this.kill();
-        setTimeout(function(){
-            Stream.run(options);
-        },120);
-        Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
-                   '  It may take up to 30 seconds for it to come back.', global:true});
+        this.kill(function(){
+            Stream.connect(options);
+            Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
+                       '  It may take up to 30 seconds for it to come back.', global:true});
+        });
     }
     
 }

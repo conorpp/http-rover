@@ -38,6 +38,7 @@ var serial = {
     _next: function(func){
         
         if (!this._funcs.length){
+            this._linking = false;
             C.log('Finished connecting devices.', {logLevel:-2});
             return;
         }
@@ -112,9 +113,8 @@ var serial = {
             find: function(addr, params){
                 params.connect = params.connect == undefined ? true : params.connect;
                 Terminal.exec('ls -s /dev | grep '+addr, function(err, stdout, stderr){
-                    D.devices = stdout.match(/ttyUSB[0-9]/g),//new RegExp('/'+ addr +'[0-9]/g')),
+                    D.devices = stdout.match(new RegExp(addr +'[0-9]*','gi')),//new RegExp('/'+ addr +'[0-9]/g')),
                     D._devices = D.devices;
-                    
                     if (params.connect) {
                         D.connect();
                     }
@@ -232,25 +232,76 @@ var serial = {
     },
     //Only returns the address.
     detectWebcam: function(callback){
-        
         D = new this.detector(function(err, data){
-                C.log('in detector wrap',err, data, {color:'yellow', logLevel:-2});
                 if (err) {
                     callback(err, data);
                     return;
                 }
                 var max = 0;
                 for (var i in data.devices) {
-                    num = parseInt(data.devices[i].substr(data.devices.length-1, 1));
+                    num = parseInt(data.devices[i].replace(serial.webcam_keyword,''));
                     if (num > max) {
                         max = num;
                     }
                 }
-                C.log('THe max is ',max,{logLevel:-2});
+                C.log('THe max is ',max,' for webcam addr',{logLevel:-2});
                 callback(err, {addr:'/dev/video'+max});
             });
         D.find(this.webcam_keyword, {connect:false});
-    }
+    },
+    //Read connected USB devices
+    busDevices:{},
+    lsusb: function(callback){
+        callback = callback || function(){};
+        Terminal.exec('lsusb',function(err, stdout, stderr){
+            var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
+            var obj = {};
+            
+            for (var i in devices) {
+                var dev = devices[i].split(' ');
+                var name = '';
+                for (var n=6; n<dev.length-1; n++) name+=' ' + dev[n];
+                obj[name] = {
+                    bus:dev[1],
+                    device:dev[3].replace(':',''),
+                    id:dev[5]
+                };
+            }
+            serial.busDevices = obj;
+            //C.log('lsusb ', obj, {color:'purple'});
+            callback(obj);
+        });
+    },
+    
+    findBus: function(keyword){
+        for (dev in this.busDevices) {
+            if (dev.indexOf(keyword) != -1) {
+                return this.busDevices[dev];
+            }
+        }
+        return null;
+    },
+    
+    killUSB: function(keyword, callback){
+        callback = callback || function(){};
+        this.lsusb(function(){
+            var device = serial.findBus(keyword);
+            C.log('about to reset this devices ', device, {color:'purple'});
+            var cmd = __dirname+'/resetusb /dev/bus/usb/'
+                        +device.bus+'/'+device.device;
+            C.log('used this cmd ', cmd, {color:'blue'});
+            Terminal.exec(cmd, function(err, stdout, stderr){
+                if (!err) {
+                    C.log('Reset ', keyword, ' device', {color:'green'});
+                }else{
+                    C.err('Error reseting device', err, stdout);
+                    
+                }
+                callback(device);
+            });
+        });
+
+    },
 
 };
 

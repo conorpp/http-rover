@@ -56,3 +56,7 @@ process.on('SIGINT', function() {
     process.exit();
 });
 
+//testing
+
+Serial.lsusb(function(){});
+

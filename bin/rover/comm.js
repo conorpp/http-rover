@@ -133,7 +133,7 @@ module.exports = (function(){
                 if (err) C.log('err in info ', err, {color:'red'});
                 data.ifconfig = stdout;
                 data.gps = GPS.read();
-                C.log('sending config ', {color:'green', logLevel:-1});
+                C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
             });
             clearInterval(this.infoInter);
