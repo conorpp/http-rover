@@ -115,7 +115,13 @@ var GPS = {
         for (var i in recs) {
             if (recs[i].substr(0,6) == '$GPRMC') {
                 console.log('PARSING ', recs[i]);
-                this.parse(recs[i]);
+                var record = this.parse(recs[i]);
+                C.log('New record ', record, {color:'green', logLevel:-1});
+                if (record.valid) for (var i in this.newDataEvents) this.newDataEvents[i](record);
+                this.records.push(record);
+                while (this.records.length > this.maxRecords) {
+                    this.records.shift();
+                }
             }
         }
         this.i=0;
@@ -196,6 +202,7 @@ var GPS = {
             angle = null;
         }
         //C.log('Knots: ', record[7], {color:'yellow'});
+        console.log();
         return {
             lat:lat,
             lng:lng,
