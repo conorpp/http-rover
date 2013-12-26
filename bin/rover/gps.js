@@ -9,10 +9,6 @@
 var GPS = {
     
     records:[],
-    gprmc:'',
-    hist:'',
-    i:0,
-    started:false,
     maxRecords:100,
     ready:false,
     home:[44.64682833, -68.95867],
@@ -21,18 +17,18 @@ var GPS = {
         Begin connection and reading from GPS module.
     */
     connect: function(){
-        var _SER = require("serialport")
+        var _SER = require("serialport");
         var SER = _SER.SerialPort;
         var SERIAL = new SER('/dev/ttyUSB1', {
-                        baudrate: 9600,
-                        parser: _SER.parsers.readline("\n")
-                    });
+            baudrate: 9600,
+            parser: _SER.parsers.readline("\n")
+        });
         SERIAL.on('open', function(){
-                    C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
-                    GPS.ready = true;
-                    SERIAL.on('data', function(data){
-                        GPS.parse(data);
-                    });
+            C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
+            GPS.ready = true;
+            SERIAL.on('data', function(data){
+                GPS.parse(data);
+            });
         });
 
         Number.prototype.toRad = function() {
@@ -65,13 +61,13 @@ var GPS = {
             var record;
             switch (start) {
                 case '$GPRMC':
-                    record = this.parse_GPRMC(line);
+                    record = this.parse_RMC(line);
                 break;
                 case '$GPGGA':
-                    record = this.parse_GPGGA(line);
+                    record = this.parse_GGA(line);
                 break;
                 case '$GPVTG':
-                    record = this.parse_GPVTG(line);
+                    record = this.parse_VTG(line);
                 break;
                 default:
                     //not supported format.
@@ -85,8 +81,7 @@ var GPS = {
                     this.records.shift();
                 }
             }
-        this.i=0;
-        this.hist='';
+
     },
     /* Returns last read data from GPS
         returns 0 if nothing yet.
@@ -104,7 +99,7 @@ var GPS = {
     /*
         Turns a GPRMC string into an obj
     */
-    parse_GPRMC: function(record){
+    parse_RMC: function(record){
         record = record.split(',');
         if (record.length < 7) {
             console.log('Not parsing GPRMC record because its incomplete');
@@ -124,6 +119,7 @@ var GPS = {
             lng = (lng + lngMinutes/60) * lngSign;
             
         return {
+            type:'RMC',
             lat:lat,
             lng:lng,
             date:new Date(),
@@ -136,7 +132,7 @@ var GPS = {
     },
     //------date0--------lat1----------lng3--------valid5--#satel.6--dil.7--alt.8
     //GPGGA,045103.000,4438.8155,N,06857.5148,W,     1,     11     ,0.89,   95.4,M,-30.6,M,,*6A
-    parse_GPGGA: function(record){
+    parse_GGA: function(record){
         record = record.split(',');
         if (record.length < 9) {
             C.err('Not parsing GPGGA record because its incomplete');
@@ -156,6 +152,7 @@ var GPS = {
             lng = (lng + lngMinutes/60) * lngSign;
             
         return {
+            type:'GGA',
             lat:lat,
             lng:lng,
             date:new Date(),
@@ -166,7 +163,7 @@ var GPS = {
         
     },//----------1direc--2true--3,4mag----5knots--6------7kilos
     //$GPVTG,    21.75,    T,    ,M      ,0.02    ,N    ,0.03    ,K   ,A*0D
-    parse_GPVTG: function(record){
+    parse_VTG: function(record){
         record = record.split(',');
         if (record.length < 7) {
             C.err('Not parsing GPVTG record because its incomplete');
@@ -174,6 +171,7 @@ var GPS = {
         }
         console.log('vtg arr',record);
         return {
+            type:'VTG',
             date:new Date(),
             mph:parseFloat(record[5]) * 1.15078,
             kmph:parseFloat(record[7]),
