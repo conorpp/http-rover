@@ -23,7 +23,7 @@ var GPS = {
         var SERIAL = new SER('/dev/ttyUSB1', {
                         baudrate: 9600
                     });
-        SERIAL.on('open', function(){
+        /*SERIAL.on('open', function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
                     SERIAL.on('data', function(data){
@@ -40,8 +40,8 @@ var GPS = {
                             }
                         }  
                     });
-        });
-        /*Serial.link('gps',function(err, _data){
+        });*/
+        Serial.link('gps',function(err, _data){
             if (_data && _data.serial) {
                 _data.serial.open(function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
@@ -64,7 +64,7 @@ var GPS = {
             }else{
                 C.log('GPS Failed', {color:'red', font:'bold', logLevel:1});
             }
-        });*/
+        });
 
         Number.prototype.toRad = function() {
           return this * Math.PI / 180;
