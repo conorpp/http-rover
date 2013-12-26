@@ -1,4 +1,9 @@
-/* usbreset -- send a USB port reset to a USB device */
+/* usbreset -- send a USB port reset to a USB device
+
+compile:    
+    cc  resetusb.c -o resetusb
+    chmod +x resetusb
+*/
 
 #include <stdio.h>
 #include <unistd.h>
@@ -7,6 +12,8 @@
 #include <sys/ioctl.h>
 
 #include <linux/usbdevice_fs.h>
+
+
 
 int main(int argc, char **argv){
     const char *filename;

@@ -9,7 +9,7 @@ lib-cov
 *.out
 *.pid
 *.gz
-
+resetusb
 pids
 logs
 results

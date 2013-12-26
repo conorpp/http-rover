@@ -136,6 +136,7 @@ var serial = {
                         this.callback('No devices', null);
                         return;
                     }
+                    
                     serial.linkedDevices.push(D.devices[0]);
                     this.port = new serial.serialPort(addr, {
                         baudrate: params.baudrate || 9600

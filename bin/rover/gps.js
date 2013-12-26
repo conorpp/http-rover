@@ -19,8 +19,29 @@ var GPS = {
         Begin connection and reading from GPS module.
     */
     connect: function(){
-
-        Serial.link('gps',function(err, _data){
+        var SER = require("serialport").SerialPort;
+        var SERIAL = new SER('/dev/ttyUSB0', {
+                        baudrate: 9600
+                    });
+        SERIAL.on('open', function(){
+                    C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
+                    GPS.ready = true;
+                    SERIAL.on('data', function(data){
+                        //console.log('dater', data);
+                        var h = data.toString('ascii');
+                        if (h == '$') {
+                            GPS.started = true;
+                        }
+                        if (GPS.started) {
+                            if (h == '\n') {
+                                GPS.end();
+                            }else{
+                                GPS.add(h);
+                            }
+                        }  
+                    });
+        });
+        /*Serial.link('gps',function(err, _data){
             if (_data && _data.serial) {
                 _data.serial.open(function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
@@ -43,7 +64,7 @@ var GPS = {
             }else{
                 C.log('GPS Failed', {color:'red', font:'bold', logLevel:1});
             }
-        });
+        });*/
 
         Number.prototype.toRad = function() {
           return this * Math.PI / 180;
