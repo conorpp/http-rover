@@ -31,7 +31,7 @@ var GPS = {
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
                     SERIAL.on('data', function(data){
-                        GPS.parse('GPS data ', data);
+                        GPS.parse(data);
                     });
         });
 
@@ -60,9 +60,9 @@ var GPS = {
     },
     
     parse: function(line){
-        console.log('got line ', line);
+        //console.log('got line ', line);
             var start = line.substr(0,6);
-            console.log('th eline is ', start);
+           // console.log('th eline is ', start);
             if (start == '$GPRMC') {
                 var record = this.parse_GPRMC(line);
                 C.log('New record ', record, {color:'green', logLevel:-1});
