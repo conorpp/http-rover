@@ -128,7 +128,7 @@ var GPS = {
             console.log('progress ', this.gprmc);
             console.log('length? ', this.gprmc.length);
         if (this.gprmc.length >= 6) {
-            if (this.gprmc.substr(0,6) != '$GPRMC') {
+            if (this.gprmc.substr(0,6) != 'GPRMC') {
                 this.redo();
             }
        }
