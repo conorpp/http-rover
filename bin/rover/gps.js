@@ -62,9 +62,6 @@ var GPS = {
     parse: function(line){
         console.log( line);
             var start = line.substr(0,6);
-            if (start == '$GPRMC') {
-                var record = this.parse_GPRMC(line);
-            }
             var record;
             switch (start) {
                 case '$GPRMC':
@@ -72,6 +69,9 @@ var GPS = {
                 break;
                 case '$GPGGA':
                     record = this.parse_GPGGA(line);
+                break;
+                case '$GPVTG':
+                    record = this.parse_GPVTG(line);
                 break;
                 default:
                     //not supported format.
@@ -161,7 +161,7 @@ var GPS = {
             date:new Date(),
             valid:record[5] != '0' ? true : false, //V = void, A=valid
             distance: this.distance(this.home[0], this.home[1], lat, lng),
-            altitude:parseInt(record[8])
+            altitude:parseFloat(record[8])
         };
         
     },//----------0direc--1true--2,3mag----4knots--5------6kilos
