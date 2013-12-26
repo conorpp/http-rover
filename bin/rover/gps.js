@@ -79,9 +79,9 @@ var GPS = {
             case '$GPGGA':
                 record = this.parse_GGA(line);
             break;
-            case '$GPVTG':
+            /*case '$GPVTG':        //not useful right now
                 record = this.parse_VTG(line);
-            break;
+            break;*/
             default:
                 //not supported format.
             break;
@@ -143,7 +143,7 @@ var GPS = {
         };
         
     },
-    //------date0--------lat1----------lng3--------valid5--#satel.6--dil.7--alt.8
+    //------date1--------lat2----------lng4--------valid6--#satel.7--dil.8--alt.9
     //GPGGA,045103.000,4438.8155,N,06857.5148,W,     1,     11     ,0.89,   95.4,M,-30.6,M,,*6A
     parse_GGA: function(record){
         record = record.split(',');
@@ -151,10 +151,10 @@ var GPS = {
             C.err('Not parsing GPGGA record because its incomplete');
             return {valid:false};
         }
-        var _lat = record[1],
-            latSign = (record[2] == 'N') ? 1 : -1, //N = +, S=-
-            _lng = record[3],
-            lngSign =(record[4] == 'E') ? 1 : -1;  //E = +, W=-
+        var _lat = record[2],
+            latSign = (record[3] == 'N') ? 1 : -1, //N = +, S=-
+            _lng = record[4],
+            lngSign =(record[5] == 'E') ? 1 : -1;  //E = +, W=-
             
         var lat = parseInt(_lat.substr(0,2)),
             latMinutes = parseFloat(_lat.substr(2,8)),
@@ -169,9 +169,9 @@ var GPS = {
             lat:lat,
             lng:lng,
             date:new Date(),
-            valid:record[5] != '0' ? true : false, //V = void, A=valid
+            valid:record[6] != '0' ? true : false, //V = void, A=valid
             distance: this.distance(this.home[0], this.home[1], lat, lng),
-            altitude:parseFloat(record[8])
+            altitude:parseFloat(record[9])
         };
         
     },//----------1direc--2true--3,4mag----5knots--6------7kilos
