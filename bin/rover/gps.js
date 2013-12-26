@@ -23,14 +23,15 @@ var GPS = {
     connect: function(){
         var SER = require("serialport").SerialPort;
         var SERIAL = new SER('/dev/ttyUSB1', {
-                        baudrate: 9600
+                        baudrate: 9600,
+                        parser: serialport.parsers.readline("\n")
                     });
-        /*SERIAL.on('open', function(){
+        SERIAL.on('open', function(){
                     C.log('GPS Ready', {color:'green', font:'bold', logLevel:1});
                     GPS.ready = true;
                     SERIAL.on('data', function(data){
-                        //console.log('dater', data);
-                        var h = data.toString('ascii');
+                        console.log('GPS data ', data);
+                       /* var h = data.toString('ascii');
                         if (h == '$') {
                             GPS.started = true;
                         }
@@ -40,9 +41,9 @@ var GPS = {
                             }else{
                                 GPS.add(h);
                             }
-                        }  
+                        }  */
                     });
-        });*/
+        });/*
         Serial.link('gps',function(err, _data){
             if (_data && _data.serial) {
                 _data.serial.open(function(){
@@ -75,14 +76,14 @@ var GPS = {
                         //if (i>180) {
                          //   i=0;
                          //   console.log('RAW GPS RECORD: ', hist);
-                       // }*/
+                       // }
                         
                     });
                 });
             }else{
                 C.log('GPS Failed', {color:'red', font:'bold', logLevel:1});
             }
-        });
+        });*/
 
         Number.prototype.toRad = function() {
           return this * Math.PI / 180;
@@ -112,7 +113,8 @@ var GPS = {
         var recs = this.hist.match(/[^\n]+(?:\n|$)/g); //split by newlines
         console.log('THE MATCHES ARE ', recs);
         for (var i in recs) {
-            if (recs[i].substr(0,6) == '$GPRMC') {
+            var start = recs[i].substr(0,6);
+            if (start == '$GPRMC' || start=='GPRMC' || start=='PRMC') {
                 console.log('PARSING ', recs[i]);
                 var record = this.parse(recs[i]);
                 C.log('New record ', record, {color:'green', logLevel:-1});
