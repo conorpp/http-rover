@@ -123,12 +123,10 @@ var GPS = {
     */
     add: function(h){
         this.gprmc+=h;
-        console.log('ADDING ', h);
-        var p = this.gprmc.length >= 6;
             console.log('progress ', this.gprmc);
             console.log('length? ', this.gprmc.length);
-        if (this.gprmc.length >= 6) {
-            if (this.gprmc.substr(0,6) != 'GPRMC') {
+        if (this.gprmc.length >= 5) {
+            if (this.gprmc.substr(0,5) != 'GPRMC') {
                 this.redo();
             }
        }
