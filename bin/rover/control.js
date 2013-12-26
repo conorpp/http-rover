@@ -9,7 +9,7 @@
     scripts:
 	stream, motors, gps, admin, comm
 */
-
+var SETUP = function(){
 //Determine which settings file to use.
 if (process.argv.indexOf('deploy') != -1){		
     S = require('./deployment/settings').Settings;
@@ -58,3 +58,13 @@ process.on('SIGINT', function() {
     Stream.kill();
     process.exit();
 });
+}//end setup
+
+if (process.argv.indexOf('now') != -1) {
+    SETUP();
+}else{
+    setTimeout(function(){
+	SETUP();
+    },10*1000);
+}
+

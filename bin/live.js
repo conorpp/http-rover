@@ -12,7 +12,7 @@ var live = {
     commandId:null,
     commandCount:0,         //total of people commanded rover.
     pings:0,                //init track of unresponded pings to rover
-    maxPings:2,             //max of consecutive unresponded pings to send distress popup
+    maxPings:3,             //max of consecutive unresponded pings to send distress popup
     roverAlive:false,
     
     
@@ -306,7 +306,7 @@ var live = {
             //feedback from rover.
             this.sub.on('message', function(channel, data){
                 data = JSON.parse(data);
-            
+                C.log('rover feed back', data);
                 switch (data.func) {
                     case 'popup':
                         C.log('Resetting video stream for all clients', {color:'blue'});
