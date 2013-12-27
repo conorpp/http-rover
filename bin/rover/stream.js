@@ -98,13 +98,14 @@ var Stream = {
         
         this.running = true;
 
-        this.ffmpeg = Terminal.spawn('ffmpeg', ['-s','640x480',
+        this.ffmpeg = Terminal.spawn('ffmpeg', ['-s',S.width+'x'+S.height,
                                   '-f', 'video4linux2',
-                                  '-i', '/dev/video0',
+                                  '-i', this.vSource,
                                   '-an', '-f', 'mpeg1video',
                                   '-b', '800k',
                                   '-r', '30',
-                                  'http://localhost:8082/abc/640/480'],
+                                  'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
+                                    + '/'+S.width+'/'+S.height ],
                        { detached: true});
         
         this.ffmpeg.unref()
