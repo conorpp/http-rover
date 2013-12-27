@@ -2,6 +2,6 @@
 # Script to start application
 echo "Doing autorun script..."
 cd /home/pi/nodejs/rover
-git pull origin master
+sudo git pull origin master
 cd
-sudo /home/pi/nodejs/rover/node.sh /home/pi/nodejs/rover/bin/rover/control.js deploy 
+sudo /home/pi/nodejs/rover/node_modules/forever/bin/forever start /home/pi/nodejs/rover/bin/rover/control.js deploy 
