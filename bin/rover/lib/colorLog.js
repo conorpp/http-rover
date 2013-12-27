@@ -83,11 +83,15 @@ var C = {
     },
     
     err: function(){
-        this.log(arguments, {color:'red', font:'bold', logLevel:this.errLevel});
+        var args = Array.prototype.slice.call(arguments);
+        args.push({color:'red', font:'bold', logLevel:this.errLevel});
+        this.log.apply(this, args);  
     },
 
     warn: function(){
-        this.log(arguments, {color:'yellow', font:'bold', logLevel:this.errLevel});
+        var args = Array.prototype.slice.call(arguments);
+        args.push({color:'yellow', font:'bold', logLevel:this.errLevel});
+        this.log.apply(this, args);  
     },
     //all of the choices for options.  For option detection. (except logLevel)
     choices:['intense','color', 'background', 'bg', 'font', 'newline', 'logLevel'],

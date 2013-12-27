@@ -85,32 +85,50 @@ var Stream = {
             }
         });
     },
-
+    ffmpeg:null,
     run: function(options){
         options = options || {};
-        C.log('Stream commands: ', {color:'cyan', logLevel:-1});
+        C.log('Stream commands: ', {color:'blue',font:'bold', logLevel:-1});
         
         var vid = this.canvas();
         
-        Terminal.exec(this.audio());
+        //Terminal.spawn(this.audio());
         C.log(this.audio(), {color:'blue', logLevel:-1});
         C.log(vid, {color:'blue', logLevel:-1});
         
         this.running = true;
-        Terminal.exec(vid, function(err, stdout, stderr){
-            if (err && err.killed ) {
-                C.log('Error with video stream : ',err, stderr, {color:'red', logLevel:-1});
-                C.log('Video Failed.  trying again in 3s', {color:'red', font:'bold', logLevel:1});
-                setTimeout(function(){Stream.reset()}, 3000);
+
+        this.ffmpeg = Terminal.spawn('ffmpeg', ['-s','640x480',
+                                  '-f', 'video4linux2',
+                                  '-i', '/dev/video19',
+                                  '-an', '-f', 'mpeg1video',
+                                  '-b', '800k',
+                                  '-r', '30',
+                                  'http://localhost:8082/abc/640/480'],
+                       { detached: true});
+        
+        this.ffmpeg.unref()
+                
+        //ffmpeg.stdout.on('data', function (data) {
+        //  console.log('stdout: ' + data);
+        //});
+        this.ffmpeg.stderr.on('data', function (data) {
+            data = (''+data)
+            if (data.indexOf('error') != -1 || data.indexOf('failed') != -1) {
+                C.err('Error with ffmpeg: ', data);
+                Emit.errors.webcam = data;
                 Stream.running = false;
             }
         });
+
+        
+        
         var inter = setTimeout(function(){
             if (Stream.running) {
                 C.log('Video Ready',{color:'green', font:'bold', logLevel:1});
             }
             clearTimeout(inter);
-        },3500);
+        },2700);
         
     },
     /*
@@ -122,45 +140,43 @@ var Stream = {
     kill: function(callback){
         this.running = false;
         callback = callback || function(){};
-        Terminal.exec('sudo pkill -SIGINT ffmpeg', function(){
-            Terminal.exec('lsusb',function(err, stdout, stderr){
-                var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
-                var device;
-                for (var i in devices) {
-                    var dev = devices[i].split(' ');
-                    //check id of device.  See lsusb.
-                    if (dev[5] == '046d:0990') {
-                        device = {
-                            bus:dev[1],
-                            device:dev[3].replace(':',''),
-                            id:dev[5]
-                        };
-                    }
+        if (this.ffmpeg) this.ffmpeg.kill('SIGINT');
+        Terminal.exec('lsusb',function(err, stdout, stderr){
+            var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
+            var device;
+            for (var i in devices) {
+                var dev = devices[i].split(' ');
+                //check id of device.  See lsusb.
+                if (dev[5] == '046d:0990') {
+                    device = {
+                        bus:dev[1],
+                        device:dev[3].replace(':',''),
+                        id:dev[5]
+                    };
                 }
-
-                if (!device) {
-                    callback('No webcam ', {});
-                    Emit.errors.webcam = 'webcam is not connected.';
-                    return;
+            }
+            if (!device) {
+                callback('No webcam ', {});
+                Emit.errors.webcam = 'webcam is not connected.';
+                return;
+            }else{
+                if (Emit.errors.webcam) 
+                    delete Emit.errors.webcam;
+            }
+            C.log('about to reset this devices ', device, {color:'yellow'});
+            var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'
+                        +device.bus+'/'+device.device;
+            C.log('used this cmd ', cmd, {color:'blue'});
+            Terminal.exec(cmd, function(err, stdout, stderr){
+                if (!err) {
+                C.log('Reset webcam device', {color:'green'});
+                    callback(null, device);
                 }else{
-                    if (Emit.errors.webcam) 
-                        delete Emit.errors.webcam;
+                    callback(err, {});
                 }
-                C.log('about to reset this devices ', device, {color:'yellow'});
-                var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'
-                            +device.bus+'/'+device.device;
-                C.log('used this cmd ', cmd, {color:'blue'});
-                Terminal.exec(cmd, function(err, stdout, stderr){
-                    if (!err) {
-                        C.log('Reset webcam device', {color:'green'});
-                        callback(null, device);
-                    }else{
-                        callback(err, {});
-                    }
-                });
             });
-
         });
+
 
     },
     
