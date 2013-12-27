@@ -88,6 +88,6 @@ if (process.argv.indexOf('now') != -1 || process.argv.indexOf('deploy') == -1) {
 }else{
     setTimeout(function(){
 	SETUP();
-    },10*1000);
+    },1*1000);
 }
 
