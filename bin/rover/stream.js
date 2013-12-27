@@ -108,7 +108,7 @@ var Stream = {
                                     + '/'+S.width+'/'+S.height ],
                        { detached: true});
         
-        this.ffmpeg.unref()
+        //this.ffmpeg.unref()
                 
         this.ffmpeg.stdout.on('data', function (data) {
           C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
@@ -142,42 +142,45 @@ var Stream = {
         this.running = false;
         callback = callback || function(){};
         if (this.ffmpeg) this.ffmpeg.kill('SIGINT');
-        Terminal.exec('lsusb',function(err, stdout, stderr){
-            var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
-            var device;
-            for (var i in devices) {
-                var dev = devices[i].split(' ');
-                //check id of device.  See lsusb.
-                if (dev[5] == '046d:0990') {
-                    device = {
-                        bus:dev[1],
-                        device:dev[3].replace(':',''),
-                        id:dev[5]
-                    };
+        Terminal.exec('sudo pkill -SIGINT ffmpeg', function(){
+            
+            
+            Terminal.exec('lsusb',function(err, stdout, stderr){
+                var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
+                var device;
+                for (var i in devices) {
+                    var dev = devices[i].split(' ');
+                    //check id of device.  See lsusb.
+                    if (dev[5] == '046d:0990') {
+                        device = {
+                            bus:dev[1],
+                            device:dev[3].replace(':',''),
+                            id:dev[5]
+                        };
+                    }
                 }
-            }
-            if (!device) {
-                callback('No webcam ', {});
-                Emit.errors.webcam = 'webcam is not connected.';
-                return;
-            }else{
-                if (Emit.errors.webcam) 
-                    delete Emit.errors.webcam;
-            }
-            C.log('about to reset this devices ', device, {color:'yellow'});
-            var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'
-                        +device.bus+'/'+device.device;
-            C.log('used this cmd ', cmd, {color:'blue'});
-            Terminal.exec(cmd, function(err, stdout, stderr){
-                if (!err) {
-                C.log('Reset webcam device', {color:'green'});
-                    callback(null, device);
+                if (!device) {
+                    callback('No webcam ', {});
+                    Emit.errors.webcam = 'webcam is not connected.';
+                    return;
                 }else{
-                    callback(err, {});
+                    if (Emit.errors.webcam) 
+                        delete Emit.errors.webcam;
                 }
+                C.log('about to reset this devices ', device, {color:'yellow'});
+                var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'
+                            +device.bus+'/'+device.device;
+                C.log('used this cmd ', cmd, {color:'blue'});
+                Terminal.exec(cmd, function(err, stdout, stderr){
+                    if (!err) {
+                    C.log('Reset webcam device', {color:'green'});
+                        callback(null, device);
+                    }else{
+                        callback(err, {});
+                    }
+                });
             });
         });
-
 
     },
     
