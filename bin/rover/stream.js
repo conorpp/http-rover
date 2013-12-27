@@ -110,7 +110,7 @@ var Stream = {
         
         this.ffmpeg.unref()
                 
-        ffmpeg.stdout.on('data', function (data) {
+        this.ffmpeg.stdout.on('data', function (data) {
           C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
         });
         this.ffmpeg.stderr.on('data', function (data) {

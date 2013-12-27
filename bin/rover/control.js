@@ -68,7 +68,7 @@ try{
     }else{
 	setTimeout(function(){
 	    SETUP();
-	},10*1000);
+	},1*1000);
     }
 }catch(e){
     console.log('ERROR: ', e);
