@@ -114,8 +114,11 @@ var Stream = {
           C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
         });
         this.ffmpeg.stderr.on('data', function (data) {
-            data = (''+data)
-            if (data.indexOf('error') != -1 || data.indexOf('failed') != -1) {
+            data = (''+data);
+            var cases = data.indexOf('/dev/') != -1||
+                        data.indexOf('error') != -1 ||
+                        data.indexOf('failed') != -1;
+            if (cases) {
                 C.err('Error with ffmpeg: ', data);
                 Emit.errors.webcam = data;
                 Stream.running = false;
