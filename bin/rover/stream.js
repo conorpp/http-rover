@@ -140,6 +140,11 @@ var Stream = {
 
                 if (!device) {
                     callback('No webcam ', {});
+                    Emit.errors.webcam = 'webcam is not connected.';
+                    return;
+                }else{
+                    if (Emit.errors.webcam) 
+                        delete Emit.errors.webcam;
                 }
                 C.log('about to reset this devices ', device, {color:'yellow'});
                 var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'

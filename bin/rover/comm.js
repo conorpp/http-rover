@@ -128,6 +128,8 @@ module.exports = (function(){
         infoInter:null,
         infoTime:1500,
         
+        errors:{},
+        
         set: function(params){
             params = params || {};
             if (params.infoTime) {
@@ -141,6 +143,7 @@ module.exports = (function(){
             Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
                 data.ifconfig = stdout;
+                data.errors = _emit.errors;
                 data.gps = GPS.read();
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);

@@ -328,7 +328,8 @@ var live = {
                         }
                         C.log('Recieved info from rover.', {color:'green'});
                         C.log('GPS : ', data.gps, {color:'green'});
-                        live.socket.io.sockets.emit('info', {gps:data.gps});
+                        data.ifconfig = '';
+                        live.socket.io.sockets.emit('info', data);
                     break;
                     case 'stdout':      //return stdout from rover
                         C.log('stdout ',data, {color:'blue'});
