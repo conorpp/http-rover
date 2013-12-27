@@ -1,7 +1,5 @@
 #!/bin/bash
 # Script to start application
-echo "Doing autorun script..."
-cd /home/pi/nodejs/rover
-sudo git pull origin master
-cd
-sudo /home/pi/nodejs/rover/node_modules/forever/bin/forever start /home/pi/nodejs/rover/bin/rover/control.js deploy 
+echo "Running rover scripts as daemon..."
+
+/home/pi/nodejs/rover/node_modules/forever/bin/forever start /home/pi/nodejs/rover/bin/rover/control.js deploy 

@@ -1,0 +1,5 @@
+#!/bin/bash
+echo "----Restarting rover scripts----"
+/home/pi/nodejs/rover/stop
+/home/pi/nodejs/rover/update
+/home/pi/nodejs/rover/startup

@@ -10,15 +10,12 @@ lib-cov
 *.pid
 *.gz
 resetusb
+*resetusb
 pids
 logs
 results
-node.sh
-npm.sh
 
 *usbreset
-*npm.sh
-*node.sh
 
 npm-debug.log
 node_modules
