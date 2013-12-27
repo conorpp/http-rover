@@ -110,9 +110,9 @@ var Stream = {
         
         this.ffmpeg.unref()
                 
-        //ffmpeg.stdout.on('data', function (data) {
-        //  console.log('stdout: ' + data);
-        //});
+        ffmpeg.stdout.on('data', function (data) {
+          C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
+        });
         this.ffmpeg.stderr.on('data', function (data) {
             data = (''+data)
             if (data.indexOf('error') != -1 || data.indexOf('failed') != -1) {
