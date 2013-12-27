@@ -204,7 +204,13 @@ var GPS = {
     
     /*returns distance between to coords using haversines formula
         Miles is default unit
-        C - optional constant to multiply answer by
+        C - optional constant to multiply answer by for unit
+            must be distance of earths radius in that unit
+            e.g.
+                mi: 3958.75
+                km: 6371
+                ft: 2.0902*Math.pow(10, 7) //2.0902*10^7
+            
      */
     distance: function(lat1, lon1, lat2, lon2, C){
         //C.log(lat1, lon1, lat2, lon2);

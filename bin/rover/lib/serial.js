@@ -4,7 +4,7 @@
     -Auto detection for webcam, motor driver, and GPS module
     -Devices are connected one at a time for stability.
     
-    *****unstable, don't use this.  wow deprecated.
+    *****unstable, don't use this.  wow deprecated. shit.
     
     requirements:
         npm - serialport

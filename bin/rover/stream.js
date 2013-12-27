@@ -67,7 +67,14 @@ var Stream = {
     /*
         Autodetect video addr and starts webcam
     */
+    timesConnected:-1,
     connect: function(){
+        this.timesConnected++;
+        if (this.timesConnected == 0) {
+            this.firstRun = true;
+            this.reset();
+            return;
+        }
         //detect webcam addr automatically.
         this.detectAddr(function(err, data){
             if (err){
@@ -106,7 +113,12 @@ var Stream = {
         },3500);
         
     },
-    
+    /*
+        Kills the ffmpeg stream and resets the USB connection
+        for webcam using a c script.  Make sure resetusb.c is
+        compiled by machine running it.  Must be sudo.
+        *Stable.
+    */
     kill: function(callback){
         this.running = false;
         callback = callback || function(){};
@@ -138,15 +150,11 @@ var Stream = {
                         C.log('Reset webcam device', {color:'green'});
                         callback(null, device);
                     }else{
-                        //C.err('Error reseting device', err, stdout);
                         callback(err, {});
-                        
                     }
                 });
             });
-                //C.log('Reset webcam.');
-                //callback();
-           // });
+
         });
 
     },
