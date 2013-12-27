@@ -115,7 +115,7 @@ var Stream = {
         });
         this.ffmpeg.stderr.on('data', function (data) {
             data = (''+data);
-            var cases = data.indexOf('/dev/') != -1||
+            var cases = data.indexOf('busy') != -1||
                         data.indexOf('error') != -1 ||
                         data.indexOf('failed') != -1;
             if (cases) {
