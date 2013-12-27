@@ -175,6 +175,7 @@ var Stream = {
                 return;
             }
             Stream.connect(options);
+            if (Stream.timesConnected >= 1)
             Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
                        '  It may take up to 30 seconds for it to come back.', global:true});
         });
