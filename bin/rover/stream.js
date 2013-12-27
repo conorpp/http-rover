@@ -100,7 +100,7 @@ var Stream = {
 
         this.ffmpeg = Terminal.spawn('ffmpeg', ['-s','640x480',
                                   '-f', 'video4linux2',
-                                  '-i', '/dev/video19',
+                                  '-i', '/dev/video0',
                                   '-an', '-f', 'mpeg1video',
                                   '-b', '800k',
                                   '-r', '30',
