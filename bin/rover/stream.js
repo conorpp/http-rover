@@ -68,6 +68,7 @@ var Stream = {
         Autodetect video addr and starts webcam
     */
     timesConnected:-1,
+    checkInter:null,
     connect: function(){
         this.timesConnected++;
         if (this.timesConnected == 0) {
@@ -84,6 +85,18 @@ var Stream = {
                 Stream.run();
             }
         });
+        if (this.checkInter == null) {   //monitor ffmpeg and reset when it crashes.
+            clearInterval(this.checkInter);//safety
+            this.checkInter = setInterval(function(){
+                var cmd = 'ps x | grep -v "grep" | grep -c ffmpeg';
+                Terminal.exec(cmd, function(err, stdout, stderr){
+                    var num = parseInt(stdout);
+                    if (num == 0) {
+                        Stream.reset();
+                    }
+                });
+            },800);
+        }
     },
     ffmpeg:null,
     run: function(options){
@@ -96,7 +109,6 @@ var Stream = {
         C.log(this.audio(), {color:'blue', logLevel:-1});
         C.log(vid, {color:'blue', logLevel:-1});
         
-        this.running = true;
 
         this.ffmpeg = Terminal.spawn('ffmpeg', ['-s',S.width+'x'+S.height,
                                   '-f', 'video4linux2',
@@ -113,28 +125,31 @@ var Stream = {
         this.ffmpeg.stdout.on('data', function (data) {
           C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
         });
+        var error = false;
         this.ffmpeg.stderr.on('data', function (data) {
             data = (''+data);
             var cases = data.indexOf('busy') != -1||
                         data.indexOf('error') != -1 ||
                         data.indexOf('failed') != -1;
             if (cases) {
+                error = true;
                 C.err('Error with ffmpeg: ', data);
                 Emit.errors.webcam = data;
-                Stream.running = false;
             }
         });
 
         
         
         var inter = setTimeout(function(){
-            if (Stream.running) {
+            if (!error) {
                 C.log('Video Ready',{color:'green', font:'bold', logLevel:1});
             }
+            Stream.running = true;
             clearTimeout(inter);
-        },2700);
+        },2500);
         
     },
+    
     /*
         Kills the ffmpeg stream and resets the USB connection
         for webcam using a c script.  Make sure resetusb.c is
@@ -193,18 +208,16 @@ var Stream = {
     */
     reset: function(options){
         C.log('Resetting stream.', {color:'blue'});
+        this.running = false;
         this.kill(function(err, device){
             if (err && err.killed) {
                 C.log('Error resetting cam ', err, {color:'red'});
-                C.log('trying again');
-                setTimeout(function(){
-                    Stream.reset();
-                },3500);
+                Emit.errors.webcam = err;
                 return;
             }
             if (Stream.timesConnected >= 1){
                 Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
-                    '  It may take up to 30 seconds for it to come back.', global:true});
+                    '  It may take up to 20 seconds for it to come back.', global:true});
             }
             Stream.connect(options);
         });
