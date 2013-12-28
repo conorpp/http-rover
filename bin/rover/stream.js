@@ -141,6 +141,9 @@ var Stream = {
         
         
         var inter = setTimeout(function(){
+            if (!this.running) {
+                return;
+            }
             if (!error) {
                 C.log('Video Ready',{color:'green', font:'bold', logLevel:1});
             }
