@@ -87,10 +87,15 @@ var Stream = {
         });
         if (this.checkInter == null) {   //monitor ffmpeg and reset when it crashes.
             clearInterval(this.checkInter);//safety
+            var parsed = true;
             this.checkInter = setInterval(function(){
+                if (!parsed) return;
+                parsed = false;
                 var cmd = 'ps x | grep -v "grep" | grep -c ffmpeg';
                 Terminal.exec(cmd, function(err, stdout, stderr){
                     var num = parseInt(stdout);
+                    parsed = true;
+                    C.log('the parsed int ', num, {color:'purple'});
                     if (num == 0) {
                         Stream.reset();
                     }
