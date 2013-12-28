@@ -101,7 +101,7 @@ var GPS = {
     */
     read: function(){
         var stat = this.stat
-        stat.age = new Date().getTime() - rec.date.getTime();
+        stat.age = new Date().getTime() - stat.date.getTime();
         stat.type = 'all';
         return stat;
     },
