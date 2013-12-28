@@ -24,14 +24,15 @@ Command.socket.on('reset', function(data){
 
 /* display announcement as popup. */
 var disconnectFlag = false;
-Command.socket.on('announce', function(data){       //not client specific
+Command.socket.on('popup', function(data){       //not client specific
     if (data.disconnect != undefined) {
         if (disconnectFlag && data.disconnect) {
             return;
         }
         disconnectFlag = data.disconnect;
     }
-    UI.popup(data.title, data.message, {announcement:true});
+    data.announcement = true;
+    UI.popup(data.title, data.message, data);
 });
 Command.socket.on('promote', function(data){        //is client specific
     Command.promote(data.millis, data.name);
@@ -91,7 +92,7 @@ Command.socket.on('commandSeized', function (data) {
 $(document).ready(function(){
     UI.createMap();
     getData();  //init queue, popup, ect.
-    
+    Command.joinRover();
     if (Command.id) {     //attempt to seize command
         Command.socket.emit('seizeCommand', {id:Command.id});
         UI.popup('Command or queue connection lost',
@@ -217,7 +218,6 @@ function getData(){
                 UI.noQueue();
             }
             if (data.popup) {
-                data.popup = JSON.parse(data.popup);
                 UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:5000, clone:true});
             }
             

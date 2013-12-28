@@ -39,7 +39,8 @@ var views = {
                                title: info.adminPopup ? info.adminPopup.title : null,
                                message:info.adminPopup ? info.adminPopup.message : null,
                                checked:info.adminPopup ? true : false,
-                               ifconfig:info.ifconfig
+                               ifconfig:info.ifconfig.replace(/(\r\n|\n|\r)/gm,"<br>"),
+                               gps:info.gps
                             });
                  });
                 //});
@@ -69,14 +70,15 @@ var views = {
         /* sends popup announcement to all clients. */
         this.app.post('/announce', function(req, res){
             if (views.authent(req)) {
-                var context =  {title: req.body.title, message: req.body.message};
+                var context =  {title: req.body.title, message: req.body.message, global:true};
                 if (req.body.title) {
-                    live.socket.io.sockets.emit('announce', context);
+                    live.popup(context);
                 }
-                console.log('req body', req.body);
+                //console.log('req body', req.body);
                 if (req.body.save && JSON.parse(req.body.save)) {
                     db.store.set('adminPopup', JSON.stringify(context));
                 }else db.store.del('adminPopup');
+                
                 
             }else{
                 res.writeHead(403);
@@ -121,6 +123,7 @@ var views = {
                     if (err) {
                         C.log('Error rendering html for queue ', {color:'red', logLevel:1});
                     }
+                    console.log('got /data ', data);
                     res.end(JSON.stringify({html:html, popup:data.adminPopup, gps:data.gps}));
                 });
             });
@@ -162,7 +165,10 @@ var views = {
     },
     authent: function(req){
         //return (req.signedCookies.admin == this.adminStatus);
-        var id = req.admin ? req.admin : req.cookies.admin;
+        var id;
+        if (req.admin) id = req.admin;
+        else if (req.cookies && req.cookies.admin) id = req.cookies.admin;
+        else id = req;
         if (id){        
             var hash = crypto.createHmac('sha1', SECRET).update('admin').digest('hex');
             return (id == hash);
@@ -171,7 +177,7 @@ var views = {
     
     /* returns sync && async live stats about server for admin */
     stats: function(callback){
-        db.get(['adminPopup', 'ifconfig'], function(data){
+        db.get(['adminPopup', 'ifconfig', 'gps'], function(data){
             data.sync = {
                 'Connected users': live.clientCount,    //add sync values here.
                 'Queue length': live.queue.length,

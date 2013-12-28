@@ -247,7 +247,7 @@ var live = {
                     }else{C.log('Failed to return command for client ', {color:'red'})}
                 });
                 socket.on('subscribe', function(data){
-                    if (!views.authent(data) && data.room == 'admin') return;
+                    if (data.room == 'admin' && !views.authent(data)) return;
                     socket.join(data.room);
                     C.log('Client joined room ', data.room, {color:'blue'});
                 });
@@ -260,7 +260,7 @@ var live = {
                     live.redis.pub.publish('roverAdmin',
                                            JSON.stringify({func:'execute', command:command}));
                     if (!live.roverAlive) {
-                        socket.emit('announce', {title:'No rover', message:'The rover is not connected.'});
+                        live.popup({title:'No rover', message:'The rover is not connected.'}, socket);
                     }
                 });
             });
@@ -283,9 +283,10 @@ var live = {
                 if (live.pings >= live.maxPings) {
                     C.log('Rover may be disconnected ', {color:'red'});
                     live.roverAlive = false;
-                    live.socket.io.sockets.emit('announce', {title:'Rover lost', message:'The rover may '+
+                    live.popup({title:'Rover lost', message:'The rover may '+
                                                 'may have lost connection.  It will attempt reconnecting and ' +
-                                                'we\'ll let you know when it comes back.  Sorry', disconnect:true});
+                                                'we\'ll let you know when it comes back.  Sorry',
+                                room:'rover', disconnect:true});
                 }
             },3*1000);
         },
@@ -310,13 +311,14 @@ var live = {
                 switch (data.func) {
                     case 'popup':
                         C.log('Resetting video stream for all clients', {color:'blue'});
-                        live.socket.io.sockets.emit('announce', data);
+                        data.room = 'rover';
+                        live.popup(data);
                     break;
                     case 'ping':    //recieve rover ping.
                         if (live.pings >= live.maxPings) {
-                            live.socket.io.sockets.emit('announce', {title:'Rover is back',
-                                                        message:'Internet has been returned to the rover.',
-                                                        disconnect:false});
+                            live.popup({title:'Rover is back',
+                                        message:'Internet has been returned to the rover.',
+                                        disconnect:false, room:'rover' });
                             C.log('Rover is alive. ',new Date(), {color:'green', font:'bold'});
                         }
                         live.roverAlive = true;
@@ -324,7 +326,7 @@ var live = {
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {
-                            db.store.set(data[key], JSON.stringify(data[key]));
+                            db.store.set(key, JSON.stringify(data[key]));
                         }
                         C.log('Recieved info from rover.', {color:'green'});
                         C.log('GPS : ', data.gps, {color:'green'});
@@ -340,6 +342,23 @@ var live = {
                 }
             });
         }
+    },
+    //Use this to send popups to clients
+    /*
+    @param global - sends to everyone on site.  annoying
+    @param title, message - for popup
+    @param room - part of site to send popup to. e.g. rover, admin
+    */
+    popup: function(params, socket){
+        if (!params) return;
+        if (params.global) {
+            this.socket.io.sockets.emit('popup', params);
+        }else if (socket){
+            socket.emit('popup', params)
+        }else if (params.room){
+            this.socket.io.sockets.in(params.room).emit('popup', params);
+        }
+        return;
     }
 }
 

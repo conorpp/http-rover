@@ -36,15 +36,17 @@ var database = {
         this._chain(callback);
         for (var i in keys) {
             db.store.get(keys[i], function(err, val){
+                var n = keys.length - database._chainStart;
                 if (err) {
-                    C.log('Error getting ', keys[i], ' from redis.', {color:'red'});
+                    C.log('Error getting ', keys[n], ' from redis.', {color:'red'});
                 }
                 try{
-                    if (val) database._data[keys[i]] = JSON.parse(val);
-                    else database._data[keys[i]] = val;
+                    if (val) database._data[keys[n]] = JSON.parse(val);
+                    else database._data[keys[n]] = val;
                 }catch(e){
-                   database._data[keys[i]] = val; 
+                   database._data[keys[n]] = val; 
                 }
+                console.log('got db val '+ keys[n], val);
                 database._chainStart--;
             });
         }

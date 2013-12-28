@@ -50,6 +50,12 @@ var Command = {
         });
     },
     
+    //Join chatroom for page
+    joinRover: function(){
+        var pageRoom = $.trim($('#pageRoom').val());
+        this.socket.emit('subscribe', {room:pageRoom});
+        console.log('Joining ', pageRoom);
+    },
     //debounce write command to prevent excessive requests to server.
     millis: new Date().getTime(),
     

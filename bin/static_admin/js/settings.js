@@ -11,8 +11,8 @@ var Settings = {
     redis_port:6379,
     canvasClient:8084,
     canvasSource:8082,
-    width:640,
-    height:480,
+    width:320,
+    height:240,
     logLevel:0,
     home:[44.646875, -68.95869]
     

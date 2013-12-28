@@ -40,11 +40,40 @@ $(document).ready(function(){
         }
         kick(name, everyone);
     });
-    
-    $('#execute').click(function(){
+    var cmds = [];
+    var cmdI = 0;
+    var current = '';
+    /*$('#execute').click(function(){
         var command = $('#execCommand').val();
         execute(command);
         console.log(command);
+    });*/
+    $('#execCommand').keyup(function(e){
+
+        if (e.keyCode == 13) {
+            command = $('#execCommand').val();
+            cmds.unshift(command);
+            execute(command);
+            command = '';
+            
+        }else if (e.keyCode == 38) { //up
+            e.preventDefault();
+            if (cmds.length) $('#execCommand').val(cmds[cmdI]);
+            cmdI++;
+            if (cmdI > cmds.length - 1) cmdI = cmds.length - 1;
+        }else if (e.keyCode == 40) { //down
+            e.preventDefault();
+            cmdI--;
+            if (cmdI < 0){
+                cmdI = 0;
+                $('#execCommand').val(command);
+                return;
+            }
+            $('#execCommand').val(cmds[cmdI]);
+        }else{
+            command = $('#execCommand').val();
+        }
+        
     });
 });
 
@@ -124,10 +153,16 @@ Command.socket.emit('subscribe', {room:'admin', admin:Cookie.get('admin')});
 
 Command.socket.on('stdout', function(data){
     console.log('got stdout!', data);
+    $('#execCommand').val('');
     var text = data.stdout != '' ? data.stdout : data.error;
     if (typeof text == 'object') {
         text = JSON.stringify(text);
     }
-    $('#stdout').html(text);
+    //console.log(text);
+    //console.log(text.replace(/(\r)/gm,"<br>"));
+    //console.log(text.replace(/(\n)/gm,"&nbsp;&nbsp;&nbsp;"));
+    //text = text.replace(/(\n)/gm,"&nbsp;&nbsp;&nbsp;");
+    $('#stdout').append(text+'<br>');
+    $('#stdout').scrollTop(99999);
 });
 
