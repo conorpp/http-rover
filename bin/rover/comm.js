@@ -138,8 +138,24 @@ module.exports = (function(){
         },
         /* Sends information to webserver. Will be saved in db.
         */
+        lastInfo: new Date().getTime() - 31*1000,
         info: function(){
+            if (this.infoInter == null) {
+                clearInterval(this.infoInter);
+                this.infoInter = setInterval(function(){
+                    _emit.info();
+                }, this.infoTime);
+            }
+            var lastPing = this.lastInfo - new Date().getTime();
             var data = {func:'info'};
+            if (lastPing < 30 * 1000) {
+                data.errors = _emit.errors;
+                data.gps = GPS.read();
+                C.log('sending config ', {color:'green', logLevel:-2});
+                _emit._parse(data);
+                return;
+            }
+            this.lastInfo = new Date().getTime();
             Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
                 data.ifconfig = stdout;
@@ -148,10 +164,6 @@ module.exports = (function(){
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
             });
-            clearInterval(this.infoInter);
-            this.infoInter = setInterval(function(){
-                _emit.info();
-            }, this.infoTime);
         },
         
         ping: function(){
