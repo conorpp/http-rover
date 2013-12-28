@@ -100,7 +100,7 @@ var Stream = {
                         Stream.reset();
                     }
                 });
-            },800);
+            },1500);
         }
     },
     ffmpeg:null,
@@ -146,9 +146,6 @@ var Stream = {
         
         
         var inter = setTimeout(function(){
-            if (!Stream.running) {
-                return;
-            }
             if (!error) {
                 C.log('Video Ready',{color:'green', font:'bold', logLevel:1});
             }
