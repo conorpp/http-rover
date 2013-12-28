@@ -17,9 +17,7 @@ module.exports = (function(){
     sub.subscribe('rover');
     sub.subscribe('roverAdmin');
     C.log('Communication is live . . .' ,{color:'green', logLevel:-1});
-    
-    var allowedSudoCommands = ['sudo reboot'];
-    
+        
     /*
         A nested switch statement handles all receiving date from webserver.
         Channel -> data.func
@@ -50,8 +48,8 @@ module.exports = (function(){
                     case 'execute':
                         C.log('about to exec command ', data, {color:'yellow', logLevel:-1});
                         if (data.command.indexOf('sudo')!=-1) {
-                            if (allowedSudoCommands.indexOf(data.command)==-1) {
-                                _emit._parse({func:'stdout',stdout:'<h1>You suck</h1>', error:error, command:data.command});
+                            if (data.command != 'sudo reboot') {
+                                _emit._parse({func:'stdout',stdout:'<h1>You suck</h1>', command:data.command});
                                 return;
                             }
                         }
