@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# checkprocess
+# this checks if the rover scripts are running
+# restarts them if necessary.
+
+USER=pi
+
+#CP=$(ps x | grep -v "grep" | grep -c "checkprocess")
+
+#if [ $CP -gt 2 ]
+#then
+#	echo "process is already being check.  exiting"
+#	return 0
+#fi
+
+check(){
+
+  P=$(ps x | grep -v "grep" | grep -c "control.js deploy")
+
+  echo "You have $P control.js deploy instances running"
+
+  case $P in
+        0)
+                echo "No process running.  Starting back up"
+		/home/pi/nodejs/rover/restart
+        ;;
+        1)
+                echo "Process is running.  Leaving it alone"
+        ;;
+        *)
+                echo "there may be more than one instance running.\n  Killing & Restarting." 
+		 /home/pi/nodejs/rover/restart
+        ;;
+  esac
+}
+
+while [ 1 ]
+do
+    check
+    sleep 25
+done
+
+#return 0
+
+
+
