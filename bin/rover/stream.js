@@ -90,6 +90,7 @@ var Stream = {
             var parsed = true;
             this.checkInter = setInterval(function(){
                 if (!parsed) return;
+                if (!Stream.running) return;
                 parsed = false;
                 var cmd = 'ps x | grep -v "grep" | grep -c ffmpeg';
                 Terminal.exec(cmd, function(err, stdout, stderr){
