@@ -98,7 +98,7 @@ var Stream = {
                     parsed = true;
                     C.log('the parsed int ', num, {color:'purple'});
                     if (num == 0) {
-                        Stream.reset();
+                        Stream.reset({noPopup:true});
                     }
                 });
             },1500);
@@ -213,6 +213,7 @@ var Stream = {
         same options for run().
     */
     reset: function(options){
+        options == options || {};
         C.log('Resetting stream.', {color:'blue'});
         this.running = false;
         this.kill(function(err, device){
@@ -221,7 +222,7 @@ var Stream = {
                 Emit.errors.webcam = err;
                 return;
             }
-            if (Stream.timesConnected >= 1){
+            if (Stream.timesConnected >= 1 && !options.noPopup){
                 Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
                     '  It may take up to 20 seconds for it to come back.', global:true});
             }
