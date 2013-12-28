@@ -126,11 +126,11 @@ var Stream = {
                                     + '/'+S.width+'/'+S.height ],
                        { detached: true});
         
-        //this.ffmpeg.unref()
+        this.ffmpeg.unref()
                 
-        this.ffmpeg.stdout.on('data', function (data) {
-          C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
-        });
+        //this.ffmpeg.stdout.on('data', function (data) {
+        //  C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
+        //});
         var error = false;
         this.ffmpeg.stderr.on('data', function (data) {
             data = (''+data);

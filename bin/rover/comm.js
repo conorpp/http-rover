@@ -113,7 +113,7 @@ module.exports = (function(){
                 }
             break;
             default:
-                C.err('Error: channel ', channel, 'isn\'t support.');
+                C.err('Error: channel ', channel, ' isn\'t support.');
             break;
         }
     });
@@ -169,7 +169,7 @@ module.exports = (function(){
         },
                 
         popup: function(data){
-            C.log('sendig popup ', data, {});
+            C.log('sendig popup ', data, {logLevel:-1});
             data.func = 'popup';
             this._parse(data);
         },

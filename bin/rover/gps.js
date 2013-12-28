@@ -79,15 +79,16 @@ var GPS = {
             case '$GPGGA':
                 record = this.parse_GGA(line);
             break;
-            /*case '$GPVTG':        //not useful right now
+            case '$GPVTG':        //not useful right now
                 record = this.parse_VTG(line);
-            break;*/
+            break;
             default:
                 //not supported format.
             break;
         }
         if (record && record.valid){
             C.log('New record ', record, {color:'green', logLevel:-2});
+            for (key in record) this.stat[key] = record[key];
             for (var i in this.newDataEvents) this.newDataEvents[i](record);
             this.records.push(record);
             while (this.records.length > this.maxRecords) {
@@ -96,17 +97,25 @@ var GPS = {
         }
 
     },
-    /* Returns last read data from GPS
-        returns 0 if nothing yet.
-        adds age attribute
+    /* Returns latest data from gps.  Adds age in ms
     */
     read: function(){
-        if (this.records.length){
-            var rec = this.records[this.records.length-1];
-            rec.age = new Date().getTime() - rec.date.getTime();
-            return rec;
-        }
-        else return 0;
+        var stat = this.stat
+        stat.age = new Date().getTime() - rec.date.getTime();
+        stat.type = 'all';
+        return stat;
+    },
+    
+    stat:{      //Latest valid data for .read()
+        lat:null,
+        lng:null,
+        date: new Date(),
+        direction:null,
+        altitude:null,
+        mph:0,
+        kmph:0,
+        distance:0,
+        type:'all'
     },
     
     /*

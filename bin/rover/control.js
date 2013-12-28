@@ -58,17 +58,11 @@ process.on('SIGINT', function() {
 
 }//end setup
 
-//SETUP actually runs everything above.
+//SETUP actually runs everything above.  It must wrap entire program.
 try{
-    if (process.argv.indexOf('now') != -1 || process.argv.indexOf('deploy') == -1) {
-	SETUP();
-    }else{
-	setTimeout(function(){
-	    SETUP();
-	},1*1000);
-    }
+    SETUP();
 }catch(e){
-    console.log('ERROR: ', e);
+    console.log('FATAL ERROR: ', e);
     console.log('Exiting.');
 }
 
