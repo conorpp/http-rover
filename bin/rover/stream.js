@@ -141,7 +141,7 @@ var Stream = {
         
         
         var inter = setTimeout(function(){
-            if (!this.running) {
+            if (!Stream.running) {
                 return;
             }
             if (!error) {
