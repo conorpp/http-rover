@@ -146,7 +146,8 @@ var UI = {
     showGPS: function(){
         
     },
-    
+    //Creates map with layer and
+    //sets rover and home markers
     createMap: function(){
         try {
         if (!L) {return;}
@@ -161,13 +162,21 @@ var UI = {
         L.mapbox.tileLayer('examples.map-y7l23tes').addTo(UI.map);
         UI.map.addControl(new L.Control.Zoom({ position: 'topright' }));
         UI.marker = L.marker(Settings.home);
+        UI.homeMarker = L.marker(Settings.home);
         UI.marker.setIcon(L.icon({
                 iconUrl:'/images/marker.png',
                 iconAnchor:[15, 35],
                 popupAnchor:[0, -35],
             }));
+        UI.homeMarker.setIcon(L.icon({
+                iconUrl:'/images/homeMarker.png',
+                iconAnchor:[15, 35],
+                popupAnchor:[0, -35],
+            }));
         UI.marker.addTo(UI.map);
+        UI.homeMarker.addTo(UI.map);
         UI.marker.bindPopup('<h4 class="color1">The rover</h4>').openPopup();
+        UI.homeMarker.bindPopup('<h4 class="color1">Rover home point</h4>');
         //UI.marker.setLatLng();
     }
 };

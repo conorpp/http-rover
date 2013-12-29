@@ -23,8 +23,10 @@ var GPS = {
         _serialport.list(function (err, ports) {
             var addr;
             ports.forEach(function(port) {
-                C.log(port.comName, {color:'yellow'});
-                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0'){
+                C.log(port, {color:'yellow', logLevel:-1});
+                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||
+                    port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0')
+                {
                     addr = port.comName;
                 }
             });
@@ -233,6 +235,24 @@ var GPS = {
                 Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2);
         var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
         return  R * c;
+    },
+    
+    //Simulate GPS by generating fake data
+    test: function(){
+        var generate = function(){
+            GPS.stat.lat = GPS.home[0] - Math.random() * 0.0001;
+            GPS.stat.lng = GPS.home[1] - Math.random() * 0.0001;
+            GPS.stat.direction = 355 - Math.random() * 20;
+            GPS.stat.kmph = Math.random() * 2;
+            GPS.stat.mph = GPS.stat.kmph * 1.15078;
+            GPS.stat.altitude = 98 - Math.random() * 15;
+            GPS.stat.date = new Date();
+            GPS.stat.valid = true;
+            for (var i in GPS.newDataEvents) GPS.newDataEvents[i](GPS.stat)
+        }
+        setInterval(function(){
+            generate();
+        },250);
     }
 };
 

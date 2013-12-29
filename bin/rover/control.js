@@ -30,8 +30,12 @@ Emit = require('./comm');
 
 //Start dependent scripts.
 Rover.connect();
-GPS.connect();
 Emit.info();
+
+if (process.argv.indexOf('test') != -1) {
+    GPS.test();
+}else GPS.connect();
+
 if (process.argv.indexOf('nostream') == -1) {
     Stream.connect();
 }

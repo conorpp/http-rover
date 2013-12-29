@@ -69,6 +69,12 @@ Command.socket.on('info', function(data){       //not client specific
     
     if (UI.marker && data.gps.lat && data.gps.lng )
         UI.marker.setLatLng([data.gps.lat, data.gps.lng]);
+        
+    if (data.gps.mph != undefined) {
+        var num = parseFloat(data.gps.mph)*100,
+            num = Math.floor(num)/100;
+        $('#mph').html(num+' mph');
+    }
 });
 Command.socket.on('kick', function(data){           //not client specific
     console.log('Kicked out');
