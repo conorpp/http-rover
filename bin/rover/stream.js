@@ -22,6 +22,7 @@ var Stream = {
     
     password:'abc',
     
+    
     //deprecated.  Just replaced by canvas.
     video : function(){
         return (
@@ -96,7 +97,6 @@ var Stream = {
                 Terminal.exec(cmd, function(err, stdout, stderr){
                     var num = parseInt(stdout);
                     parsed = true;
-                    C.log('the parsed int ', num, {color:'purple'});
                     if (num == 0) {
                         Stream.reset({noPopup:true});
                     }
@@ -109,22 +109,23 @@ var Stream = {
         options = options || {};
         C.log('Stream commands: ', {color:'blue',font:'bold', logLevel:-1});
         
-        var vid = this.canvas();
-        
+        //var vid = this.canvas();
         //Terminal.spawn(this.audio());
         C.log(this.audio(), {color:'blue', logLevel:-1});
-        C.log(vid, {color:'blue', logLevel:-1});
-        
-
-        this.ffmpeg = Terminal.spawn('ffmpeg', ['-s',S.width+'x'+S.height,
-                                  '-f', 'video4linux2',
-                                  '-i', this.vSource,
-                                  '-an', '-f', 'mpeg1video',
-                                  '-b', '800k',
-                                  '-r', '30',
-                                  'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
-                                    + '/'+S.width+'/'+S.height ],
-                       { detached: true});
+        var args = ['-s',S.width+'x'+S.height,
+                    '-f', 'video4linux2',
+                    '-i', this.vSource,
+                    '-an', '-f', 'mpeg1video',
+                    '-b', '800k',
+                    '-r', '30',   //canvas
+                    'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
+                     + '/'+S.width+'/'+S.height,
+                    '-f', 'flv',    //flash
+                    'rtmp://184.173.103.51:31002/rovervideo/mystream'];
+        C.log('ffmpeg', {newline:false, color:'blue'});
+        for (var a in args) C.log(' '+args[a], {newline:false, color:'blue'});
+        // -f flv rtmp://184.173.103.51:31002/rovervideo/mystream  <-flash
+        this.ffmpeg = Terminal.spawn('ffmpeg', args, { detached: true});
         
         this.ffmpeg.unref()
                 
