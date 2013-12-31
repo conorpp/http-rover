@@ -263,6 +263,10 @@ var live = {
                         live.popup({title:'No rover', message:'The rover is not connected.'}, socket);
                     }
                 });
+                socket.on('audio', function(data){
+                    console.log('got audio data ', data);
+                    live.redis.pub.publish('audio', JSON.stringify(data));
+                });
             });
             
             /* for keeping times synced with all clients */

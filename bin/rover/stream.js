@@ -68,8 +68,6 @@ var Stream = {
     /*
         Autodetect video addr and starts webcam
     */
-    timesConnected:-1,
-    checkInter:null,
     connect: function(){
         this.timesConnected++;
         if (this.timesConnected == 0) {
@@ -86,17 +84,25 @@ var Stream = {
                 Stream.run();
             }
         });
-        if (this.checkInter == null) {   //monitor ffmpeg and reset when it crashes.
+        this.monitor();
+
+    },
+    
+    //monitor ffmpeg and reset when it crashes.
+    timesConnected:-1,
+    checkInter:null,
+    monitor: function(){
+        if (this.checkInter == null) {   
             clearInterval(this.checkInter);//safety
-            var parsed = true;
+            var didCheck = true;
             this.checkInter = setInterval(function(){
-                if (!parsed) return;
+                if (!didCheck) return;
                 if (!Stream.running) return;
-                parsed = false;
+                didCheck = false;
                 var cmd = 'ps x | grep -v "grep" | grep -c ffmpeg';
                 Terminal.exec(cmd, function(err, stdout, stderr){
                     var num = parseInt(stdout);
-                    parsed = true;
+                    didCheck = true;
                     if (num == 0) {
                         Stream.reset({noPopup:true});
                     }
@@ -188,11 +194,11 @@ var Stream = {
                     callback('No webcam ', {});
                     Emit.errors.webcam = 'webcam is not connected.';
                     return;
-                }else{
+                }else
                     if (Emit.errors.webcam) 
                         delete Emit.errors.webcam;
-                }
-                C.log('about to reset this devices ', device, {color:'yellow'});
+                
+                C.log('about to reset this device ', device, {color:'yellow'});
                 var cmd = 'sudo '+ __dirname+'/lib/resetusb /dev/bus/usb/'
                             +device.bus+'/'+device.device;
                 C.log('used this cmd ', cmd, {color:'blue'});

@@ -7,6 +7,8 @@ block header
   |<link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.ie.css' rel='stylesheet' >
   |<![endif]-->
   |<script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
+  script(src="http://cdn.binaryjs.com/0/binary.js")
+  script(src='/js/audio.js')
 block content
     #navBar.abs
         button(id='refresh', class='btn btn-primary fright mar20') Refresh
@@ -50,5 +52,7 @@ block content
                 td
                     div#map
     input(type='hidden', id='pageRoom', value='rover')
+    button(id="download") blob
+    a(id="link", download="wav.wav", target="_blank").fs20 download
  
                 
