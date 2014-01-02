@@ -292,7 +292,9 @@ var live = {
                                                 'we\'ll let you know when it comes back.  Sorry',
                                 room:'rover', disconnect:true});
                 }
+                console.log('Sending PING ', live.pings);
             },3*1000);
+            
         },
         
     },
@@ -327,6 +329,7 @@ var live = {
                         }
                         live.roverAlive = true;
                         live.pings = 0;
+                        console.log('recieved PING', live.pings);
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {

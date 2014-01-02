@@ -10,6 +10,7 @@ var Settings = {
     redis_port:14177,
     canvasClient:27376,
     canvasSource:11963,
+    audio_port:17454,
     width:160,
     height:120,
     logLevel:5,
