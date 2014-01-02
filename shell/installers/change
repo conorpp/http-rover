@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# shell/installers/change
+
+# changes location of node in npm package forever.
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ '${DIR: -5}' = "shell" ]
+then
+	cd ../..
+fi
+
+fDIR="node_modules/forever/bin"
+
+#make a copy
+if [ ! -d "$fDIR/oldScript" ]
+then
+	mkdir "$fDIR/oldScript"
+	cp "$fDIR/forever $fDIR/oldScript"
+fi
+
+#change file
+echo "#!/opt/node/bin/node" > "$fDIR/forever"
+echo "// node location for RPi" >> "$fDIR/forever"
+echo "require('../lib/forever').cli.start();" >> "$fDIR/forever"
+
+

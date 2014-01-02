@@ -1,0 +1,5 @@
+#!/bin/sh
+
+#testing shell stuff
+
+echo "hellow special characters \$@"

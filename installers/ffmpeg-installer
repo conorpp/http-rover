@@ -1,4 +1,17 @@
-# #yasm
+#!/bin/sh
+
+# /shell/installers/ffmpeg-installer
+# installs ffmpeg with extra codec libraries.
+# FFmpeg won't be ready to use on RPi yet.
+# see http://blog.oscarliang.net/webcam-streaming-video-raspberry-pi-via-browser/
+
+echo "-----Starting installation for ffmpeg and dependencies----"
+sudo apt-get -y install autoconf automake build-essential git libass-dev libgpac-dev \
+  libsdl1.2-dev libtheora-dev libtool libva-dev libvdpau-dev libvorbis-dev libx11-dev \
+  libxext-dev libxfixes-dev pkg-config texi2html zlib1g-dev
+mkdir ~/ffmpeg_sources
+
+echo "-----installing ffmpeg dependency yasm-----"
 cd ~/ffmpeg_sources
 wget http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz
 tar xzvf yasm-1.2.0.tar.gz
@@ -8,7 +21,8 @@ make
 make install
 make distclean
 . ~/.profile
-###x264
+
+echo "-----installing ffmpeg dependency x264-----"
 cd ~/ffmpeg_sources
 git clone --depth 1 git://git.videolan.org/x264.git
 cd x264
@@ -16,7 +30,8 @@ cd x264
 make
 make install
 make distclean
-###AAC
+
+echo "-----installing ffmpeg dependency fdk-aac-----"
 cd ~/ffmpeg_sources
 git clone --depth 1 git://git.code.sf.net/p/opencore-amr/fdk-aac
 cd fdk-aac
@@ -25,8 +40,8 @@ autoreconf -fiv
 make
 make install
 make distclean
-###lame
-sudo apt-get install libmp3lame-dev
+
+echo "-----installing ffmpeg dependency libmp3lame-----"
 sudo apt-get install nasm
 cd ~/ffmpeg_sources
 wget http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz
@@ -37,7 +52,7 @@ make
 make install
 make distclean
 
-##libopus
+echo "-----installing ffmpeg dependency libopus-----"
 cd ~/ffmpeg_sources
 wget http://downloads.xiph.org/releases/opus/opus-1.0.3.tar.gz
 tar xzvf opus-1.0.3.tar.gz
@@ -47,7 +62,7 @@ make
 make install
 make distclean
 
-##libvpx
+echo "-----installing ffmpeg dependency libvpx-----"
 cd ~/ffmpeg_sources
 git clone --depth 1 http://git.chromium.org/webm/libvpx.git
 cd libvpx
@@ -55,8 +70,11 @@ cd libvpx
 make
 make install
 make clean
-###ffmpeg!!
-#
+
+echo "-----installing ffmpeg dependency lib2sound2-dev-----"
+apt-get install libasound2-dev
+
+echo "-----installing ffmpeg-----"
 cd ~/ffmpeg_sources
 git clone --depth 1 git://source.ffmpeg.org/ffmpeg
 cd ffmpeg
@@ -66,23 +84,11 @@ export PKG_CONFIG_PATH
   --extra-cflags="-I$HOME/ffmpeg_build/include" --extra-ldflags="-L$HOME/ffmpeg_build/lib" \
   --bindir="$HOME/bin" --extra-libs="-ldl" --enable-gpl --enable-libass --enable-libfdk-aac \
   --enable-libmp3lame --enable-libopus --enable-libtheora --enable-libvorbis --enable-libvpx \
-  --enable-libx264 --enable-nonfree --enable-x11grab --enable-libfaac \
- --enable-nonfree
-
+  --enable-libx264 --enable-nonfree --enable-x11grab
 make
 make install
 make distclean
 hash -r
-
-##clean and update
-
-#rm -rf ~/ffmpeg_build ~/bin/{ffmpeg,ffprobe,ffserver,vsyasm,x264,yasm,ytasm}
-#sudo apt-get update
-#sudo apt-get -y install autoconf automake build-essential git libass-dev libgpac-dev \
-#  libsdl1.2-dev libtheora-dev libtool libva-dev libvdpau-dev libvorbis-dev libx11-dev \
-#  libxext-dev libxfixes-dev pkg-config texi2html zlib1g-dev
-
-
-
+. ~/.profile
 
 

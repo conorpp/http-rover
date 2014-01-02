@@ -1,7 +1,10 @@
 #!/bin/bash
 # Script to start application
 echo "Updating rover scripts..."
-cd /home/pi/nodejs/rover
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+cd $DIR/..
 sudo git pull origin master
 cd
 

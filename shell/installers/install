@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# shell/installers/install
+
+# installs everything for rover application
+# makes executables for node and npm
+# adds restart script to /etc/rc.local so application
+# starts at boot.
+
+# FFmpeg will take 3-5 hours.
+# everything else shouldn't take longer than 30 minutes.
+
+echo "---------------------------------------------"
+echo "Installing everything for rover application."
+echo "Make sure you run with sudo."
+echo "---------------------------------------------"
+
+sleep 2
+
+echo "---------------------------------------------"
+echo "Starting with FFmpeg. This will take hours."
+echo "---------------------------------------------"
+
+./ffmpeg-installer
+./ffmpeg-rpi
+
+echo "---------------------------------------------"
+echo "FFmpeg is finished.  Test by typing \"FFmpeg\""
+echo "---------------------------------------------"
+
+sleep 2
+
+echo "---------------------------------------------"
+echo "Installing node.js and npm."
+echo "---------------------------------------------"
+./node-installer
+
+echo "---------------------------------------------"
+echo "Node and npm installed.  Use the node and npm"
+echo "executables made and mv them to wherever."
+echo "---------------------------------------------"
+
+sleep 2
+
+echo "---------------------------------------------"
+echo "Installing npm packages."
+echo "---------------------------------------------"
+
+./npm-dependencies
+
+echo "---------------------------------------------"
+echo "Npm packages installed."
+echo "---------------------------------------------"
+
+sleep 1
+
+echo "---------------------------------------------"
+echo "Adding start script to /etc/rc.local . . ."
+echo "---------------------------------------------"
+
+./add-to-startup
+
+sleep1
+
+echo "---------------------------------------------"
+echo "Rover application installed. Cleaning up . . ."
+echo "---------------------------------------------"
+
+./cleanup
+

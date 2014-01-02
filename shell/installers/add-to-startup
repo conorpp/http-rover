@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# shell/installers/add-to-startup
+
+# this adds a line to /etc/rc.local
+# to make rover application start
+# at boot.  RPi tested.
+
+LINE=`cat -n /etc/rc.local | grep "exit 0" | grep -v "#" |awk '{print $1;}'`
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+CMD="$DIR/../restart"
+
+CHECK_NUM=`cat -n /etc/rc.local | grep "$CMD" | grep -v "#" |awk '{print $1;}'`
+
+if [ -z "$CHECK_NUM" ]
+then
+	echo "adding $CMD to line $LINE in /etc/rc.local"
+	sudo sed -i "${LINE}i ${CMD}" /etc/rc.local
+else
+	echo "\"$CMD\" is already in /etc/rc.local at line $CHECK_NUM"
+fi

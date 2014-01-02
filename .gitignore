@@ -11,6 +11,7 @@ lib-cov
 *.gz
 resetusb
 *resetusb
+trash/
 pids
 logs
 results

@@ -1,8 +1,0 @@
-#!/bin/bash
-# Script to start application
-echo "Stopping rover scripts..."
-/home/pi/nodejs/rover/node_modules/forever/bin/forever stop /home/pi/nodejs/rover/bin/rover/control.js
-sudo pkill -SIGINT node
-sudo pkill -SIGINT ffmpeg
-
-

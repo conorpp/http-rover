@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# shell/installers/cleanup
+# moves all directories and 
+# non-executable files to a trash folder.
+
+# for cleaning up after installing.
+
+TRASH_NAME="trash"
+
+CONTENTS=`ls -A`
+
+# check if folder exists
+if [ ! -d "$TRASH_NAME" ]
+then
+	mkdir "$TRASH_NAME"
+fi
+
+for ITEM in $CONTENTS
+do
+	#don't remove trash folder
+	if [ "$ITEM" = "$TRASH_NAME" ]
+	then 
+		continue
+	fi
+	# move directory or not executable file
+	if [ -d "$ITEM" -o ! -x "$ITEM" ]
+	then
+		echo "Moving $ITEM to $TRASH_NAME"
+		mv "$ITEM" "$TRASH_NAME"
+
+	fi 
+done

@@ -1,10 +1,13 @@
 #!/bin/bash
 # Script to start rover scripts
+
 USER=pi
 echo "Running rover scripts as daemon..."
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 #this is forever daemon startup
-sudo -u $USER /home/pi/nodejs/rover/node_modules/forever/bin/forever start /home/pi/nodejs/rover/bin/rover/control.js deploy -debug 5
+sudo -u $USER $DIR/../node_modules/forever/bin/forever start $DIR/../bin/rover/control.js deploy -debug 5
 
 #this is regular node startup
 #sudo -u $USER  /home/pi/nodejs/rover/node.sh /home/pi/nodejs/rover/bin/rover/control.js deploy -debug -1

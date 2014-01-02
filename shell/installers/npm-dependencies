@@ -1,0 +1,24 @@
+#!/bin/sh
+
+# shell/installs/npm-dependencies
+# installs the dependent npm packages
+# must have npm installed in /opt/node/bin/npm
+
+echo "-----Installing npm packages-----"
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+cd ../..
+
+/opt/node/bin/npm install serialport
+
+/opt/node/bin/npm install socket.io
+
+/opt/node/bin/npm install redis
+
+/opt/node/bin/npm install forever
+
+$DIR/change
+
+
+

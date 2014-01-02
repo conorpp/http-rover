@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# shell/installers/node-installer
+# installs node and npm for rpi
+# outputs executable script for node and npm
+
+NODE_DIR="/opt/node"
+
+echo "-----installing node.js-----"
+sudo mkdir $NODE_DIR
+wget http://nodejs.org/dist/v0.10.2/node-v0.10.2-linux-arm-pi.tar.gz
+tar xvzf node-v0.10.2-linux-arm-pi.tar.gz
+sudo cp -r node-v0.10.2-linux-arm-pi/* $NODE_DIR
+export PATH=$PATH:$NODE_DIR/bin
+echo "-----finished installing node.js.  See $NODE_DIR-----"
+
+echo "-----Making executable scripts-----"
+
+touch node
+echo "#!/bin/sh" > node
+echo "# executable for node.js" >> node
+echo " " >> node
+echo "$NODE_DIR/bin/node \$@" >> node
+chmod 755 node
+
+touch npm
+echo "#!/bin/sh" > npm
+echo "# executable for npm" >> npm
+echo " " >> npm
+echo "$NODE_DIR/bin/npm \$@" >> npm
+chmod 755 npm
