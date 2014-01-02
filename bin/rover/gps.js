@@ -26,9 +26,9 @@ var GPS = {
                 C.log(port, {color:'yellow', logLevel:-1});
                 if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||
                     port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0')
-                {
-                    addr = port.comName;
-                }
+
+                        addr = port.comName;
+                
             });
             if (!addr) {
                 C.log('GPS Fail', {color:'red', font:'bold', logLevel:1});
@@ -81,7 +81,7 @@ var GPS = {
             case '$GPGGA':
                 record = this.parse_GGA(line);
             break;
-            case '$GPVTG':        //not useful right now
+            case '$GPVTG':        
                 record = this.parse_VTG(line);
             break;
             default:
@@ -90,12 +90,16 @@ var GPS = {
         }
         if (record && record.valid){
             C.log('New record ', record, {color:'green', logLevel:-2});
-            for (key in record) this.stat[key] = record[key];
-            for (var i in this.newDataEvents) this.newDataEvents[i](record);
-            this.records.push(record);
-            while (this.records.length > this.maxRecords) {
+            
+            for (key in record) this.stat[key] = record[key];                   //update stat
+            
+            for (var i in this.newDataEvents) this.newDataEvents[i](record);    //emit event
+            
+            this.records.push(record);                                          //add to records                            
+            
+            while (this.records.length > this.maxRecords)                       //delete old records
                 this.records.shift();
-            }
+            
         }
 
     },
@@ -121,7 +125,12 @@ var GPS = {
     },
     
     /*
-        Turns a GPRMC string into an obj
+        *PARSING functions: parse_RMC, parse_GGA, parse_VTG
+        
+        parse GPS strings from GPS, e.g. GPGGA,045103.000,4438.8155,N,06857.5148,W,1,11,0.89,95.4,M,-30.6,M,,*6A
+        and returns it in object form.
+        
+        *the respective object keys must match that in this.stat
     */
     parse_RMC: function(record){
         record = record.split(',');
@@ -205,17 +214,17 @@ var GPS = {
     },
     
     /*
-        Prints out the records recorded from GPS
+        Prints out the parsed records recorded from GPS
     */
     print: function(){
         for (var i in this.records) {
-            C.log(this.records[i], {color:'yellow'});
+            C.log(this.records[i], {color:'green'});
         }
     },
     
     /*returns distance between to coords using haversines formula
         Miles is default unit
-        C - optional constant to multiply answer by for unit
+        Const - optional constant to multiply answer by for unit
             must be distance of earths radius in that unit
             e.g.
                 mi: 3958.75
@@ -223,9 +232,9 @@ var GPS = {
                 ft: 2.0902*Math.pow(10, 7) //2.0902*10^7
             
      */
-    distance: function(lat1, lon1, lat2, lon2, C){
+    distance: function(lat1, lon1, lat2, lon2, Const){
         //C.log(lat1, lon1, lat2, lon2);
-        var R = C || 3958.75; // mi
+        var R = Const || 3958.75; // mi
         var dLat = (lat2-lat1).toRad();
         var dLon = (lon2-lon1).toRad();
         lat1 = lat1.toRad();
@@ -238,7 +247,12 @@ var GPS = {
     },
     
     //Simulate GPS by generating fake data
+    isTesting:false,
     test: function(){
+        if (this.isTesting) {
+            C.warn('GPS is already testing fake data.  Ignored call.');
+            return;
+        }
         var generate = function(){
             GPS.stat.lat = GPS.home[0] - Math.random() * 0.0001;
             GPS.stat.lng = GPS.home[1] - Math.random() * 0.0001;
@@ -253,6 +267,7 @@ var GPS = {
         setInterval(function(){
             generate();
         },250);
+        this.isTesting=true;
     }
 };
 

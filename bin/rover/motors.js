@@ -18,34 +18,43 @@ var Rover = {
     */
     connect: function(){
 	if (this.ready) {
-		C.log('Warning: board might already be connected.', {color:'yellow'});
+		C.warn('Warning: board might already be connected.');
 	}
-	
-        Serial.link('motor',function(err, _data){
-            if (_data && _data.serial) {
-                _data.serial.open(function(){
-                    C.log('Rover Ready', {color:'green', font:'bold', logLevel:1});
-		    Rover.serial = _data.serial;
-                    Rover.ready = true;
-		    process.stdin.resume();
-                    _data.serial.on('data', function(data){
-			//Handle feedback from board here
-                    });
-		    var buf = new Buffer(1);
-		    buf.writeUInt8(0x0,0);
-		    _data.serial.write(buf, function(err, results) {
-		       	if (err) {
-				C.log('Error connecting rover: ' , err );
-			}
- 		    });
-                });
-            }else{
-                C.log('Motors Failed', {color:'red', font:'bold', logLevel:1});
+        var _serialport = require("serialport");
+        var _serialConstr = _serialport.SerialPort;
+        _serialport.list(function (err, ports) {
+            var addr;
+	    //connect to port with correct ID. see `$ lspnp`
+            ports.forEach(function(port) {
+                C.log(port, {color:'yellow', logLevel:-1});
+                if (port.pnpId == 'some id i dont know yet')
+                        addr = port.comName;
+            });
+            if (!addr) {
+                C.log('Motors Fail', {color:'red', font:'bold', logLevel:1});
+                return;
             }
-        });
-
+            Rover.serial = new _serialConstr(addr, {
+                baudrate: 9600
+            });
+            Rover.serial.on('data', function(data){
+		//Handle feedback from board here
+            });
+	    //write stop command to start off.
+	    var buf = new Buffer(1);
+	    buf.writeUInt8(0x0,0);  //0x0 0x0
+	    _data.serial.write(buf, function(err, results) {
+		if (err) {
+		    C.log('Error connecting rover: ' , err );
+	    	}
+    	    });
+	    
+	    Rover.ready = true;
+	});
+	
 	/* accept a decimal number on range 0-255 
 	   writes the hex conversion to usb.  STDIN.   */
+	process.stdin.resume();
 	process.stdin.on('data', function(data){
 	    Rover.write(data);
 	});

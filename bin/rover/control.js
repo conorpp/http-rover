@@ -4,12 +4,12 @@
     
     requirements:
 	nodejs - child_process
-	custom lib - colorLog, serial
+	custom lib - colorLog
 	
     scripts:
 	stream, motors, gps, admin, comm
 */
-var SETUP = function(){
+var START = function(){
 //Determine which settings file to use.
 if (process.argv.indexOf('deploy') != -1){		
     S = require('./deployment/settings').Settings;
@@ -22,7 +22,6 @@ console.log('Startin up rover.  Here are the settings', S);
 /* Global variables.  Do not overwrite these names! */
 Terminal = require('child_process'),
 C = require('./lib/colorLog'),
-Serial = require('./lib/serial'),
 GPS = require('./gps'),
 Stream = require('./stream'),
 Rover = require('./motors'),
@@ -32,13 +31,13 @@ Emit = require('./comm');
 Rover.connect();
 Emit.info();
 
-if (process.argv.indexOf('test') != -1) {
+if (process.argv.indexOf('test') != -1) 
     GPS.test();
-}else GPS.connect();
+else
+    GPS.connect();
 
-if (process.argv.indexOf('nostream') == -1) {
+if (process.argv.indexOf('nostream') == -1) 
     Stream.connect();
-}
 
 //Set addition settings
 GPS.set({home: S.home});
@@ -62,9 +61,9 @@ process.on('SIGINT', function() {
 
 }//end setup
 
-//SETUP actually runs everything above.  It must wrap entire program.
+//START() actually runs everything above.  It wraps entire program.
 try{
-    SETUP();
+    START();
 }catch(e){
     console.log('FATAL ERROR: ', e);
     console.log('Exiting.');
