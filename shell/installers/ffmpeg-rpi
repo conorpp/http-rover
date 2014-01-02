@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # shell/installers/ffmpeg-rpi
 # configure ffmpeg for rpi

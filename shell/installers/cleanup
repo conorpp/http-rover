@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # shell/installers/cleanup
 # moves all directories and 

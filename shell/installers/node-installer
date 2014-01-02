@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # shell/installers/node-installer
 # installs node and npm for rpi

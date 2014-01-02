@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # /shell/installers/ffmpeg-installer
 # installs ffmpeg with extra codec libraries.

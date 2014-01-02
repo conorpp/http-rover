@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # shell/installs/npm-dependencies
 # installs the dependent npm packages
