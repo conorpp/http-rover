@@ -10,7 +10,7 @@
 */
 
 module.exports = (function(){
-    var redis = require('socket.io/node_modules/redis')
+    var redis = require('redis');
     var pub = redis.createClient(S.redis_port, S.host);	//to server	
     var sub = redis.createClient(S.redis_port, S.host);	//from server
     //channels
