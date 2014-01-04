@@ -224,6 +224,7 @@ var Stream = {
         C.log('Resetting stream.', {color:'blue'});
         this.running = false;
         this.kill(function(err, device){
+            var options = options;
             if (err && err.killed) {
                 C.log('Error resetting cam ', err, {color:'red'});
                 Emit.errors.webcam = err;
