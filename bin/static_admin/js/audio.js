@@ -46,8 +46,8 @@ function makeWAV(leftchannel, rightchannel, recordingLength){
 	var rightBuffer = mergeBuffers ( rightchannel, recordingLength );
 	// we interleave both channels together
 	var interleaved = interleave ( leftBuffer, rightBuffer );
-	client.send('channel',interleaved);
-	return;
+	
+	
 	// create the buffer and view to create the .WAV file
 	var buffer = new ArrayBuffer(44 + interleaved.length * 2);
 	
@@ -83,6 +83,7 @@ function makeWAV(leftchannel, rightchannel, recordingLength){
  
 	// our final binary blob that we can hand off
 	var blob = new Blob ( [ view ], { type : 'audio/wav' } );
+	//client.send('channel',blob);
 	//var reader = new FileReader();
 	//var arr = reader.readAsArrayBuffer(blob);
 	//client.send(null, blob);
@@ -124,16 +125,29 @@ function setup(){
         	var left = AudioBuffer.inputBuffer.getChannelData (0);
 		//console.log ('recording', left);
         	var right = AudioBuffer.inputBuffer.getChannelData (1);
-        	// we clone the samples
-		var weaved = interleave(left, right);
+        	
+		leftchannel.push (new Float32Array (left));
+        	rightchannel.push (new Float32Array (right));
+        	recordingLength += bufferSize;
 		
-		var avg = 0;
-		for (var i in weaved) {
-			avg += weaved[i]
-		}
-		avg = avg/weaved.length;
-		console.log('Avg: ', avg*100);
-		client.send('channel', weaved);
+		//if (recordingLength > 1000) {
+			//makeWAV(leftchannel, rightchannel, recordingLength);
+			var leftBuffer = mergeBuffers ( leftchannel, recordingLength );
+			var rightBuffer = mergeBuffers ( rightchannel, recordingLength );
+			var weaved = interleave(left, right);
+			
+			/*var l = weaved.length;
+			var bufI = new Int16Array(l)
+			
+			while (l--) {
+				bufI[l] = weaved[l]|0;
+			}
+			*/console.log('sending off buffer ', weaved.buffer);
+			client.send('channel', weaved.buffer );
+			leftchannel = [],
+			rightchannel = [],
+			recordingLength = 0;
+		//}
         	//leftchannel.push (new Float32Array (left));
         	//rightchannel.push (new Float32Array (right));
         	//recordingLength += bufferSize;
@@ -144,17 +158,18 @@ function setup(){
     	recorder.connect (context.destination); 
     	//var button = document.getElementById('download');
     	//button.addEventListener("click", function(){
-	setInterval(function(){
+	/*setInterval(function(){
     		console.log('button clicked');
     		//makeWAV(leftchannel, rightchannel, recordingLength);
 		leftchannel = [];
 		rightchannel = [];
 		recordingLength = 0;
-	},200);
+	},200);*/
 	//}, false);
 	}, errorCallback);
 }
 navigator.getUserMedia = hasGetUserMedia();
+
 if (navigator.getUserMedia) {
   setup();
   console.log('setting up');
@@ -162,12 +177,14 @@ if (navigator.getUserMedia) {
   console.log('not supported.');
 }
 
-var client = new BinaryClient('ws://'+Settings.host+':'+Settings.audio_port);
 
+var client = new BinaryClient('ws://'+Settings.host+':'+Settings.audio_port);
+console.log('AUDIO BCLIENT at '+ Settings.host, Settings.audio_port);
 client.on('stream', function(stream, meta){
 	console.log('recieving stream ', stream, meta);
 	/*if (_blob) {
 		stream.write(_blob);
 	}*/
 });
+
 

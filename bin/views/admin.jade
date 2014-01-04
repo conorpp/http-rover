@@ -8,6 +8,7 @@ block content
         input(type='submit', value='log out')
     h2.color0.head Stats
     p.fs12 - current info for web server -
+    p.color0.left15 Total commanded : #{commandCount}
     each val, key in stats
         p.color0.left15 #{key} : #{val}
         

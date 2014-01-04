@@ -40,7 +40,8 @@ var views = {
                                message:info.adminPopup ? info.adminPopup.message : null,
                                checked:info.adminPopup ? true : false,
                                ifconfig:info.ifconfig.replace(/(\r\n|\n|\r)/gm,"<br>"),
-                               gps:info.gps
+                               gps:info.gps,
+                               commandCount: info.commandCount
                             });
                  });
                 //});
@@ -177,11 +178,10 @@ var views = {
     
     /* returns sync && async live stats about server for admin */
     stats: function(callback){
-        db.get(['adminPopup', 'ifconfig', 'gps'], function(data){
+        db.get(['adminPopup', 'ifconfig', 'gps', 'commandCount'], function(data){
             data.sync = {
                 'Connected users': live.clientCount,    //add sync values here.
-                'Queue length': live.queue.length,
-                'Command total': live.commandCount
+                'Queue length': live.queue.length
                 };
             callback(data);
         });

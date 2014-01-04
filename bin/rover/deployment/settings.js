@@ -14,7 +14,9 @@ var Settings = {
     width:160,
     height:120,
     logLevel:5,
-    home:[44.646875, -68.95869]
+    home:[44.646875, -68.95869],
+    ip:'184.173.103.51',
+    udp_port:12554
 };
 
 try{

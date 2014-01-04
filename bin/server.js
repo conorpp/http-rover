@@ -41,16 +41,5 @@ live.socket.listen(S.command_port).redis.listen(S.redis_port, S.host);
 db.listen(S.redis_port, S.host);
 //canvas.stream();
 
-//testing stuff:
+//testing stuff:***********************************
 
-var BinaryServer = require('binaryjs').BinaryServer;
-
-var BSserver = BinaryServer({port: S.audio_port});
-
-BSserver.on('connection', function(client){
-    console.log('Client connected');
-    client.on('stream', function(stream, data){
-        //console.log('got data ', data);
-        live.redis.pub.publish('audio',JSON.stringify(data));
-    });
-});

@@ -4,6 +4,30 @@
 
     Requirements:
         redis (see server.js)
+        
+        
+    Keys Index:
+        commandCount - (int) number of times queue entered.  Incremented every time.
+        
+        adminPopup - (str) JSON obj for popup.  For saving from admin page.
+        
+        ifconfig - (str) Last info on network config for rover.
+        
+        gps - (str) JSON obj for last known GPS data for rover.
+    
+    TODO:
+    HMSET index:
+    
+        roverInfo = {
+            ifconfig: same as above,
+            gps: same as above
+        }
+        
+        serverInfo = {
+            commandCount: same
+            adminPopup: same
+        }
+        
 */
 
 var database = {
@@ -31,38 +55,29 @@ var database = {
         if (typeof keys == 'string') {
             keys = [keys];
         }
-        this._chainStart = keys.length;
-        this._data = {};
-        this._chain(callback);
+        var self = this;
+        self._chainStart = keys.length;
+        self._data = {};
+        //this._chain(callback);
         for (var i in keys) {
-            db.store.get(keys[i], function(err, val){
-                var n = keys.length - database._chainStart;
+            self.store.get(keys[i], function(err, val){
+                var n = keys.length - self._chainStart;
                 if (err) {
                     C.log('Error getting ', keys[n], ' from redis.', {color:'red'});
                 }
                 try{
-                    if (val) database._data[keys[n]] = JSON.parse(val);
-                    else database._data[keys[n]] = val;
+                    if (val) self._data[keys[n]] = JSON.parse(val);
+                    else self._data[keys[n]] = val;
                 }catch(e){
-                   database._data[keys[n]] = val; 
+                   self._data[keys[n]] = val; 
                 }
                 console.log('got db val '+ keys[n], val);
-                database._chainStart--;
+                self._chainStart--;
+                if (self._chainStart == 0) callback(self._data);
+                    
             });
         }
         return keys;
-    },
-    _chainStart:0,
-    _chainInter:null,
-    _chain: function(callback){
-        clearInterval(this._chainInter);
-        this._chainInter = setInterval(function(){
-            if (database._chainStart <= 0) {
-                clearInterval(database._chainInter);
-                callback(database._data);
-            }
-        },1);
-        
     }
     
 }

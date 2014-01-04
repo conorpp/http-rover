@@ -10,7 +10,6 @@ var live = {
     secs: Math.floor(this.time/1000),
     queueInterval: setTimeout(),
     commandId:null,
-    commandCount:0,         //total of people commanded rover.
     pings:0,                //init track of unresponded pings to rover
     maxPings:3,             //max of consecutive unresponded pings to send distress popup
     roverAlive:false,
@@ -127,7 +126,6 @@ var live = {
             data.socket.emit('promote', {millis:this.time, name:data.name});
             data.start = new Date().getTime();
             this.commandId = data.id;
-            this.commandCount++;
         }else{
             C.log('promote function given empty data, checking next in line.', {color:'red'});
             if (this.queue.length) {
@@ -244,7 +242,7 @@ var live = {
                             });
                             if (first)C.log('Client returned to command ', {color:'green'});
                             else C.log('Client returned to queue. ', {color:'green'});
-                    }else{C.log('Failed to return command for client ', {color:'red'})}
+                    }else C.log('Failed to return command for client ', {color:'red'});
                 });
                 socket.on('subscribe', function(data){
                     if (data.room == 'admin' && !views.authent(data)) return;
@@ -292,7 +290,7 @@ var live = {
                                                 'we\'ll let you know when it comes back.  Sorry',
                                 room:'rover', disconnect:true});
                 }
-                console.log('Sending PING ', live.pings);
+                C.log('Sending PING ', live.pings, {color:'blue', logLevel:-2});
             },3*1000);
             
         },
@@ -329,7 +327,7 @@ var live = {
                         }
                         live.roverAlive = true;
                         live.pings = 0;
-                        console.log('recieved PING', live.pings);
+                        C.log('recieved PING', live.pings, {color:'blue', logLevel:-2});
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {

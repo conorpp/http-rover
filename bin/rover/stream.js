@@ -68,6 +68,7 @@ var Stream = {
     /*
         Autodetect video addr and starts webcam
     */
+    timesConnected:-1,
     connect: function(){
         this.timesConnected++;
         if (this.timesConnected == 0) {
@@ -89,7 +90,6 @@ var Stream = {
     },
     
     //monitor ffmpeg and reset when it crashes.
-    timesConnected:-1,
     checkInter:null,
     monitor: function(){
         if (this.checkInter == null) {   
@@ -232,7 +232,7 @@ var Stream = {
             if (Stream.timesConnected >= 1 && !options.noPopup){
                 Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
                     '  It may take up to 20 seconds for it to come back.', global:true});
-            }
+            }else C.log('Not emitting video reset popup!' , {color:'yellow', logLevel:-1});
             Stream.connect(options);
         });
     },

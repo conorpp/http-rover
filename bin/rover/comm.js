@@ -12,18 +12,18 @@
 module.exports = (function(){
     var redis = require('redis');
     var pub = redis.createClient(S.redis_port, S.host);	//to server	
-    var sub = redis.createClient(S.redis_port, S.host);	//from server
+    var subRover = redis.createClient(S.redis_port, S.host);	//from server
+    var subAdmin = redis.createClient(S.redis_port, S.host);	//from server
     //channels
-    sub.subscribe('rover');
-    sub.subscribe('roverAdmin');
+    subRover.subscribe('rover');
+    subAdmin.subscribe('roverAdmin');
     C.log('Communication is live . . .' ,{color:'green', logLevel:-1});
         
     /*
-        A nested switch statement handles all receiving date from webserver.
-        Channel -> data.func
+        switch statements handle all receiving date from webserver.
         
         Channels:
-            1. rover - Adminfor admin commands
+            1. roverAdmin - for admin commands
                 a. reset - resets the webcam & ffmpeg stream.
                 b. ping - indicator reciprocated regularly to show connection is still good.
                 c. execute - terminal command to be executed.
@@ -32,90 +32,79 @@ module.exports = (function(){
                 a. forward, left, right, reverse, forwardright, forwardleft, stop
                     - directions for motors.
     */
-    sub.on('message', function(channel, data){
+    subAdmin.on('message', function(channel, data){
         data = JSON.parse(data);
-        switch (channel) {
-            case 'roverAdmin':
-                var asked = true;
-                switch (data.func) {
-                    case 'reset':
-                        C.log('Resetting stream', {color:'blue'});
-                        Stream.reset();
-                    break;
-                    case 'ping':
-                        _emit.ping();
-                    break;
-                    case 'execute':
-                        C.log('about to exec command ', data, {color:'yellow', logLevel:-1});
-                        if (data.command.indexOf('sudo')!=-1) {
-                            if (data.command != 'sudo reboot') {
-                                _emit._parse({func:'stdout',stdout:'<h1>You suck</h1>', command:data.command});
-                                return;
-                            }
-                        }
-                        Terminal.exec(data.command, function(err, stdout, stderr){
-                            var error = stderr;
-                            if (error && error != '') {
-                                C.log('Error with exec command : ', error, {color:'red', logLevel:1});
-                            }
-                            C.log('Got stdout ', stdout, {color:'yellow'});
-                            _emit._parse({func:'stdout',stdout:stdout, error:error, command:data.command});
-                        });
-                    break;
-                    default:
-                        asked = false;
-                        if (channel=='roverAdmin') {
-                            C.log('No cases met on admin channel.', {color:red});
-                        }
-                    break;
-                }
-                //Check to see if hack.  This should hopefully never run.
-                if (channel != 'roverAdmin' && asked) {
-                    C.err('Unauthorized attempt for ' + data.func + 'command');
-                    return;
-                }
+        var asked = true;
+        console.log('admin func : ', data.func);
+        switch (data.func) {
+            case 'reset':
+                C.log('Resetting stream', {color:'blue'});
+                Stream.reset();
             break;
-            case 'rover':
-                switch (data.func) {
-                    
-                    case 'forward':
-                        Rover.moving();
-                        Rover.write(127,255);
-                    break;
-                    case 'left':
-                        Rover.moving();
-                        Rover.write(107,158);
-                    break;
-                    case 'right':
-                        Rover.moving();
-                        Rover.write(21,235);
-                    break;
-                    case 'forwardleft':
-                        Rover.moving();
-                        Rover.write(31,128);
-                        
-                    break;
-                    case 'forwardright':
-                        Rover.moving();
-                        Rover.write(1,160);
-                    break;
-                    case 'stop':
-                        Rover.stop();
-                    break;
-                    case 'reverse':
-                        Rover.moving();
-                        Rover.write(1,128);
-                    break;
-    
-                    default:
-                        C.err('Error: No cases were met on rover pubsub.');
-                    break;
+            case 'ping':
+                _emit.ping();
+            break;
+            case 'execute':
+                C.log('about to exec command ', data, {color:'yellow', logLevel:-1});
+                if (data.command.indexOf('sudo')!=-1) {
+                    if (data.command != 'sudo reboot') {
+                        _emit._parse({func:'stdout',stdout:'<h1>You suck</h1>', command:data.command});
+                        return;
+                    }
                 }
+                Terminal.exec(data.command, function(err, stdout, stderr){
+                    var error = stderr;
+                    if (error && error != '') {
+                        C.log('Error with exec command : ', error, {color:'red', logLevel:1});
+                    }
+                    C.log('Got stdout ', stdout, {color:'yellow'});
+                    _emit._parse({func:'stdout',stdout:stdout, error:error, command:data.command});
+                });
             break;
             default:
-                C.err('Error: channel ', channel, ' isn\'t support.');
+                asked = false;
+                if (channel=='roverAdmin') {
+                    C.log('No cases met on admin channel.', {color:red});
+                }
             break;
         }
+    });
+    subRover.on('message', function(channel, data){
+        data = JSON.parse(data);
+        console.log('rover func : ', data.func);
+        switch (data.func) {                
+            case 'forward':
+                Rover.moving();
+                Rover.write(127,255);
+            break;
+            case 'left':
+            Rover.moving();
+            Rover.write(107,158);
+            break;
+            case 'right':
+                Rover.moving();
+                Rover.write(21,235);
+            break;
+            case 'forwardleft':
+                Rover.moving();
+                Rover.write(31,128);                        
+            break;
+            case 'forwardright':
+                Rover.moving();
+                Rover.write(1,160);
+            break;
+            case 'stop':
+                Rover.stop();
+            break;
+            case 'reverse':
+                Rover.moving();
+                Rover.write(1,128);
+            break;
+            default:
+                C.err('Error: No cases were met on rover pubsub.');
+            break;
+        }
+
     });
     
     /*
