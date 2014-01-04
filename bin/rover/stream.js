@@ -64,16 +64,23 @@ var Stream = {
             + '/'+S.width+'/'+S.height
                );    
     },
-    
+    //settings
+    set: function(params){
+        if (params.resetTime) {
+            this.resetTime = parseInt(params.resetTime);
+        }
+    },
     /*
         Autodetect video addr and starts webcam
     */
     timesConnected:-1,
+    firstRun:true,
     connect: function(){
         this.timesConnected++;
-        if (this.timesConnected == 0) {
-            this.firstRun = true;
+        if (this.timesConnected == 0 && this.firstRun) {
+            this.firstRun = false;
             this.reset();
+            this.resetInter();
             return;
         }
         //detect webcam addr automatically.
@@ -257,6 +264,14 @@ var Stream = {
             callback(err, {addr:'/dev/video'+max});
         });
 
+    },
+    
+    /*   Interval to regularly reset stream   */
+    resetTime: 1000*60*15,      //15min
+    resetInter: function(){
+        setInterval(function(){
+            Stream.reset();
+        }, this.resetTime);
     }
     
 }
