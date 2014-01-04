@@ -219,18 +219,18 @@ var Stream = {
         Reset stream and get feedback.
         same options for run().
     */
+    resetParams:{},
     reset: function(options){
-        options == options || {};
+        this.resetParams == options || {};
         C.log('Resetting stream.', {color:'blue'});
         this.running = false;
         this.kill(function(err, device){
-            var options = options;
             if (err && err.killed) {
                 C.log('Error resetting cam ', err, {color:'red'});
                 Emit.errors.webcam = err;
                 return;
             }
-            if (Stream.timesConnected >= 1 && !options.noPopup){
+            if (Stream.timesConnected >= 1 && !Stream.resetParams.noPopup){
                 Emit.popup({title:'Reset video', message:'The webcam on the rover just reset.'+
                     '  It may take up to 20 seconds for it to come back.', global:true});
             }else C.log('Not emitting video reset popup!' , {color:'yellow', logLevel:-1});
