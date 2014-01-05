@@ -167,11 +167,14 @@ $(document).ready(function(){
     });
     
     $('#record').mousedown(function(){
-        console.log('mousedown on audio');
         R.start();
+        $(this).find('span')
+            .removeClass('not-recording').addClass('recording');
     });
     $('#record').mouseup(function(){    
         R.stop();
+        $(this).find('span')
+            .removeClass('recording').addClass('not-recording');
     });
     
     $(document).on('click', '.joinSubmit', function(){

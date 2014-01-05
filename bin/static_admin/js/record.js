@@ -12,7 +12,13 @@ var R = {
 	volume:null,
 	socket:null,
 	client:null,
+	isRecording:false,
 	
+	/*
+		Sets up recording audio and opens websocket connection for streaming.
+		Handles cross-browser methods.
+		
+	*/
 	init: function(){
 	    //audio
 	    navigator.getUserMedia = this.hasUserMedia();
@@ -28,11 +34,16 @@ var R = {
 	    this.client = new BinaryClient('ws://'+Settings.host+':'+Settings.audio_port);
 	    this.client.on('open', function(){
 		console.log('audio socket connected.');
-		R.socket = R.client.send('channel', {channel:'audio', id:Command.id});
+		R._createSocket();
 	    });
 	    this._record();
 	},
 	
+	_createSocket: function(){
+		R.socket = R.client.send('channel', {channel:'audio', id:Command.id});
+	},
+	
+	/*	See if web audio api is supported.	*/
 	hasUserMedia: function(){
 	    return  navigator.getUserMedia ||
 		navigator.webkitGetUserMedia ||
@@ -80,7 +91,9 @@ var R = {
 			
 		if (R.socket) R.socket.write(buf.buffer);
 		else console.log('not connected yet');
+		
 	},
+	/*	Prompt browser to get mic recording	*/
 	_recorder: null,
 	_record: function(){
 	    navigator.getUserMedia({audio:true}, function (e){
@@ -94,33 +107,43 @@ var R = {
 		dispatched and how many sample-frames need to be processed each call. 
 		Lower values for buffer size will result in a lower (better) latency. 
 		Higher values will be necessary to avoid audio breakup and glitches */
-		var bufferSize = 2048;
+		var bufferSize = 2048/2;
 		R._recorder = R.context.createJavaScriptNode(bufferSize, 2, 2);
 	    
-		R._recorder.onaudioprocess = null;//R._stream;
+		//R._recorder.onaudioprocess = null;//R._stream;
 	    
 		R.volume.connect (R._recorder);
-		R._recorder.connect (R.context.destination); 
+		R._recorder.connect (R.context.destination);
+		R.isRecording = true;
 	    
-	    }, function(e){ console.log('MEDIA ERROR ', e); });
+	    }, function(e){ console.log('getUserMedia error: ', e); });
 	},
+	/*  Start/stop streaming the recording.  */
 	start: function(){
-	    console.log('starting recording streaming');
 	    if (this._recorder) 
 		this._recorder.onaudioprocess = this._stream;
 	    else
 		console.log('Error: R not initialized');
+	    //if (this.socket) this.socket.resume();
 	    
 	},
-	stop: function(){
-	    console.log('stopping recording stream');
-	    if (this._recorder) R._recorder.onaudioprocess = null;
-	},
 	
+	stop: function(){
+	    if (this._recorder) R._recorder.onaudioprocess = null;
+	    if (this.socket) this._resetStream();
+	},
+	/*	Stops and kills everything.  init() must be called
+		before recording again
+	*/
 	destroy: function(){
 	    this.stop();
 	    this.context = this.volume = this._recorder = null;
 	    if (R.client) R.client.close();
+	},
+	//For attempting to improve latency
+	_resetStream: function(){
+		this.socket.destroy();
+		this._createSocket();
 	}
 };
 
