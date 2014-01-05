@@ -40,60 +40,7 @@ function writeUTFBytes(view, offset, string){
   }
 }
 
-function makeWAV(leftchannel, rightchannel, recordingLength){
-	//we flat the left and right channels down
-	var leftBuffer = mergeBuffers ( leftchannel, recordingLength );
-	var rightBuffer = mergeBuffers ( rightchannel, recordingLength );
-	// we interleave both channels together
-	var interleaved = interleave ( leftBuffer, rightBuffer );
-	
-	
-	// create the buffer and view to create the .WAV file
-	var buffer = new ArrayBuffer(44 + interleaved.length * 2);
-	
-	var view = new DataView(buffer);
- 
-	// write the WAV container, check spec at: https://ccrma.stanford.edu/courses/422/projects/WaveFormat/
-	// RIFF chunk descriptor
-	writeUTFBytes(view, 0, 'RIFF');
-	view.setUint32(4, 44 + interleaved.length * 2, true);
-	writeUTFBytes(view, 8, 'WAVE');
-	// FMT sub-chunk
-	writeUTFBytes(view, 12, 'fmt ');
-	view.setUint32(16, 16, true);
-	view.setUint16(20, 1, true);
-	// stereo (2 channels)
-	view.setUint16(22, 2, true);
-	view.setUint32(24, 44100, true);
-	view.setUint32(28, 44100 * 4, true);
-	view.setUint16(32, 4, true);
-	view.setUint16(34, 16, true);
-	// data sub-chunk
-		writeUTFBytes(view, 36, 'data');
-	view.setUint32(40, interleaved.length * 2, true);
-		 
-	// write the PCM samples
-	var lng = interleaved.length;
-	var index = 44;
-	var volume = 1;
-	for (var i = 0; i < lng; i++){
-    	view.setInt16(index, interleaved[i] * (0x7FFF * volume), true);
-	    index += 2;
-	}
- 
-	// our final binary blob that we can hand off
-	var blob = new Blob ( [ view ], { type : 'audio/wav' } );
-	//client.send('channel',blob);
-	//var reader = new FileReader();
-	//var arr = reader.readAsArrayBuffer(blob);
-	//client.send(null, blob);
-	//reader.addEventListener("loadend", function() {
-	//	_blob = reader.result;
-	//	client.send(_blob);
-	//});
-	//Command.socket.emit('audio', {leftchannel:leftchannel, rightchannel:rightchannel, recordingLength:recordingLength});
-}
-_blob=0;
+
 function setup(){
 
     navigator.getUserMedia({audio:true}, function (e){
@@ -123,49 +70,26 @@ function setup(){
     	recorder.onaudioprocess = function(AudioBuffer){
         	
         	var left = AudioBuffer.inputBuffer.getChannelData (0);
-		//console.log ('recording', left);
         	var right = AudioBuffer.inputBuffer.getChannelData (1);
         	
-		leftchannel.push (new Float32Array (left));
-        	rightchannel.push (new Float32Array (right));
-        	recordingLength += bufferSize;
+		var weaved = interleave(left, right);
+			
+		var l = weaved.length;
+		var bufI = new Int8Array(l)
 		
-		//if (recordingLength > 1000) {
-			//makeWAV(leftchannel, rightchannel, recordingLength);
-			var leftBuffer = mergeBuffers ( leftchannel, recordingLength );
-			var rightBuffer = mergeBuffers ( rightchannel, recordingLength );
-			var weaved = interleave(left, right);
+		while (l--) {
+			bufI[l] = (weaved[l]*0xFF); 	//convert to 8 bit
+		}
 			
-			/*var l = weaved.length;
-			var bufI = new Int16Array(l)
-			
-			while (l--) {
-				bufI[l] = weaved[l]|0;
-			}
-			*/console.log('sending off buffer ', weaved.buffer);
-			client.send('channel', weaved.buffer );
-			leftchannel = [],
-			rightchannel = [],
-			recordingLength = 0;
-		//}
-        	//leftchannel.push (new Float32Array (left));
-        	//rightchannel.push (new Float32Array (right));
-        	//recordingLength += bufferSize;
+		if (STREAM) STREAM.write(bufI.buffer);
+		else console.log('not connected yet');
+
     	}
 
     	// we connect the recorder
     	volume.connect (recorder);
     	recorder.connect (context.destination); 
-    	//var button = document.getElementById('download');
-    	//button.addEventListener("click", function(){
-	/*setInterval(function(){
-    		console.log('button clicked');
-    		//makeWAV(leftchannel, rightchannel, recordingLength);
-		leftchannel = [];
-		rightchannel = [];
-		recordingLength = 0;
-	},200);*/
-	//}, false);
+
 	}, errorCallback);
 }
 navigator.getUserMedia = hasGetUserMedia();
@@ -186,5 +110,11 @@ client.on('stream', function(stream, meta){
 		stream.write(_blob);
 	}*/
 });
+var STREAM;
+client.on('open', function(){
+	STREAM = client.send('channel', {channel:'audio'});
+
+});
+
 
 

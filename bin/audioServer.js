@@ -4,14 +4,17 @@
 S = require('./static_admin/js/settings').Settings;
 var BinaryServer = require('binaryjs').BinaryServer;
 
-var BSserver = BinaryServer({port: S.audio_port});
+var websocket = BinaryServer({port: S.audio_port});
 
-BSserver.on('connection', function(client){
+websocket.on('connection', function(client){
     console.log('Client connected');
-    client.on('stream', function(stream, buffer){
-        if (rinfo)
-            srv.send(buffer, 0, buffer.length, rinfo.port, rinfo.address);
-        //console.log('length ', buffer.length);
+    client.on('stream', function(stream, meta){
+        if (meta.channel == 'audio') {
+            stream.on('data', function(buf){
+                if (!rinfo || typeof buf == 'string') return;
+                srv.send(buf, 0, buf.length, rinfo.port, rinfo.address);
+            });
+        }
     });
 });
 var dgram = require('dgram');
@@ -36,11 +39,4 @@ srv.on('error', function (err) {
 
 srv.bind(S.udp_port, S.ip);
 
-//process.stdin.resume();
 
-process.stdin.on('data', function(data){
-    //socket.send(buf, offset, length, port, address, [callback])
-    var buf = new Buffer(''+data, 'utf8');
-    if (rinfo) 
-        srv.send(buf, 0, buf.length, rinfo.port, rinfo.address);    
-});

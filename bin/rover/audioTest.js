@@ -11,49 +11,54 @@ var Speaker = require('speaker');
 // Create the Speaker instance
 var speaker = new Speaker({
   channels: 2,          // 2 channels
-  bitDepth: 32,          // 16-bit samples
+  bitDepth: 8,          // 16-bit samples
   sampleRate: 48000,    // 44,100 Hz sample rate
   signed:true
 });
 
-console.log('speaker obj ', speaker);
-
-var dgram = require('dgram');
-var srv = dgram.createSocket("udp4");
-var i = 0;
-var bufs = [];
-/*****************------------************************/
-var audBufs = [];
-srv.on("message", function (msg, rinfo) {
-    audBufs.push(msg);
-   // if (audBufs.length > 100) {
-   //     for (var n in audBufs) {
-           speaker.write((msg)); 
-   //    }
-   //     audBufs = [];
-   // }
-});
-/*********************------------********************/
-
-srv.on("listening", function () {
-  var address = srv.address();
-  console.log(" upd server listening " + address.address + ":" + address.port);
-});
-
-srv.on('error', function (err) {
-  console.error(err);
-  process.exit(0);
-});
-
-srv.bind(9002);
-
-    var buf = new Buffer('ping', 'utf8');
-    srv.send(buf, 0, buf.length, S.udp_port, S.ip);
-setInterval(function(){
-    console.log('sending UPD packet');
-    //socket.send(buf, offset, length, port, address, [callback])
+var UDP = {
     
-    var buf = new Buffer('ping', 'utf8');
-    srv.send(buf, 0, buf.length, S.udp_port, S.ip);
+    srv: null,
     
-},5050);
+    connect: function(){
+        var dgram = require('dgram');
+        this.srv = dgram.createSocket("udp4");
+        this.srv.bind(9004);
+        this.handlers();
+        this.heartBeat();
+    },
+    
+    /*   Pings server to maintain connection.   */
+    heartBeat: function(){
+        var buf = new Buffer('ping', 'utf8');
+        this.srv.send(buf, 0, buf.length, S.udp_port, S.ip);
+        setInterval(function(){
+            var buf = new Buffer('ping', 'utf8');
+            UDP.srv.send(buf, 0, buf.length, S.udp_port, S.ip);
+        }, 5000);
+    },
+    
+    handlers: function(){
+        
+        /*  Play the PCM  */
+        this.srv.on("message", function (msg, rinfo) {
+            speaker.write(msg); 
+        });
+        
+        
+        this.srv.on("listening", function () {
+          var address = UDP.srv.address();
+          console.log(" UDP server listening " + address.address + ":" + address.port);
+        });
+        
+        this.srv.on('error', function (err) {
+          console.error('UDP err ',err);
+        });
+
+    }
+    
+};
+
+UDP.connect();
+
+
