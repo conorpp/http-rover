@@ -1,120 +1,128 @@
-console.log('Hello webkit tester');
 
-//var navigator = window.navigator;
-function hasGetUserMedia() {
-	return navigator.getUserMedia || navigator.webkitGetUserMedia ||
-            navigator.mozGetUserMedia || navigator.msGetUserMedia;
-}
-function errorCallback(e){
-	console.log('there was an error ', e);
-}
+/*
+	Interface for recording audio and streaming it to server.
+	
+	Must first call init()
+	then use stop() and start() freely.
+*/
 
-function mergeBuffers(channelBuffer, recordingLength){
-  var result = new Float32Array(recordingLength);
-  var offset = 0;
-  var lng = channelBuffer.length;
-  for (var i = 0; i < lng; i++){
-    var buffer = channelBuffer[i];
-    result.set(buffer, offset);
-    offset += buffer.length;
-  }
-  return result;
-}
-function interleave(leftChannel, rightChannel){
-  var length = leftChannel.length + rightChannel.length;
-  var result = new Float32Array(length);
- 
-  var inputIndex = 0;
- 
-  for (var index = 0; index < length; ){
-    result[index++] = leftChannel[inputIndex];
-    result[index++] = rightChannel[inputIndex];
-    inputIndex++;
-  }
-  return result;
-}
-function writeUTFBytes(view, offset, string){
-  var lng = string.length;
-  for (var i = 0; i < lng; i++){
-    view.setUint8(offset + i, string.charCodeAt(i));
-  }
-}
-
-
-function setup(){
-
-    navigator.getUserMedia({audio:true}, function (e){
-    	// creates the audio context
-    	audioContext = window.AudioContext || window.webkitAudioContext;
-    	context = new audioContext();
-
-    	// creates a gain node
-    	volume = context.createGain();
-
-    	// creates an audio node from the microphone incoming stream
-    	audioInput = context.createMediaStreamSource(e);
-
-    	// connect the stream to the gain node
-    	audioInput.connect(volume);
-
-    	/* From the spec: This value controls how frequently the audioprocess event is 
-    	dispatched and how many sample-frames need to be processed each call. 
-    	Lower values for buffer size will result in a lower (better) latency. 
-    	Higher values will be necessary to avoid audio breakup and glitches */
-    	var bufferSize = 2048;
-    	context.createJavaScriptNode = context.createScriptProcessor || context.createJavaScriptNode;
-    	recorder = context.createJavaScriptNode(bufferSize, 2, 2);
-	var leftchannel = [];
-	var rightchannel = [];
-	var recordingLength = 0;
-    	recorder.onaudioprocess = function(AudioBuffer){
-        	
+var R = {
+	
+	context: null,
+	volume:null,
+	socket:null,
+	client:null,
+	
+	init: function(){
+	    //audio
+	    navigator.getUserMedia = this.hasUserMedia();
+	    if (!navigator.getUserMedia) {
+		console.log('web audio api is not supported.'); return;
+	    }
+	    audioContext = window.AudioContext || window.webkitAudioContext;
+	    this.context = new audioContext();
+	    this.volume = this.context.createGain();
+	    this.context.createJavaScriptNode = this.context.createScriptProcessor ||
+						this.context.createJavaScriptNode;
+	    //websocket
+	    this.client = new BinaryClient('ws://'+Settings.host+':'+Settings.audio_port);
+	    this.client.on('open', function(){
+		console.log('audio socket connected.');
+		R.socket = R.client.send('channel', {channel:'audio', id:Command.id});
+	    });
+	    this._record();
+	},
+	
+	hasUserMedia: function(){
+	    return  navigator.getUserMedia ||
+		navigator.webkitGetUserMedia ||
+		navigator.mozGetUserMedia ||
+		navigator.msGetUserMedia;
+	},
+	
+	mergeBuffers: function(channelBuffer, recordingLength){
+	    var result = new Float32Array(recordingLength);
+	    var offset = 0;
+	    var lng = channelBuffer.length;
+	    for (var i = 0; i < lng; i++){
+		var buffer = channelBuffer[i];
+		result.set(buffer, offset);
+		offset += buffer.length;
+	    }
+	    return result;
+	},
+	interleave: function(leftChannel, rightChannel){
+		var length = leftChannel.length + rightChannel.length;
+		var result = new Float32Array(length);
+	       
+		var inputIndex = 0;
+	       
+		for (var index = 0; index < length; ){
+		  result[index++] = leftChannel[inputIndex];
+		  result[index++] = rightChannel[inputIndex];
+		  inputIndex++;
+		}
+		return result;
+	},
+	
+	_stream: function(AudioBuffer){
+		if (!Command.inCommand) return; 
         	var left = AudioBuffer.inputBuffer.getChannelData (0);
         	var right = AudioBuffer.inputBuffer.getChannelData (1);
-        	
-		var weaved = interleave(left, right);
+		var weaved = R.interleave(left, right);
 			
 		var l = weaved.length;
-		var bufI = new Int8Array(l)
+		var buf = new Int8Array(l)
 		
 		while (l--) {
-			bufI[l] = (weaved[l]*0xFF); 	//convert to 8 bit
+			buf[l] = (weaved[l]*0xFF); 	//convert to 8 bit
 		}
 			
-		if (STREAM) STREAM.write(bufI.buffer);
+		if (R.socket) R.socket.write(buf.buffer);
 		else console.log('not connected yet');
-
-    	}
-
-    	// we connect the recorder
-    	volume.connect (recorder);
-    	recorder.connect (context.destination); 
-
-	}, errorCallback);
-}
-navigator.getUserMedia = hasGetUserMedia();
-
-if (navigator.getUserMedia) {
-  setup();
-  console.log('setting up');
-} else {
-  console.log('not supported.');
-}
-
-
-var client = new BinaryClient('ws://'+Settings.host+':'+Settings.audio_port);
-console.log('AUDIO BCLIENT at '+ Settings.host, Settings.audio_port);
-client.on('stream', function(stream, meta){
-	console.log('recieving stream ', stream, meta);
-	/*if (_blob) {
-		stream.write(_blob);
-	}*/
-});
-var STREAM;
-client.on('open', function(){
-	STREAM = client.send('channel', {channel:'audio'});
-
-});
+	},
+	_recorder: null,
+	_record: function(){
+	    navigator.getUserMedia({audio:true}, function (e){
+		// creates an audio node from the microphone incoming stream
+		audioInput = R.context.createMediaStreamSource(e);
+	    
+		// connect the stream to the gain node
+		audioInput.connect(R.volume);
+	    
+		/* From the spec: This value controls how frequently the audioprocess event is 
+		dispatched and how many sample-frames need to be processed each call. 
+		Lower values for buffer size will result in a lower (better) latency. 
+		Higher values will be necessary to avoid audio breakup and glitches */
+		var bufferSize = 2048;
+		R._recorder = R.context.createJavaScriptNode(bufferSize, 2, 2);
+	    
+		R._recorder.onaudioprocess = null;//R._stream;
+	    
+		R.volume.connect (R._recorder);
+		R._recorder.connect (R.context.destination); 
+	    
+	    }, function(e){ console.log('MEDIA ERROR ', e); });
+	},
+	start: function(){
+	    console.log('starting recording streaming');
+	    if (this._recorder) 
+		this._recorder.onaudioprocess = this._stream;
+	    else
+		console.log('Error: R not initialized');
+	    
+	},
+	stop: function(){
+	    console.log('stopping recording stream');
+	    if (this._recorder) R._recorder.onaudioprocess = null;
+	},
+	
+	destroy: function(){
+	    this.stop();
+	    this.context = this.volume = this._recorder = null;
+	    if (R.client) R.client.close();
+	}
+};
 
 
 

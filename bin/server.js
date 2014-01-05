@@ -11,6 +11,7 @@ redis = require('socket.io/node_modules/redis'),
 views = require('./views'),
 db = require('./database'),
 live = require('./live'),
+AudioServer = require('./audioServer'),
 crypto = require('crypto'),
 app = express();
 SECRET = 'wow such secret.';

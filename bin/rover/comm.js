@@ -35,7 +35,6 @@ module.exports = (function(){
     subAdmin.on('message', function(channel, data){
         data = JSON.parse(data);
         var asked = true;
-        console.log('admin func : ', data.func);
         switch (data.func) {
             case 'reset':
                 C.log('Resetting stream', {color:'blue'});

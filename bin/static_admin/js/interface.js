@@ -94,7 +94,8 @@ var Command = {
         this.keyupUnbind();
         this.keyupListen();
         this.inCommand = true;
-
+        //audio
+        R.init();
     },
     
     /*
@@ -112,6 +113,8 @@ var Command = {
         this.id = null;
         this.inCommand = false;
         this.keyupUnbind();
+        //audio
+        R.destroy();
     
     },
     

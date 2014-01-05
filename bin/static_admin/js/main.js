@@ -165,7 +165,15 @@ $(document).ready(function(){
         $('#stream').attr('src','');
         $('#stream').attr('src',url);
     });
-     
+    
+    $('#record').mousedown(function(){
+        console.log('mousedown on audio');
+        R.start();
+    });
+    $('#record').mouseup(function(){    
+        R.stop();
+    });
+    
     $(document).on('click', '.joinSubmit', function(){
         var name = $.trim($(this).siblings('input.name').val());
         if (name=='') {
@@ -179,6 +187,7 @@ $(document).ready(function(){
     $(document).on('click','.pX', function(){
         $(this).parents('.popupSpace').hide();
     });
+    
 
 });
 

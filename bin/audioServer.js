@@ -1,7 +1,8 @@
 /*
-    Audio streaming
+    Enables audio streaming on webserver.
 */
-S = require('./static_admin/js/settings').Settings;
+module.exports = (function(){
+    
 var BinaryServer = require('binaryjs').BinaryServer;
 
 var websocket = BinaryServer({port: S.audio_port});
@@ -9,7 +10,7 @@ var websocket = BinaryServer({port: S.audio_port});
 websocket.on('connection', function(client){
     console.log('Client connected');
     client.on('stream', function(stream, meta){
-        if (meta.channel == 'audio') {
+        if (meta.channel == 'audio' && live.isCommander(meta.id)) {
             stream.on('data', function(buf){
                 if (!rinfo || typeof buf == 'string') return;
                 srv.send(buf, 0, buf.length, rinfo.port, rinfo.address);
@@ -39,4 +40,4 @@ srv.on('error', function (err) {
 
 srv.bind(S.udp_port, S.ip);
 
-
+})();

@@ -23,7 +23,7 @@ block content
                     #mph  0 mph
                     iframe(src='/video', id='stream')
                     #controlBar
-                        button(id='join', class='btn btn-success right15') Control
+                        button(id='join', class='btn btn-success right15') Join
                         div.btn-group
                             | 
                             button(id='left', class='btn btn-default command')
@@ -35,9 +35,10 @@ block content
                             button(id='right', class='btn btn-default command')
                                 |<span class="glyphicon glyphicon-chevron-right"></span>
 
-                        button(id='stop' class='btn btn-danger command hide')
                         
-                            |<span class="glyphicon glyphicon-remove-circle"></span>
+                        button(id='record' class='btn btn-default left5')
+                            |<span class="glyphicon glyphicon-volume-up color5"></span>
+                        
                         .info
                             | you can use arrow keys too
             tr
