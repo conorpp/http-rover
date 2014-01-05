@@ -5,7 +5,9 @@ echo "Stopping rover scripts..."
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 $DIR/../node_modules/forever/bin/forever stop $DIR/../bin/rover/control.js
+
 sudo pkill -SIGINT node
 sudo pkill -SIGINT ffmpeg
 
+echo "Killed nodejs and ffmpeg processes."
 
