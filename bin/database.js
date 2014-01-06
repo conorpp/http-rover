@@ -3,7 +3,7 @@
     module for storing/getting data
 
     Requirements:
-        redis (see server.js)
+        redis
         
         
     Keys Index:
@@ -29,6 +29,9 @@
         }
         
 */
+module.exports = (function(){
+    
+var redis = require('redis');
 
 var database = {
     
@@ -43,7 +46,7 @@ var database = {
     initStore: function(){
         database.store.get('commandCount',function(err, val){
             if (!val) database.store.set('commandCount', 1);
-            console.log('commandCount - ', val);
+            C.log('commandCount - ', val, {logLevel:-1});
             live.commandCount = val;
         });
     },
@@ -82,4 +85,6 @@ var database = {
     
 }
 
-module.exports = database;
+return database
+
+})();

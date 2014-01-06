@@ -20,6 +20,7 @@ websocket.on('connection', function(client){
 });
 var dgram = require('dgram');
 var srv = dgram.createSocket("udp4");
+
 var rinfo;
 srv.on("message", function (msg, _rinfo) {
     if (msg == 'ping') {

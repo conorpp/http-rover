@@ -1,3 +1,4 @@
+// The admin page.  Displays stats and allows for config
 extend layout
 block header
     script(src='/js/admin.js')
@@ -52,7 +53,6 @@ block content
     | - Send a command to be executed in the rover shell.  stdout will be displayed below. *CAREFUL!- <br />
     div#stdout.pad10
     input(id='execCommand', class='block form-control mar5', placeholder=' Command')
-    //button(class='btn btn-primary', id='execute') Execute
     
         
     

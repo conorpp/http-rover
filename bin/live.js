@@ -1,6 +1,10 @@
 
 /* module for live events/functions */
 
+module.exports = (function(){
+
+var redis = require('redis');
+
 var live = {
     
     // data
@@ -8,7 +12,7 @@ var live = {
     queue:[],
     time:1000*60,           //ms
     secs: Math.floor(this.time/1000),
-    queueInterval: setTimeout(),
+    queueInterval: null,
     commandId:null,
     pings:0,                //init track of unresponded pings to rover
     maxPings:3,             //max of consecutive unresponded pings to send distress popup
@@ -17,10 +21,31 @@ var live = {
     
     /* for attempting to reload queue in quick server restarts. */
     initQueue: function(){
-
+        var secs = 30*1000;
+        db.store.get('queue', function(err, data){
+            data = data ? JSON.parse(data) : data;
+            if (!data || new Date().getTime() - data.timeStamp > secs)
+                return;
+            console.log('saved queue: ', data);
+            live.persist = true;
+            setTimeout(function(){ live.persist = false; },secs);
+            for (var i in data.queue) {
+                live.addQueue(data.queue[i].name, data.queue[i].id, null);
+            }
+        });
     },
     
-    /* adds to queue and returns id. */
+    /* Takes a snapshot of queue.  for reinitializing on server restarts */
+    saveQueue: function(){
+        var temp = this.queue;
+        for (var i in temp) {
+            delete temp[i].socket;
+        }
+        console.log('temp ', temp.length);
+        db.store.set('queue', JSON.stringify({ timeStamp: new Date().getTime(), queue:temp }));
+    },
+    
+    /* adds to queue */
     addQueue:function(name, id, socket){
         var secs = Math.floor(this.time/1000);
         this.queue.push({
@@ -47,6 +72,7 @@ var live = {
             context.html = html;
             live.socket.io.sockets.emit('addQueue', context);
         });
+        live.saveQueue();
     },
     
     logInterval:null,
@@ -115,18 +141,20 @@ var live = {
         for (q in this.queue) {
             this.queue[q].position = this.queue.indexOf(this.queue[q])+1;
         }
+        this.saveQueue();
         
     },
     //data is object in queue array
     //promotes socket if socket exists, otherwise
     // it will move to next in line.
+    persist:false,
     promote: function(data){
         if (data.socket) {
             C.log('Promoting next in queue ', {color:'green'});
             data.socket.emit('promote', {millis:this.time, name:data.name});
             data.start = new Date().getTime();
             this.commandId = data.id;
-        }else{
+        }else if (!this.persist){
             C.log('promote function given empty data, checking next in line.', {color:'red'});
             if (this.queue.length) {
                 this.queue.splice(0,1);
@@ -135,7 +163,9 @@ var live = {
                     this.promote(this.queue[0]);
                 }else C.log('Queue is now empty. ', {color:'yellow'});
             }
-        }
+        }else
+            C.warn('Queue has no socket but is persisting anyways. ');
+
     },
     
     demote: function(data, position, kick){
@@ -148,7 +178,7 @@ var live = {
         } else C.log('Demoting position ', position, ' failed. Invalid socket.', {color:'red'});
     },
     
-    //validate
+    /* Returns true if signed id matches client currently in command. */
     isCommander: function(id){
         if (id){        //fast.
             var split = id.split(':');
@@ -168,18 +198,11 @@ var live = {
             this.port = port;
             var io = require('socket.io').listen(port);
             io.configure(function(){
-                /*io.set('authorization', function(data, accept){
-                    
-                    if (data.headers.cookie) {
-                        data.cookie = cookie_reader.parse(data.headers.cookie);
-                        return accept(null, true);
-                    }
-                    return accept('error',false);
-                });*/
                 io.set('log level',1);
             });
             this.io = io;
             this.events();
+            live.initQueue();
             return live;
         },
         
@@ -350,6 +373,7 @@ var live = {
     },
     //Use this to send popups to clients
     /*
+    socket - specify a socket.io socket to emit to only.
     @param global - sends to everyone on site.  annoying
     @param title, message - for popup
     @param room - part of site to send popup to. e.g. rover, admin
@@ -367,4 +391,6 @@ var live = {
     }
 }
 
-module.exports = live;
+return live;
+
+})();
