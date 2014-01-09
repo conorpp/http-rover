@@ -56,8 +56,6 @@ var Command = {
         this.socket.emit('subscribe', {room:pageRoom});
         console.log('Joining ', pageRoom);
     },
-    //debounce write command to prevent excessive requests to server.
-    millis: new Date().getTime(),
     
     /*
         Writes a command to the server to control rover.
@@ -65,6 +63,7 @@ var Command = {
         
         command - string to specify what command to execute.  See rover.js
     */
+    millis: new Date().getTime(),
     write: function(command){
         var debounce = new Date().getTime() - this.millis;
         if (debounce > 125) {
@@ -92,10 +91,12 @@ var Command = {
                  {millis:2500});
         UI.timer(millis);
         this.keyupUnbind();
+        console.log('about to call this.keyupListen();');
         this.keyupListen();
         this.inCommand = true;
         //audio
         R.init();
+        setTimeout(function(){ if (Command.inCommand) Command.demote(); }, millis+5000);
     },
     
     /*
@@ -119,14 +120,17 @@ var Command = {
     },
     
     keyupListen: function(){
+        console.log('keys are listening.');
         $('html,body').keydown(function(e){
             Command.keys[e.which] = true;
             var c = Command.getCommand();
+            console.log('got key '+c);
             if (c) {
                 e.preventDefault();
                 Command.write(c);
                 for (var key in Command.keys) {
                     $('#'+Command.getCommand(key)).addClass('active');
+                    console.log('activating key '+Command.getCommand(key)+'  key: '+key);
                 }
                 
             }
@@ -160,7 +164,7 @@ var Command = {
                 break;
             }
         }
-        switch (keyCode) {
+        switch (parseInt(keyCode)) {
             case 37:
                 return 'left';
             break;

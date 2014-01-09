@@ -37,11 +37,10 @@ var live = {
     
     /* Takes a snapshot of queue.  for reinitializing on server restarts */
     saveQueue: function(){
-        var temp = this.queue;
-        for (var i in temp) {
-            delete temp[i].socket;
+        var temp = [];
+        for (var i in this.queue) {
+            temp.push({name: this.queue[i].name, id:this.queue[i].id, time:this.queue[i].secs, position:this.queue[i].position});
         }
-        console.log('temp ', temp.length);
         db.store.set('queue', JSON.stringify({ timeStamp: new Date().getTime(), queue:temp }));
     },
     
@@ -175,7 +174,7 @@ var live = {
             live.socket.io.sockets.emit('removeQueue', {position:position || 1});
             this.queue.splice(position - 1, 1);
             this.commandId = null;
-        } else C.log('Demoting position ', position, ' failed. Invalid socket.', {color:'red'});
+        } else C.log('Demoting position ', position, ' failed. Invalid socket.', data,{color:'red'});
     },
     
     /* Returns true if signed id matches client currently in command. */

@@ -36,6 +36,7 @@ Command.socket.on('popup', function(data){       //not client specific
 });
 Command.socket.on('promote', function(data){        //is client specific
     Command.promote(data.millis, data.name);
+    
 });
 Command.socket.on('demote', function(data){     //is client specific
     if (!data.kick) {
@@ -156,7 +157,8 @@ $(document).ready(function(){
     });
     
      
-    $('#join').click(function(){    //step one: enter name
+    $('#record,.command').click(function(){    //step one: enter name
+        if (Command.inCommand) return;
         UI.popup('Enter a name', UI.T.nameTemplate);
         $('input.name').focus();
     });
@@ -185,6 +187,11 @@ $(document).ready(function(){
         }
         $(this).parents('.popupSpace').hide();
         join(name.substr(0,20));
+    });
+    $(document).on('keyup', '#nameField', function(e){
+        if (e.keyCode == 13) 
+            $('.joinSubmit').trigger('click');
+        
     });
     
     $(document).on('click','.pX', function(){
