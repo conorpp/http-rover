@@ -11,9 +11,9 @@ block header
   script(src='/js/record.js')
 block content
     #navBar.abs
-        button(id='refresh', class='btn btn-primary fright mar20') Refresh
+        button(id='refresh', class='btn btn-primary fright mar20', title='reload the video stream and maybe it\'ll be quicker') Refresh
         
-    #streamWrap.center
+    #streamWrap.center.inline
         
         table
             tr
@@ -26,23 +26,23 @@ block content
                         //button(id='join', class='btn btn-success right15') Join
                         div.btn-group
                             | 
-                            button(id='left', class='btn btn-default command')
+                            button(id='left', class='btn btn-default command', title="go left")
                                 |<span class="glyphicon glyphicon-chevron-left"></span>
-                            button(id='reverse' ,class='btn btn-default command')
+                            button(id='reverse' ,class='btn btn-default command', title="go backward")
                                 |<span class="glyphicon glyphicon-arrow-down"></span>
-                            button(id='forward' ,class='btn btn-default command')
+                            button(id='forward' ,class='btn btn-default command', title="go forward")
                                 |<span class="glyphicon glyphicon-arrow-up"></span>
-                            button(id='right', class='btn btn-default command')
+                            button(id='right', class='btn btn-default command', title="go right")
                                 |<span class="glyphicon glyphicon-chevron-right"></span>
 
                         
-                        button(id='record' class='btn btn-default left5')
+                        button(id='record' class='btn btn-default left5', title='Broadcast your voice to the rover\'s speakers')
                             |<span class="glyphicon glyphicon-volume-up not-recording"></span>
                         
                         .info
                             | you can use arrow keys too
             tr
-                td#queue
+                td(id='queue', title='join the queue to control the rover by pressing a button')
                     .fs20 queue
                     table.table.table-striped.color1.bg0
                         tr
@@ -51,7 +51,7 @@ block content
                             th seconds left
             tr
                 td
-                    div#map
+                    div(id='map', title='the live rover location and home point')
     // meta for which room to join (socket.io)
     input(type='hidden', id='pageRoom', value='rover')
  

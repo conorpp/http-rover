@@ -130,16 +130,16 @@ footer{
 
 #logo{top:0px;}
 #title{margin-left: 30px; top:0px; font-size: 2.5em;}
-#siteWrap{top:0px;}
+#siteWrap{/*top:0px; *//*margin-left: 20%;*/}
 #wrap{
-    padding-bottom: 100px;
+    /*padding-bottom: 100px;
     min-height: 450px;
     margin-top: 40px;
     text-align: left;
-    padding-left: 20px;
+    padding-left: 20px;*/
 }
 #streamWrap{
-    left:20%;
+   /* left:20%; */
     top:0px;
 }
 #audio{
@@ -150,7 +150,7 @@ footer{
 }
 #stream{
     top:0;
-    left:25%;
+  /*  left:25%; */
 }
 #controlBar{
     width:100%;
@@ -161,7 +161,6 @@ footer{
     top:10px;
     padding:5px;
     z-index: 1;
-    
 }
 #controlBar button{
     font-size: 2.6em;
