@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# run webserver, canvas server, and rover as development
-
-node server.js $@ &
-node canvas-server.js $@ &
-sudo node rover/control.js $@ &
-
-echo "running everything on localhost"
