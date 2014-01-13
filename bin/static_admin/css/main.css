@@ -17,9 +17,9 @@ iframe{
 }
 body {
     background: #333;
-    text-align: center;
-    margin-top: 10%;
+    margin-top: 15px;
     color:white;
+    text-align: center;
 }
 button{
     padding:25px;
@@ -97,6 +97,9 @@ footer{
 .width2{max-width: 400px;}
 .width3{max-width: 500px;}
 
+.wide{width: 100%;}
+.high{height: 100%;}
+
 .topleft{top:0px; left: 0px;}
 
 .shadow{box-shadow: -2px 2px 20px 1px #000;}
@@ -135,8 +138,13 @@ footer{
     /*padding-bottom: 100px;
     min-height: 450px;
     margin-top: 40px;
+    text-align: left; */
+    /*padding:30px;*/
+    /*margin-left: -25px;*/
+}
+.textWrap{
+    max-width: 550px;
     text-align: left;
-    padding-left: 20px;*/
 }
 #streamWrap{
    /* left:20%; */
@@ -186,6 +194,9 @@ footer{
 
 /* MOBILE devices < 480px wide */
 @media all and (max-width: 480px) {
-    #controlBar .btn-group button{font-size: 4em}
-    #controlBar button#join{font-size: 1.5em}
+    #controlBar .btn-group button, #controlBar #record{font-size: 4em}
+    /*#controlBar button#join{font-size: 1.5em}*/
+}
+@media all and (min-width: 520px) {
+    body .textWrap{margin-left: 22%;}
 }

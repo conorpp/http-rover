@@ -5,54 +5,55 @@ block header
 block title
     | wow much admin.
 block content
-    form(method='post' , action='/logout', id='logout' class="inline")
-        input(type='submit', value='log out')
-    h2.color0.head Stats
-    p.fs12 - current info for web server -
-    p.color0.left15 Total commanded : #{commandCount}
-    each val, key in stats
-        p.color0.left15 #{key} : #{val}
+    .textWrap
+        form(method='post' , action='/logout', id='logout' class="inline")
+            input(type='submit', value='log out')
+        h2.color0.head Stats
+        p.fs12 - current info for web server -
+        p.color0.left15 Total commanded : #{commandCount}
+        each val, key in stats
+            p.color0.left15 #{key} : #{val}
+            
+        h2.head Last known stats of the rover
+        p.fs12 - Network configuration  (ifconfig) - <br />
+        p !{ifconfig}
+        p.fs12 - GPS - <br />
+        p latitute: #{gps.lat}
+        p longitude: #{gps.lng}
+        p altitude: #{gps.altitude} m
+        p date: #{gps.date}
+        p age: #{gps.age} ms
+        p speed: #{gps.mph} mph
         
-    h2.head Last known stats of the rover
-    p.fs12 - Network configuration  (ifconfig) - <br />
-    p !{ifconfig}
-    p.fs12 - GPS - <br />
-    p latitute: #{gps.lat}
-    p longitude: #{gps.lng}
-    p altitude: #{gps.altitude} m
-    p date: #{gps.date}
-    p age: #{gps.age} ms
-    p speed: #{gps.mph} mph
-    
-    h2.head Stream Reset
-    p.fs12 - Reset the stream.  All connected clients will be notified. - <br />
-    button(id='reset' class='btn btn-primary') Reset Stream
-    
-    h2.color0.head Announcement
-    .adminPopup
-        p.fs12 - send a global pop up to all connected users. -
+        h2.head Stream Reset
+        p.fs12 - Reset the stream.  All connected clients will be notified. - <br />
+        button(id='reset' class='btn btn-primary') Reset Stream
+        
+        h2.color0.head Announcement
+        .adminPopup
+            p.fs12 - send a global pop up to all connected users. -
+            lable
+                input(type='checkbox', class='checkbox inline', id='savePopup', checked=checked)
+                | Save and open on every page load.
+            input(type='text', placeholder='Title', class='block form-control mar5', id='popupTitle', value=title)
+            textarea(placeholder='message' class='form-control mar5', id='popupMessage') #{message}
+            button(class='btn btn-success', id='send') Send
+            - if(popup)
+                button(class='btn btn-danger', id='deletePopup') Delete
+        
+        h2.head Kick People
+        p.fs12 - Kick someone out of the queue by name.  Or everyone.  Notification will be sent. - <br />
         lable
-            input(type='checkbox', class='checkbox inline', id='savePopup', checked=checked)
-            | Save and open on every page load.
-        input(type='text', placeholder='Title', class='block form-control mar5', id='popupTitle', value=title)
-        textarea(placeholder='message' class='form-control mar5', id='popupMessage') #{message}
-        button(class='btn btn-success', id='send') Send
-        - if(popup)
-            button(class='btn btn-danger', id='deletePopup') Delete
-    
-    h2.head Kick People
-    p.fs12 - Kick someone out of the queue by name.  Or everyone.  Notification will be sent. - <br />
-    lable
-        input(type='checkbox', class='checkbox inline', id='kickEveryone', checked=checked)
-        | Everyone.
-    input(type='text', placeholder='Or by name', class='block form-control mar5 width2', id='kickName', value=title)
-    button(id='kick' class='btn btn-danger') Kick
-    
-    
-    h2.head Send shell command
-    | - Send a command to be executed in the rover shell.  stdout will be displayed below. *CAREFUL!- <br />
-    div#stdout.pad10
-    input(id='execCommand', class='block form-control mar5', placeholder=' Command')
+            input(type='checkbox', class='checkbox inline', id='kickEveryone', checked=checked)
+            | Everyone.
+        input(type='text', placeholder='Or by name', class='block form-control mar5 width2', id='kickName', value=title)
+        button(id='kick' class='btn btn-danger') Kick
+        
+        
+        h2.head Send shell command
+        | - Send a command to be executed in the rover shell.  stdout will be displayed below. *CAREFUL!- <br />
+        div#stdout.pad10
+        input(id='execCommand', class='block form-control mar5', placeholder=' Command')
     
         
     

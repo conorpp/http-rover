@@ -9,18 +9,25 @@ block header
   |<script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
   script(src="http://cdn.binaryjs.com/0/binary.js")
   script(src='/js/record.js')
-block content
-    #navBar.abs
-        button(id='refresh', class='btn btn-primary fright mar20', title='reload the video stream and maybe it\'ll be quicker') Refresh
+block content        
         
     #streamWrap.center.inline
         
         table
             tr
                 td
-                    #time.fs18
-                        
-                    #mph  0 mph
+                    table.wide
+                        tr
+                            td
+                                #mph  0 mph
+                            td
+                                #time.fs18
+                            td
+                                button(id='refresh', class='btn btn-primary', title='reload the video stream and maybe it\'ll be quicker') Refresh
+                
+            tr
+                td
+
                     iframe(src='/video', id='stream')
                     #controlBar
                         //button(id='join', class='btn btn-success right15') Join
