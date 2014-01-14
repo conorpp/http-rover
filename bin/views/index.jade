@@ -31,7 +31,7 @@ block content
                     iframe(src='/video', id='stream')
                     #controlBar
                         //button(id='join', class='btn btn-success right15') Join
-                        div.btn-group
+                        div.btn-group.fleft
                             | 
                             button(id='left', class='btn btn-default command', title="go left")
                                 |<span class="glyphicon glyphicon-chevron-left"></span>
@@ -43,11 +43,11 @@ block content
                                 |<span class="glyphicon glyphicon-chevron-right"></span>
 
                         
-                        button(id='record' class='btn btn-default left5', title='Broadcast your voice to the rover\'s speakers')
+                        button(id='record' class='btn btn-default left5 fleft', title='Broadcast your voice to the rover\'s speakers')
                             |<span class="glyphicon glyphicon-volume-up not-recording"></span>
                         
-                        .info
-                            | you can use arrow keys too
+                    p.info
+                        | <br>you can use arrow keys too
             tr
                 td(id='queue', title='join the queue to control the rover by pressing a button')
                     .fs20 queue

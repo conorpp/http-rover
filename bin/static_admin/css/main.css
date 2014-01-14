@@ -11,7 +11,7 @@ Order of this file
 
 iframe{
     width:500px;
-    height:380px;
+    height:320px;
     border:none;
     overflow-y: hidden;
 }
@@ -142,6 +142,7 @@ footer{
     /*padding:30px;*/
     /*margin-left: -25px;*/
 }
+
 .textWrap{
     max-width: 550px;
     text-align: left;
@@ -179,7 +180,6 @@ footer{
 }
 #queue table{
     max-width: 420px;
-    margin-left: 8%;
 }
 
 #forward{
@@ -197,6 +197,7 @@ footer{
     #controlBar .btn-group button, #controlBar #record{font-size: 4em}
     /*#controlBar button#join{font-size: 1.5em}*/
 }
-@media all and (min-width: 520px) {
+@media all and (min-width: 480px) {
     body .textWrap{margin-left: 22%;}
+    #controlBar .btn-group{margin-left: 10%;}
 }
