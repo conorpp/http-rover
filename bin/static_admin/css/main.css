@@ -50,7 +50,8 @@ footer{
 .mar5{margin: 5px;}
 .mar10{margin: 10px;}
 .mar15{margin: 15px;}
-.mar20{margin: 20px;}
+.mar25{margin: 25px;}
+.mar30{margin: 30px;}
 
 .pad5{padding: 5px;}
 .pad10{padding: 10px;}
@@ -64,6 +65,10 @@ footer{
 .level3{z-index: 3;}
 .level4{z-index: 4;}
 .level5{z-index: 5;}
+
+.textLeft{text-align: left;}
+.textRight{text-align: right;}
+.textCenter{text-align: center;}
 
 .clicker{cursor: pointer;}
 
