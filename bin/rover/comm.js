@@ -77,8 +77,8 @@ module.exports = (function(){
                 Rover.write(127,255);
             break;
             case 'left':
-            Rover.moving();
-            Rover.write(107,158);
+                Rover.moving();
+                Rover.write(107,158);
             break;
             case 'right':
                 Rover.moving();

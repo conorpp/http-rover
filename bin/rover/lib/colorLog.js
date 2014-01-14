@@ -55,6 +55,9 @@
         });
                 
 */
+
+module.exports = (function(){
+
 var C = {
     
     options:{},
@@ -131,7 +134,22 @@ var C = {
             }
         }
         args = this.format(args);
-        if (this.options.newline || this.options.newline == undefined) args += '\n';
+
+        /*if (args.indexOf('\\t') != -1) {
+            var temp = args.split('\\t');
+            var args = '';
+            for (var a in temp) {
+                args += temp[a];
+            }
+            args = '\r' + args;
+        }else */ if (args.indexOf('\\n') != -1) {
+            var temp = args.split('\\n');
+            var args = '';
+            for (var a in temp) {
+                args += temp[a];
+            }
+        }else args += '\n';
+        
         process.stdout.write(args,'utf-8');
     },
     
@@ -156,8 +174,9 @@ var C = {
         if (this.options.font) {
             code += '\033[10;' +this.font(this.options.font)+ 'm';
         }
-
-        return code + raw + '\033[0m';   //end with reset code.
+        code += raw + '\033[0m';
+        if (C.options.noline == false) args += '\\n';
+        return code;   //end with reset code.
     },
     
     //return color code
@@ -254,4 +273,56 @@ var C = {
     }
 };
 
-module.exports = C;
+var colors = ['red', 'purple', 'yellow',
+              'blue', 'black',
+              'white', 'green', 'teal',
+              'random'];
+var l = colors.length;
+
+while (l--) {
+    (function(){
+        var val = colors[l];
+        String.prototype[val] = function(){
+            C.options = {color:val}; return C.format(this);
+        };
+        String.prototype['bg'+val] = function(){
+            C.options = {bg:val}; return C.format(this);
+        };
+    })();
+}
+
+var fonts = ['bold', 'faint', 'italic',
+            'underline', 'blink', 'blinkfast',
+            'inverse', 'conceal', 'cross',
+            'normal', 'random'];
+l = fonts.length;
+while (l--) {
+    (function(){
+        var val = fonts[l];
+        if (val=='random') {
+            val = 'font'+'Random';
+        }
+        String.prototype[val] = function(){
+            C.options = {font:val}; return C.format(this);
+        };
+    })();
+}
+
+
+String.prototype.intense = function(){
+    C.options = {intense:true}; return C.format(this);
+};
+
+String.prototype.noline = function(){
+    return this + '\\n'
+};
+/*
+String.prototype.replace = function(){
+    return this + '\\t'
+};*/
+
+return C;
+})();
+
+
+
