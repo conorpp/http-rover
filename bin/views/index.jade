@@ -19,13 +19,15 @@ block content
                 td
                     table.wide
                         tr
-                            td
+                            td.fs8
                                 #mph  0 mph
                             td
                                 #time.fs18
-                            td
-                                button(id='refresh', class='btn btn-primary', title='reload the video stream and maybe it\'ll be quicker') Refresh
-                
+                            td.fs8
+                                | latency: 
+                                span#latency 1000
+                            td.fs8
+                                button(id='refresh', class='btn btn-primary', title='reload the video stream and maybe it\'ll be quicker') refresh
             tr
                 td
 

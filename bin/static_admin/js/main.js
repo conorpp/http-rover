@@ -76,6 +76,10 @@ Command.socket.on('info', function(data){       //not client specific
             num = Math.floor(num)/100;
         $('#mph').html(num+' mph');
     }
+    
+    if (data.latency != undefined) {
+        $('#latency').html(data.latency+' ms');
+    }
 });
 Command.socket.on('kick', function(data){           //not client specific
     console.log('Kicked out');

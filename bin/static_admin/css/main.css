@@ -41,6 +41,9 @@ footer{
 .color0{color:white;}
 .bg1{background:#a5a5a5;}
 
+.fs4{font-size: 0.4em;}
+.fs6{font-size: 0.6em;}
+.fs8{font-size: 0.8em;}
 .fs12{font-size: 1.2em;}
 .fs14{font-size: 1.4em;}
 .fs16{font-size: 1.6em;}
@@ -200,6 +203,7 @@ footer{
 /* MOBILE devices < 480px wide */
 @media all and (max-width: 480px) {
     #controlBar .btn-group button, #controlBar #record{font-size: 4em}
+    .info{display: none;}
     /*#controlBar button#join{font-size: 1.5em}*/
 }
 @media all and (min-width: 480px) {

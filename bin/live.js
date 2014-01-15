@@ -14,8 +14,11 @@ var live = {
     secs: Math.floor(this.time/1000),
     queueInterval: null,
     commandId:null,
-    pings:0,                //init track of unresponded pings to rover
-    maxPings:3,             //max of consecutive unresponded pings to send distress popup
+    
+    //latency.
+    lastPingSent: new Date().getTime(),                
+    lastPingReturn: new Date().getTime(),
+    latency:0,
     roverAlive:false,
     
     
@@ -301,19 +304,21 @@ var live = {
             },10*1000);
             
             /* for checking the rovers connection */
+            var pingInter = 3*1000;
             setInterval(function(){
-                live.pings++;           //reset in redis pub.
                 live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
-                if (live.pings >= live.maxPings) {
+                live.lastPingSent = new Date().getTime();
+                live.latency = live.lastPingSent - live.lastPingReturn - pingInter;
+                if (live.latency > live.maxLatency) {
                     C.log('Rover may be disconnected ', {color:'red'});
                     live.roverAlive = false;
-                    live.popup({title:'Rover lost', message:'The rover may '+
-                                                'may have lost connection.  It will attempt reconnecting and ' +
-                                                'we\'ll let you know when it comes back.  Sorry',
+                    live.popup({title:'Rover lost', message:'The rover may ' +
+                                'may have lost connection.  It will attempt reconnecting and ' +
+                                'we\'ll let you know when it comes back.  Sorry',
                                 room:'rover', disconnect:true});
                 }
-                C.log('Sending PING ', live.pings, {color:'blue', logLevel:-2});
-            },3*1000);
+                C.log(('Sending PING. latency: ' + live.latency).blue(), {logLevel:-1});
+            }, pingInter);
             
         },
         
@@ -341,23 +346,29 @@ var live = {
                         live.popup(data);
                     break;
                     case 'ping':    //recieve rover ping.
-                        if (live.pings >= live.maxPings) {
+                        if (live.latency > live.maxLatency) {
                             live.popup({title:'Rover is back',
                                         message:'Internet has been returned to the rover.',
                                         disconnect:false, room:'rover' });
                             C.log('Rover is alive. ',new Date(), {color:'green', font:'bold'});
                         }
+                        
                         live.roverAlive = true;
-                        live.pings = 0;
-                        C.log('recieved PING', live.pings, {color:'blue', logLevel:-2});
+                        live.lastPingReturn = new Date().getTime();
+                        live.latency = live.lastPingReturn - live.lastPingSent;
+                        C.log('recieved PING.  latency: ', live.latency, {color:'blue', logLevel:-1});
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {
+                            if (key == 'gps') {
+                                if (!data[key].valid) return;
+                            }
                             db.store.set(key, JSON.stringify(data[key]));
                         }
                         C.log('Recieved info from rover.', {color:'green'});
-                        C.log('GPS : ', data.gps, {color:'green'});
-                        data.ifconfig = '';
+                        C.log('GPS : ', data.gps, {color:'green', logLevel:-2});
+                        delete data.ifconfig;
+                        data.latency = live.latency;
                         live.socket.io.sockets.emit('info', data);
                     break;
                     case 'stdout':      //return stdout from rover
