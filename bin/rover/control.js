@@ -7,7 +7,7 @@
 	custom lib - colorLog
 	
     scripts:
-	stream, motors, gps, admin, comm
+	stream.js, motors.js, gps.js, comm.js
 */
 var START = function(){
 //Determine which settings file to use.
@@ -70,6 +70,12 @@ try{
     START();
 }catch(e){
     console.log('FATAL ERROR: ', e);
-    console.log('Exiting.');
 }
+
+
+
+
+
+
+
 
