@@ -1,25 +1,32 @@
 
 /* module for live events/functions */
 
-module.exports = (function(){
+module.exports =
+
+(function(){
 
 var redis = require('redis');
 
 var live = {
+    /* General */
+    clientCount:0,  // Total of current number of people connected to website.
     
-    // data
-    clientCount:0,
-    queue:[],
-    time:1000*60,           //ms
+    /* Queue */
+    queue:[],       // Queue for command
+    time:1000*60,   // ms time for how long command lasts.
     secs: Math.floor(this.time/1000),
-    queueInterval: null,
-    commandId:null,
+    _queueInterval: null,
+    commandId:null, // ID of current client in command.
     
-    //latency.
-    lastPingSent: new Date().getTime(),                
+    /* Rover latency */
+    lastPingSent: new Date().getTime(),    // Time stamps for calculating latency       
     lastPingReturn: new Date().getTime(),
-    latency:0,
-    roverAlive:false,
+    latency:0,              //current latency
+    
+    maxLatency: 6*1000,     //Time window for warning about being disconnected.
+    disconnected:45*1000,
+    
+    roverAlive:false,       // indicator if rover is connected.
     
     
     /* for attempting to reload queue in quick server restarts. */
@@ -79,12 +86,12 @@ var live = {
     
     logInterval:null,
     beginQueue: function(){
-        live.queueInterval = setInterval(function(){
+        live._queueInterval = setInterval(function(){
             C.log('Interval executed. Changing command.  Length - ', live.queue.length, {color:'green', logLevel:1});
             
             live.changeCommand();
             
-            if (live.queue.length <= 0 ) clearInterval(live.queueInterval);
+            if (live.queue.length <= 0 ) clearInterval(live._queueInterval);
             
         }, live.time);
         
@@ -309,7 +316,7 @@ var live = {
                 live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
                 live.lastPingSent = new Date().getTime();
                 live.latency = live.lastPingSent - live.lastPingReturn - pingInter;
-                if (live.latency > live.maxLatency) {
+                if (live.latency > live.maxLatency && live.latency < live.disconnected) {
                     C.log('Rover may be disconnected ', {color:'red'});
                     live.roverAlive = false;
                     live.popup({title:'Rover lost', message:'The rover may ' +

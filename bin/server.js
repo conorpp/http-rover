@@ -21,12 +21,12 @@ app.use(express.static('static_admin'));
 app.use(express.cookieParser(SECRET));
 app.use(express.bodyParser());
 
-if (process.argv.indexOf('superdebug') != -1) 
-  C.set({logLevel: -1});
-else if (process.argv.indexOf('debug') != -1)
-  C.set({logLevel: 0});
+var debug = process.argv.indexOf('-debug');
+if (debug != -1) 
+  C.set({logLevel: process.argv[parseInt(debug)]});
 else
-  C.set({logLevel: 1});
+  C.set({logLevel: 0});
+
 
 
 C.log('Listening for http requests on ', S.http_port, {logLevel:1, color:'green', font:'bold'});
