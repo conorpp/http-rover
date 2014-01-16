@@ -10,9 +10,9 @@ var Speaker = require('speaker');
 
 // Create the Speaker instance
 var speaker = new Speaker({
-  channels: 2,          // 2 channels
-  bitDepth: 8,          // 16-bit samples
-  sampleRate: 48000,    // 44,100 Hz sample rate
+  channels: 2,          
+  bitDepth: 8,          
+  sampleRate: 48000,    
   signed:true
 });
 

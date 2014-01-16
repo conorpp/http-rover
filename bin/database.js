@@ -14,6 +14,8 @@
         ifconfig - (str) Last info on network config for rover.
         
         gps - (str) JSON obj for last known GPS data for rover.
+        
+        queueHistory - (str) JSON copy of everyone that commanded rover ever.
     
     TODO:
     HMSET index:
@@ -49,6 +51,7 @@ var database = {
             C.log('commandCount - ', val, {logLevel:-1});
             live.commandCount = val;
         });
+
     },
     
     /*
@@ -74,7 +77,7 @@ var database = {
                 }catch(e){
                    self._data[keys[n]] = val; 
                 }
-                console.log('got db val '+ keys[n], val);
+                //console.log('got db val '+ keys[n], val);
                 self._chainStart--;
                 if (self._chainStart == 0) callback(self._data);
                     

@@ -163,7 +163,7 @@ module.exports = (function(){
         },
         
         _parse: function(data){
-            C.log('Sending feedback ', data.func, {color:'purple', logLevel:-1});
+            C.log('Sending feedback ', data.func, {color:'purple', logLevel:-2});
             pub.publish('feedback', JSON.stringify(data));
         }
     };
