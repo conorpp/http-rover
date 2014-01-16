@@ -9,7 +9,8 @@ block content
         h3
             | These are all of the past clients that have controlled the rover.
             | In order of most recently joined.
-        
+        h3
+            | total: #{clients.length}
         each client in clients
             div.fs12 #{client.name} - #{client.start.naturaltime()}
             each val, key in client
