@@ -43,7 +43,7 @@ var Rover = {
 	    //write stop command to start off.
 	    var buf = new Buffer(1);
 	    buf.writeUInt8(0x0,0);  //0x0 0x0
-	    _data.serial.write(buf, function(err, results) {
+	    Rover.serial.write(buf, function(err, results) {
 		if (err) {
 		    C.log('Error connecting rover: ' , err );
 	    	}
