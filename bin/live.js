@@ -40,7 +40,7 @@ var live = {
             live.persist = true;
             setTimeout(function(){ live.persist = false; },secs);
             for (var i in data.queue) {
-                live.addQueue(data.queue[i].name, data.queue[i].id, null);
+                live.addQueue(data.queue[i].name, data.queue[i].id, null, data.queue[i].address);
             }
         });
     },
@@ -49,20 +49,42 @@ var live = {
     saveQueue: function(){
         var temp = [];
         for (var i in this.queue) {
-            temp.push({name: this.queue[i].name, id:this.queue[i].id, time:this.queue[i].secs, position:this.queue[i].position});
+            var obj = {};
+            for (var key in this.queue[i]) {
+                if (key != 'socket') 
+                    obj[key] = this.queue[i][key];
+                
+            }
+            temp.push(obj);
         }
         db.store.set('queue', JSON.stringify({ timeStamp: new Date().getTime(), queue:temp }));
     },
     
+    saveMember: function(member){
+        var copy = {};
+        for (var key in member) {
+            if (key != 'socket') 
+                copy[key] = member[key];                
+        }
+        db.store.get('queueHistory', function(err, data){
+            if (data)copy = '['+JSON.stringify(copy) +','+ data.substr(1, data.length);
+            else copy = JSON.stringify([copy]);
+            db.store.set('queueHistory',copy);
+        });
+        
+    },
+    
     /* adds to queue */
-    addQueue:function(name, id, socket){
+    addQueue:function(name, id, socket, addr){
         var secs = Math.floor(this.time/1000);
         this.queue.push({
             name:name,
             id:id,
             time:secs,
             position: this.queue.length +1,
-            socket:socket
+            dateJoined: new Date(),
+            socket:socket,
+            address: socket ? socket.handshake.address : addr
         });
         C.log('queue added to. length:', this.queue.length, {color:'green'});
         if (live.queue.length == 1) {
@@ -76,7 +98,7 @@ var live = {
             position:this.queue.length,
             time:secs
         }
-
+        // Send html string to clients
         app.render('templates/queue', {queue:[context]}, function(err, html){
             context.html = html;
             live.socket.io.sockets.emit('addQueue', context);
@@ -158,11 +180,12 @@ var live = {
     // it will move to next in line.
     persist:false,
     promote: function(data){
+        if (!data) {
+            C.log('ERROR:  Promote() called with empty data arg! '.red().bold(), {logLevel:1});
+            return;
+        }
         if (data.socket) {
-            C.log('Promoting next in queue ', {color:'green'});
             data.socket.emit('promote', {millis:this.time, name:data.name});
-            data.start = new Date().getTime();
-            this.commandId = data.id;
         }else if (!this.persist){
             C.log('promote function given empty data, checking next in line.', {color:'red'});
             if (this.queue.length) {
@@ -172,9 +195,16 @@ var live = {
                     this.promote(this.queue[0]);
                 }else C.log('Queue is now empty. ', {color:'yellow'});
             }
-        }else
+            return;
+        }else{
             C.warn('Queue has no socket but is persisting anyways. ');
-
+            data.serverRestarted = true;
+        }
+        C.log('Promoting next in queue ', {color:'green'});
+        data.start = new Date().getTime();
+        data.commanded = true;
+        this.commandId = data.id;
+        this.saveMember(data);
     },
     
     demote: function(data, position, kick){
@@ -248,7 +278,11 @@ var live = {
                     if (live.isCommander(data.id)) {
                         C.log('command: ', data.func, {color:'blue'});
                         live.redis.pub.publish('rover', JSON.stringify(data));
-                    }else C.log('Command Denied.  ('+data.func+')', {color:'yellow'});
+                    }else{
+                        C.log('Command Denied.  ('+data.func+')', {color:'yellow'});
+                        C.log('Demoting bad socket.'.yellow());
+                        socket.emit('demote');
+                    }
                 });
                 
                 socket.on('join', function(data){
@@ -345,7 +379,7 @@ var live = {
             //feedback from rover.
             this.sub.on('message', function(channel, data){
                 data = JSON.parse(data);
-                C.log('rover feed back', data);
+                C.log('Recieved rover feed back', data.func, {logLevel:-2});
                 switch (data.func) {
                     case 'popup':
                         C.log('Resetting video stream for all clients', {color:'blue'});
@@ -372,7 +406,7 @@ var live = {
                             }
                             db.store.set(key, JSON.stringify(data[key]));
                         }
-                        C.log('Recieved info from rover.', {color:'green'});
+                        C.log('Recieved info from rover.', {color:'green', logLevel:-2});
                         C.log('GPS : ', data.gps, {color:'green', logLevel:-2});
                         delete data.ifconfig;
                         data.latency = live.latency;

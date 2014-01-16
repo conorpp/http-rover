@@ -39,6 +39,7 @@ Command.socket.on('promote', function(data){        //is client specific
     
 });
 Command.socket.on('demote', function(data){     //is client specific
+    data = data || {};
     if (!data.kick) {
         Command.demote();
     }else{
@@ -247,7 +248,7 @@ function getData(){
                 UI.noQueue();
             }
             if (data.popup) {
-                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:5000, clone:true});
+                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:15000, clone:true});
             }
             
         },

@@ -278,6 +278,13 @@ String.prototype.intense = function(){
 String.prototype.noline = function(){
     return this + '\\n'
 };
+
+String.prototype.logLevel = function(i){
+    if (parseInt(i) < C.logLevel)
+        return '\r';
+    else
+        return this;
+};
 /*
 String.prototype.replace = function(){
     return this + '\\t'

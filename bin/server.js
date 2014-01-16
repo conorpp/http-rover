@@ -14,7 +14,7 @@ crypto = require('crypto'),
 app = express();
 SECRET = 'wow such secret.';
 /******************************************/
-
+require('./rover/lib/funcs');
 app.set('view engine','jade');
 
 app.use(express.static('static_admin'));
@@ -27,8 +27,6 @@ if (debug != -1)
 else
   C.set({logLevel: 0});
 
-
-
 C.log('Listening for http requests on ', S.http_port, {logLevel:1, color:'green', font:'bold'});
 C.log('Listening for commands on ', S.command_port, {logLevel:1, color:'green', font:'bold'});
 C.log('Redis connected to '+S.host+':'+S.redis_port, {logLevel:1, color:'green', font:'bold'});
@@ -37,5 +35,16 @@ db.listen(S.redis_port, S.host);
 views.listen(app);
 live.socket.listen(S.command_port);
 live.redis.listen(S.redis_port, S.host);
+
+//Exit gracefully
+var Terminal = require('child_process');
+process.on('SIGINT', function() {
+  //console.log('signal caught??');
+ // Terminal.exec('./stop', function(err, stdout, stderr){
+ //   console.log(err, stdout, stderr);
+    process.exit();
+ // });
+});
+
 
 

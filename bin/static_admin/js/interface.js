@@ -36,7 +36,7 @@ var Command = {
                 var lost = 'You may have to wait a moment to send commands again.';
             }else var lost = '';
             UI.popup('Connected','We successfully reconnected you. <br>'+lost,{millis:4100});
-            if (Command.id) {     //attempt to seize command
+            if (Command.inCommand) {     //attempt to seize command
                 Command.socket.emit('seizeCommand', {id:Command.id});
             }
         });

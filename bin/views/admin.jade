@@ -12,8 +12,10 @@ block content
         p.fs12 - current info for web server -
         p.color0.left15 Total commanded : #{commandCount}
         each val, key in stats
+            - if (key == 'address') val = JSON.stringify(val);
             p.color0.left15 #{key} : #{val}
-            
+        a(href='/admin/history') See past rover clients
+        
         h2.head Last known stats of the rover
         p.fs12 - Network configuration  (ifconfig) - <br />
         p !{ifconfig}
