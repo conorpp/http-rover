@@ -27,7 +27,7 @@ var Rover = {
 	    //connect to port with correct ID. see `$ lspnp`
             ports.forEach(function(port) {
                 C.log(port, {color:'yellow', logLevel:-1});
-                if (port.pnpId == 'some id i dont know yet')
+                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0')
                         addr = port.comName;
             });
             if (!addr) {

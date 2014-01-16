@@ -31,7 +31,7 @@ return  {
             var addr;
             ports.forEach(function(port) {
                 C.log(port, {color:'yellow', logLevel:-1});
-                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||
+                if (/*port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||*/
                     port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0')
 
                         addr = port.comName;
