@@ -10,14 +10,17 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cd ../..
 
-/opt/node/bin/npm install serialport
+NPM="/opt/node/bin/npm"
 
-/opt/node/bin/npm install socket.io
+$NPM install serialport
 
-/opt/node/bin/npm install redis
+$NPM install redis
 
-/opt/node/bin/npm install forever
+$NPM install forever
 
+$NPM install speaker
+
+#edit forever's location for node.
 $DIR/change
 
 

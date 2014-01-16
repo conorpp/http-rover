@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# running server, canvas server, and rover as development
+
+echo "Running everything rover on localhost"
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+node server.js debug $@ &
+node canvas-server.js $@ &
+sudo node rover/control.js -debug -1 test $@ &
+

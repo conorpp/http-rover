@@ -5,8 +5,15 @@
     Requirements:
         custom lib - serial, colorLog 
 */
+module.exports =
 
-var GPS = {
+(function(){
+    
+Number.prototype.toRad = function() {
+    return this * Math.PI / 180;
+}
+           
+return  {
     
     records:[],
     maxRecords:100,
@@ -24,7 +31,7 @@ var GPS = {
             var addr;
             ports.forEach(function(port) {
                 C.log(port, {color:'yellow', logLevel:-1});
-                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||
+                if (/*port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||*/
                     port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0')
 
                         addr = port.comName;
@@ -47,9 +54,6 @@ var GPS = {
             });
         });
 
-        Number.prototype.toRad = function() {
-          return this * Math.PI / 180;
-        }
     },
     /* Set attributes for GPS program
         @param home - set coord pair [lat, long] for calculating distance.
@@ -261,6 +265,7 @@ var GPS = {
             GPS.stat.mph = GPS.stat.kmph * 1.15078;
             GPS.stat.altitude = 98 - Math.random() * 15;
             GPS.stat.date = new Date();
+            GPS.stat.distance = GPS.distance(GPS.stat.lat, GPS.stat.lng, GPS.home[0], GPS.home[1]);
             GPS.stat.valid = true;
             for (var i in GPS.newDataEvents) GPS.newDataEvents[i](GPS.stat)
         }
@@ -269,9 +274,9 @@ var GPS = {
         },250);
         this.isTesting=true;
     }
-};
+}
 
-module.exports = GPS;
+})();
 
 
 

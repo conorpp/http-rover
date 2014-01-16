@@ -49,6 +49,16 @@ var views = {
                 res.render('login');
             }
         });
+        this.app.get('/admin/history', function(req, res){
+            if (!views.authent(req)) {
+                res.render('login'); return;
+            }
+            db.store.get('queueHistory', function(err, data){
+                if (err) C.err('admin history view error : ', err);
+                res.render('history', {clients:JSON.parse(data)});
+            });   
+            
+        });
         /* log in validation */
         this.app.post('/admin', function(req, res){
             if(views.login(req)){
@@ -124,7 +134,7 @@ var views = {
                     if (err) {
                         C.log('Error rendering html for queue ', {color:'red', logLevel:1});
                     }
-                    console.log('got /data ', data);
+                    C.log('got /data ', data, {logLevel:-2});
                     res.end(JSON.stringify({html:html, popup:data.adminPopup, gps:data.gps}));
                 });
             });

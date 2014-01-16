@@ -36,7 +36,7 @@ var Command = {
                 var lost = 'You may have to wait a moment to send commands again.';
             }else var lost = '';
             UI.popup('Connected','We successfully reconnected you. <br>'+lost,{millis:4100});
-            if (Command.id) {     //attempt to seize command
+            if (Command.inCommand) {     //attempt to seize command
                 Command.socket.emit('seizeCommand', {id:Command.id});
             }
         });
@@ -56,8 +56,6 @@ var Command = {
         this.socket.emit('subscribe', {room:pageRoom});
         console.log('Joining ', pageRoom);
     },
-    //debounce write command to prevent excessive requests to server.
-    millis: new Date().getTime(),
     
     /*
         Writes a command to the server to control rover.
@@ -65,6 +63,7 @@ var Command = {
         
         command - string to specify what command to execute.  See rover.js
     */
+    millis: new Date().getTime(),
     write: function(command){
         var debounce = new Date().getTime() - this.millis;
         if (debounce > 125) {
@@ -92,9 +91,12 @@ var Command = {
                  {millis:2500});
         UI.timer(millis);
         this.keyupUnbind();
+        console.log('about to call this.keyupListen();');
         this.keyupListen();
         this.inCommand = true;
-
+        //audio
+        R.init();
+        setTimeout(function(){ if (Command.inCommand) Command.demote(); }, millis+5000);
     },
     
     /*
@@ -112,18 +114,23 @@ var Command = {
         this.id = null;
         this.inCommand = false;
         this.keyupUnbind();
+        //audio
+        R.destroy();
     
     },
     
     keyupListen: function(){
+        console.log('keys are listening.');
         $('html,body').keydown(function(e){
             Command.keys[e.which] = true;
             var c = Command.getCommand();
+            console.log('got key '+c);
             if (c) {
                 e.preventDefault();
                 Command.write(c);
                 for (var key in Command.keys) {
                     $('#'+Command.getCommand(key)).addClass('active');
+                    console.log('activating key '+Command.getCommand(key)+'  key: '+key);
                 }
                 
             }
@@ -157,7 +164,7 @@ var Command = {
                 break;
             }
         }
-        switch (keyCode) {
+        switch (parseInt(keyCode)) {
             case 37:
                 return 'left';
             break;

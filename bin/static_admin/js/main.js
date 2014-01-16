@@ -36,8 +36,10 @@ Command.socket.on('popup', function(data){       //not client specific
 });
 Command.socket.on('promote', function(data){        //is client specific
     Command.promote(data.millis, data.name);
+    
 });
 Command.socket.on('demote', function(data){     //is client specific
+    data = data || {};
     if (!data.kick) {
         Command.demote();
     }else{
@@ -74,6 +76,10 @@ Command.socket.on('info', function(data){       //not client specific
         var num = parseFloat(data.gps.mph)*100,
             num = Math.floor(num)/100;
         $('#mph').html(num+' mph');
+    }
+    
+    if (data.latency != undefined) {
+        $('#latency').html(data.latency+' ms');
     }
 });
 Command.socket.on('kick', function(data){           //not client specific
@@ -156,7 +162,8 @@ $(document).ready(function(){
     });
     
      
-    $('#join').click(function(){    //step one: enter name
+    $('#record,.command').click(function(){    //step one: enter name
+        if (Command.inCommand) return;
         UI.popup('Enter a name', UI.T.nameTemplate);
         $('input.name').focus();
     });
@@ -165,7 +172,18 @@ $(document).ready(function(){
         $('#stream').attr('src','');
         $('#stream').attr('src',url);
     });
-     
+    
+    $('#record').mousedown(function(){
+        R.start();
+        $(this).find('span')
+            .removeClass('not-recording').addClass('recording');
+    });
+    $('#record').mouseup(function(){    
+        R.stop();
+        $(this).find('span')
+            .removeClass('recording').addClass('not-recording');
+    });
+    
     $(document).on('click', '.joinSubmit', function(){
         var name = $.trim($(this).siblings('input.name').val());
         if (name=='') {
@@ -175,10 +193,16 @@ $(document).ready(function(){
         $(this).parents('.popupSpace').hide();
         join(name.substr(0,20));
     });
+    $(document).on('keyup', '#nameField', function(e){
+        if (e.keyCode == 13) 
+            $('.joinSubmit').trigger('click');
+        
+    });
     
     $(document).on('click','.pX', function(){
         $(this).parents('.popupSpace').hide();
     });
+    
 
 });
 
@@ -224,7 +248,7 @@ function getData(){
                 UI.noQueue();
             }
             if (data.popup) {
-                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:5000, clone:true});
+                UI.popup(data.popup.title, data.popup.message, {announcement:true, millis:15000, clone:true});
             }
             
         },

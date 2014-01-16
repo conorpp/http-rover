@@ -35,7 +35,6 @@ module.exports = (function(){
     subAdmin.on('message', function(channel, data){
         data = JSON.parse(data);
         var asked = true;
-        console.log('admin func : ', data.func);
         switch (data.func) {
             case 'reset':
                 C.log('Resetting stream', {color:'blue'});
@@ -78,8 +77,8 @@ module.exports = (function(){
                 Rover.write(127,255);
             break;
             case 'left':
-            Rover.moving();
-            Rover.write(107,158);
+                Rover.moving();
+                Rover.write(107,158);
             break;
             case 'right':
                 Rover.moving();
@@ -164,7 +163,7 @@ module.exports = (function(){
         },
         
         _parse: function(data){
-            C.log('Sending feedback ', data.func, {color:'purple', logLevel:-1});
+            C.log('Sending feedback ', data.func, {color:'purple', logLevel:-2});
             pub.publish('feedback', JSON.stringify(data));
         }
     };

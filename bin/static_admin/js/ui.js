@@ -51,6 +51,14 @@ var UI = {
         if (options.error) popup.find('.popupTitle').css('color', 'red');
         if (options.announcement) popup.find('.popupTitle').css('color', '#8d8cff');
         popup.show('fast');
+        if (options.pin) {
+            var ele =  $(options.pin.element);
+            var pos = ele.position();
+            popup.css('position', 'absolute');
+            popup.css('right', $(window).width()-(pos.left*5/4)).css('left', 'inherit');
+            popup.css('top', pos.top);
+            console.log('pnned popup at  ', pos);
+        }
         if(options.millis!=undefined) this.timeout = setTimeout(function(){popup.hide('fast')},options.millis);
     },
     /*
@@ -140,7 +148,11 @@ var UI = {
         For when client/server time values get out of sync.
     */
     syncTime: function(millis){
-        $('#pos1').find('td.timer').html(Math.floor(millis/1000)); //convert ms to s
+        var secs = Math.floor(millis/1000);
+        $('#pos1').find('td.timer').html(secs); 
+        if (Command.inCommand) {
+            $('#timer').html(secs);
+        }
     },
     
     showGPS: function(){

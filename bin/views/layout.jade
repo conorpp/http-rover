@@ -10,6 +10,7 @@ html(layout='en')
         link(rel='stylesheet', href='/css/main.css')
         script(src='/js/lib/utils.js')
         script(src='/js/lib/Tocca.min.js')
+        script(src='/js/lib/jGravity-min.js')
         script(src='/js/settings.js')
         script(src='/js/ui.js')
         script(src='/js/interface.js')
@@ -19,10 +20,11 @@ html(layout='en')
         a(href='/').abs.topleft.level3
             #logo.abs.fs20.color0.mar10
                 | <span class="glyphicon glyphicon-eye-open"></span>
-        #siteWrap.abs
+        #siteWrap
             #wrap
-                #title
+                #title.mar30
                     block title
+                
                 block content
             #footer
                 #container
@@ -45,7 +47,7 @@ html(layout='en')
         #templates.hide            
             |<div id="popupTemplate">
             |<div class="color0 background3 ">
-            |<div class="abs fright clicker pad10 fs18 pX">X</div>
+            |<div class="abs fright clicker pad10 fs20 pX">X</div>
             |<div class="bg3 pad20  fleft popup">
             |<p class=" popupTitle fs16 center"><!-- title --></p>
             |<p class=" popupMessage"><!-- message --></p>
@@ -53,7 +55,7 @@ html(layout='en')
             |</div>
             |</div>
             #nameTemplate
-                input(type='text',class='name form-control', maxlength='20')
+                input(type='text', class='name form-control', id='nameField', maxlength='20')
                 button(class='joinSubmit btn btn-success') Join
                 div.errors.color5
 

@@ -1,0 +1,22 @@
+
+extend layout
+block header
+block title
+    | wow much history.
+block content
+    .textWrap
+        a(href='/admin').fs14 back
+        h3
+            | These are all of the past clients that have controlled the rover.
+            | In order of most recently joined.
+        h3
+            | total: #{clients ? clients.length : 0}
+        each client in clients
+            div.fs12 #{client.name} - #{client.start.naturaltime()}
+            each val, key in client
+                - if (key == 'address') val = JSON.stringify(val);
+                div.left15 #{key} : #{val}
+            br
+                
+                
+        | <br> <br> <br> <br> <br> <br>

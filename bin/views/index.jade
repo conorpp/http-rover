@@ -1,6 +1,7 @@
 extend layout
 block title
-    | The Rover
+    p.fleft
+        | The Rover
 block header
   |<link href='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.css' rel='stylesheet' />
   |<!--[if lte IE 8]>
@@ -9,50 +10,59 @@ block header
   |<script src='http://api.tiles.mapbox.com/mapbox.js/v1.3.1/mapbox.js'></script>
   script(src="http://cdn.binaryjs.com/0/binary.js")
   script(src='/js/record.js')
-block content
-    #navBar.abs
-        button(id='refresh', class='btn btn-primary fright mar20') Refresh
+block content        
         
-    #streamWrap.center
+    #streamWrap.center.inline
         
         table
             tr
                 td
-                    #time.fs18
-                        
-                    #mph  0 mph
+                    table.wide
+                        tr
+                            td.fs8
+                                #mph  0 mph
+                            td
+                                #time.fs18
+                            td.fs8
+                                | latency: 
+                                span#latency 0 ms
+                            td.fs8
+                                button(id='refresh', class='btn btn-primary', title='reload the video stream and maybe it\'ll be quicker') refresh
+            tr
+                td
+
                     iframe(src='/video', id='stream')
                     #controlBar
-                        button(id='join', class='btn btn-success right15') Control
-                        div.btn-group
+                        //button(id='join', class='btn btn-success right15') Join
+                        div.btn-group.fleft
                             | 
-                            button(id='left', class='btn btn-default command')
+                            button(id='left', class='btn btn-default command', title="go left")
                                 |<span class="glyphicon glyphicon-chevron-left"></span>
-                            button(id='reverse' ,class='btn btn-default command')
+                            button(id='reverse' ,class='btn btn-default command', title="go backward")
                                 |<span class="glyphicon glyphicon-arrow-down"></span>
-                            button(id='forward' ,class='btn btn-default command')
+                            button(id='forward' ,class='btn btn-default command', title="go forward")
                                 |<span class="glyphicon glyphicon-arrow-up"></span>
-                            button(id='right', class='btn btn-default command')
+                            button(id='right', class='btn btn-default command', title="go right")
                                 |<span class="glyphicon glyphicon-chevron-right"></span>
 
-                        button(id='stop' class='btn btn-danger command hide')
                         
-                            |<span class="glyphicon glyphicon-remove-circle"></span>
-                        .info
-                            | you can use arrow keys too
+                        button(id='record' class='btn btn-default left5 fleft', title='Broadcast your voice to the rover\'s speakers')
+                            |<span class="glyphicon glyphicon-volume-up not-recording"></span>
+                        
+                    p.info
+                        | <br>you can use arrow keys too
             tr
-                td#queue
-                    .fs20 queue
-                    table.table.table-striped.color1.bg0
+                td(id='queue', title='join the queue to control the rover by pressing a button')
+                    .fs20.textLeft queue
+                    table.table.table-striped.color1.bg0.fleft
                         tr
                             th position
                             th user
                             th seconds left
             tr
                 td
-                    div#map
+                    div(id='map', title='the live rover location and home point')
+    // meta for which room to join (socket.io)
     input(type='hidden', id='pageRoom', value='rover')
-    button(id="download") blob
-    a(id="link", download="wav.wav", target="_blank").fs20 download
  
                 

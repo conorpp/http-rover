@@ -27,7 +27,7 @@ var Rover = {
 	    //connect to port with correct ID. see `$ lspnp`
             ports.forEach(function(port) {
                 C.log(port, {color:'yellow', logLevel:-1});
-                if (port.pnpId == 'some id i dont know yet')
+                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0')
                         addr = port.comName;
             });
             if (!addr) {
@@ -71,7 +71,7 @@ var Rover = {
             var num = parseInt(arguments[i]);
             var errs = num<0 || num>255 ||isNaN(num);
             if (errs) {
-                console.error('You must enter a decimal in range of 0-255');
+                C.err('You must enter a decimal in range of 0-255');
                 return;
             }
             var hex = num.toString(16);
@@ -122,17 +122,7 @@ var Rover = {
     
     GPSListen: function(){
 	GPS.on('data', function(data){
-	    if (!data || !data.valid) {
-		C.log('GPS data is not valid', {color:'red'});
-		return;
-	    }
-	   // C.log('Distance:  ',
-		//data.distance,
-		//{color:'blue'});
-	   //C.log('Lat: ', data.lat, ' Lng: ', data.lng);
-	    if (data.distance > 0.0032) {
-		//C.log('OUT OF RANGE! ', {color:'red', font:'bold'});
-	    }
+
 	});
     }
     

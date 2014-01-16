@@ -6,55 +6,20 @@
     -allowed infinite args to be printed
     -added log levels
     
-    Requirements:
-        none
+    usage:
     
-    usage example:
-        var options = {
-            color:'red',
-            font:'bold',
-            newline:true
-        };
-        C.log('This is my first print', 'second arg', 45, options);
-        C.log('   second log', options);
-        >> This is my first printsecondarg      //red and bold print.
-        >>     second log
-
-        //options not required but must be last arg to work.
+        var C = require('colorLog');
+    
+        console.log('this is blue'.blue(),  'this is purple and bold'.purple().bold());
+        console.log('this has a yellow background'.bgyellow() );
         
-    documentation:
-        .log - the logging function.  Specify any number of args to dump
-                and optional options for the print at end.
-        .log options:
-            newline
-                set to false to disable the newline after each log.
-                default true.
-            color
-                'red', 'blue', 'purple', 'cyan', 'white', 'black', 'green', 'random'
-            background
-                *same as color
-            colorIntense
-                bool to increase brightness increase on text color.
-                default false.
-            backgroundIntense
-                bool to increase brightness increase on bg color.
-                default false.
-            font
-                'bold', 'faint', 'underline', 'blink', 'blinkFast',
-                'italic', 'inverse', 'cross', 'conceal', 'normal', 'random'
-            logLevel
-                number that will make log excluded if it's below
-                logLevel attribute. Default 0.
-        .err - same as .log but takes no options and uses {color:'red', logLevel:errLevel},
-                where errLevel is 1 by default
-        .warn - same as .err but yellow.
-    setup:
-        C.set({
-            logLevel: 1  //Excludes all logs with logLevel less than 1. Default 0.
-            errLevel: 1  //the default level .err sets logs to.
-        });
-                
+        // or
+         
+        C.log('this is red and blue ', {font:'bold', color:'blue', bg:'red'});
 */
+
+module.exports = (function(){
+
 var C = {
     
     options:{},
@@ -131,7 +96,22 @@ var C = {
             }
         }
         args = this.format(args);
-        if (this.options.newline || this.options.newline == undefined) args += '\n';
+
+        /*if (args.indexOf('\\t') != -1) {
+            var temp = args.split('\\t');
+            var args = '';
+            for (var a in temp) {
+                args += temp[a];
+            }
+            args = '\r' + args;
+        }else */ if (args.indexOf('\\n') != -1) {
+            var temp = args.split('\\n');
+            var args = '';
+            for (var a in temp) {
+                args += temp[a];
+            }
+        }else args += '\n';
+        
         process.stdout.write(args,'utf-8');
     },
     
@@ -156,8 +136,9 @@ var C = {
         if (this.options.font) {
             code += '\033[10;' +this.font(this.options.font)+ 'm';
         }
-
-        return code + raw + '\033[0m';   //end with reset code.
+        code += raw + '\033[0m';
+        if (C.options.noline == false) args += '\\n';
+        return code;   //end with reset code.
     },
     
     //return color code
@@ -254,4 +235,63 @@ var C = {
     }
 };
 
-module.exports = C;
+var colors = ['red', 'purple', 'yellow',
+              'blue', 'black', 'cyan',
+              'white', 'green', 'teal',
+              'random', 'magenta'];
+var l = colors.length;
+
+while (l--) {
+    (function(){
+        var val = colors[l];
+        String.prototype[val] = function(){
+            C.options = {color:val}; return C.format(this);
+        };
+        String.prototype['bg'+val] = function(){
+            C.options = {bg:val}; return C.format(this);
+        };
+    })();
+}
+
+var fonts = ['bold', 'faint', 'italic',
+            'underline', 'blink', 'blinkfast',
+            'inverse', 'conceal', 'cross',
+            'normal', 'random'];
+l = fonts.length;
+while (l--) {
+    (function(){
+        var val = fonts[l];
+        if (val=='random') {
+            val = 'font'+'Random';
+        }
+        String.prototype[val] = function(){
+            C.options = {font:val}; return C.format(this);
+        };
+    })();
+}
+
+
+String.prototype.intense = function(){
+    C.options = {intense:true}; return C.format(this);
+};
+
+String.prototype.noline = function(){
+    return this + '\\n'
+};
+
+String.prototype.logLevel = function(i){
+    if (parseInt(i) < C.logLevel)
+        return '\r';
+    else
+        return this;
+};
+/*
+String.prototype.replace = function(){
+    return this + '\\t'
+};*/
+
+return C;
+})();
+
+
+

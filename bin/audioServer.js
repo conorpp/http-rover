@@ -1,15 +1,16 @@
 /*
-    Audio streaming
+    Enables audio streaming on webserver.
 */
-S = require('./static_admin/js/settings').Settings;
+module.exports = (function(){
+    
 var BinaryServer = require('binaryjs').BinaryServer;
 
 var websocket = BinaryServer({port: S.audio_port});
 
 websocket.on('connection', function(client){
-    console.log('Client connected');
+    C.log('Client\'s audio connected'.blue(), {logLevel:0});
     client.on('stream', function(stream, meta){
-        if (meta.channel == 'audio') {
+        if (meta.channel == 'audio' && live.isCommander(meta.id)) {
             stream.on('data', function(buf){
                 if (!rinfo || typeof buf == 'string') return;
                 srv.send(buf, 0, buf.length, rinfo.port, rinfo.address);
@@ -19,18 +20,18 @@ websocket.on('connection', function(client){
 });
 var dgram = require('dgram');
 var srv = dgram.createSocket("udp4");
+
 var rinfo;
 srv.on("message", function (msg, _rinfo) {
     if (msg == 'ping') {
-        console.log('ping recieved');
+        C.log('Audio server recieved ping'.blue(), {logLevel:-3});
         rinfo = _rinfo;
     }
-    console.log("server got: " + msg + " from " + _rinfo.address + ":" + _rinfo.port);
 });
 
 srv.on("listening", function () {
   var address = srv.address();
-  console.log(" upd server listening " + address.address + ":" + address.port);
+  console.log(('UDP server listening ' + address.address + ':' + address.port).green().bold());
 });
 
 srv.on('error', function (err) {
@@ -39,4 +40,4 @@ srv.on('error', function (err) {
 
 srv.bind(S.udp_port, S.ip);
 
-
+})();

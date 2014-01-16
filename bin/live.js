@@ -1,34 +1,90 @@
 
 /* module for live events/functions */
 
+module.exports =
+
+(function(){
+
+var redis = require('redis');
+
 var live = {
+    /* General */
+    clientCount:0,  // Total of current number of people connected to website.
     
-    // data
-    clientCount:0,
-    queue:[],
-    time:1000*60,           //ms
+    /* Queue */
+    queue:[],       // Queue for command
+    time:1000*60,   // ms time for how long command lasts.
     secs: Math.floor(this.time/1000),
-    queueInterval: setTimeout(),
-    commandId:null,
-    pings:0,                //init track of unresponded pings to rover
-    maxPings:3,             //max of consecutive unresponded pings to send distress popup
-    roverAlive:false,
+    _queueInterval: null,
+    commandId:null, // ID of current client in command.
+    
+    /* Rover latency */
+    lastPingSent: new Date().getTime(),    // Time stamps for calculating latency       
+    lastPingReturn: new Date().getTime(),
+    latency:0,              //current latency
+    
+    maxLatency: 6*1000,     //Time window for warning about being disconnected.
+    disconnected:45*1000,
+    
+    roverAlive:false,       // indicator if rover is connected.
     
     
     /* for attempting to reload queue in quick server restarts. */
     initQueue: function(){
-
+        var secs = 30*1000;
+        db.store.get('queue', function(err, data){
+            data = data ? JSON.parse(data) : data;
+            if (!data || new Date().getTime() - data.timeStamp > secs)
+                return;
+            console.log('saved queue: ', data);
+            live.persist = true;
+            setTimeout(function(){ live.persist = false; },secs);
+            for (var i in data.queue) {
+                live.addQueue(data.queue[i].name, data.queue[i].id, null, data.queue[i].address);
+            }
+        });
     },
     
-    /* adds to queue and returns id. */
-    addQueue:function(name, id, socket){
+    /* Takes a snapshot of queue.  for reinitializing on server restarts */
+    saveQueue: function(){
+        var temp = [];
+        for (var i in this.queue) {
+            var obj = {};
+            for (var key in this.queue[i]) {
+                if (key != 'socket') 
+                    obj[key] = this.queue[i][key];
+                
+            }
+            temp.push(obj);
+        }
+        db.store.set('queue', JSON.stringify({ timeStamp: new Date().getTime(), queue:temp }));
+    },
+    
+    saveMember: function(member){
+        var copy = {};
+        for (var key in member) {
+            if (key != 'socket') 
+                copy[key] = member[key];                
+        }
+        db.store.get('queueHistory', function(err, data){
+            if (data)copy = '['+JSON.stringify(copy) +','+ data.substr(1, data.length);
+            else copy = JSON.stringify([copy]);
+            db.store.set('queueHistory',copy);
+        });
+        
+    },
+    
+    /* adds to queue */
+    addQueue:function(name, id, socket, addr){
         var secs = Math.floor(this.time/1000);
         this.queue.push({
             name:name,
             id:id,
             time:secs,
             position: this.queue.length +1,
-            socket:socket
+            dateJoined: new Date(),
+            socket:socket,
+            address: socket ? socket.handshake.address : addr
         });
         C.log('queue added to. length:', this.queue.length, {color:'green'});
         if (live.queue.length == 1) {
@@ -42,21 +98,22 @@ var live = {
             position:this.queue.length,
             time:secs
         }
-
+        // Send html string to clients
         app.render('templates/queue', {queue:[context]}, function(err, html){
             context.html = html;
             live.socket.io.sockets.emit('addQueue', context);
         });
+        live.saveQueue();
     },
     
     logInterval:null,
     beginQueue: function(){
-        live.queueInterval = setInterval(function(){
+        live._queueInterval = setInterval(function(){
             C.log('Interval executed. Changing command.  Length - ', live.queue.length, {color:'green', logLevel:1});
             
             live.changeCommand();
             
-            if (live.queue.length <= 0 ) clearInterval(live.queueInterval);
+            if (live.queue.length <= 0 ) clearInterval(live._queueInterval);
             
         }, live.time);
         
@@ -115,18 +172,21 @@ var live = {
         for (q in this.queue) {
             this.queue[q].position = this.queue.indexOf(this.queue[q])+1;
         }
+        this.saveQueue();
         
     },
     //data is object in queue array
     //promotes socket if socket exists, otherwise
     // it will move to next in line.
+    persist:false,
     promote: function(data){
+        if (!data) {
+            C.log('ERROR:  Promote() called with empty data arg! '.red().bold(), {logLevel:1});
+            return;
+        }
         if (data.socket) {
-            C.log('Promoting next in queue ', {color:'green'});
             data.socket.emit('promote', {millis:this.time, name:data.name});
-            data.start = new Date().getTime();
-            this.commandId = data.id;
-        }else{
+        }else if (!this.persist){
             C.log('promote function given empty data, checking next in line.', {color:'red'});
             if (this.queue.length) {
                 this.queue.splice(0,1);
@@ -135,7 +195,16 @@ var live = {
                     this.promote(this.queue[0]);
                 }else C.log('Queue is now empty. ', {color:'yellow'});
             }
+            return;
+        }else{
+            C.warn('Queue has no socket but is persisting anyways. ');
+            data.serverRestarted = true;
         }
+        C.log('Promoting next in queue ', {color:'green'});
+        data.start = new Date().getTime();
+        data.commanded = true;
+        this.commandId = data.id;
+        this.saveMember(data);
     },
     
     demote: function(data, position, kick){
@@ -145,10 +214,10 @@ var live = {
             live.socket.io.sockets.emit('removeQueue', {position:position || 1});
             this.queue.splice(position - 1, 1);
             this.commandId = null;
-        } else C.log('Demoting position ', position, ' failed. Invalid socket.', {color:'red'});
+        } else C.log('Demoting position ', position, ' failed. Invalid socket.', data,{color:'red'});
     },
     
-    //validate
+    /* Returns true if signed id matches client currently in command. */
     isCommander: function(id){
         if (id){        //fast.
             var split = id.split(':');
@@ -168,18 +237,11 @@ var live = {
             this.port = port;
             var io = require('socket.io').listen(port);
             io.configure(function(){
-                /*io.set('authorization', function(data, accept){
-                    
-                    if (data.headers.cookie) {
-                        data.cookie = cookie_reader.parse(data.headers.cookie);
-                        return accept(null, true);
-                    }
-                    return accept('error',false);
-                });*/
                 io.set('log level',1);
             });
             this.io = io;
             this.events();
+            live.initQueue();
             return live;
         },
         
@@ -216,7 +278,11 @@ var live = {
                     if (live.isCommander(data.id)) {
                         C.log('command: ', data.func, {color:'blue'});
                         live.redis.pub.publish('rover', JSON.stringify(data));
-                    }else C.log('Command Denied.  ('+data.func+')', {color:'yellow'});
+                    }else{
+                        C.log('Command Denied.  ('+data.func+')', {color:'yellow'});
+                        C.log('Demoting bad socket.'.yellow());
+                        socket.emit('demote');
+                    }
                 });
                 
                 socket.on('join', function(data){
@@ -279,19 +345,21 @@ var live = {
             },10*1000);
             
             /* for checking the rovers connection */
+            var pingInter = 3*1000;
             setInterval(function(){
-                live.pings++;           //reset in redis pub.
                 live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
-                if (live.pings >= live.maxPings) {
+                live.lastPingSent = new Date().getTime();
+                live.latency = live.lastPingSent - live.lastPingReturn - pingInter;
+                if (live.latency > live.maxLatency && live.latency < live.disconnected) {
                     C.log('Rover may be disconnected ', {color:'red'});
                     live.roverAlive = false;
-                    live.popup({title:'Rover lost', message:'The rover may '+
-                                                'may have lost connection.  It will attempt reconnecting and ' +
-                                                'we\'ll let you know when it comes back.  Sorry',
+                    live.popup({title:'Rover lost', message:'The rover may ' +
+                                'may have lost connection.  It will attempt reconnecting and ' +
+                                'we\'ll let you know when it comes back.  Sorry',
                                 room:'rover', disconnect:true});
                 }
-                C.log('Sending PING ', live.pings, {color:'blue', logLevel:-2});
-            },3*1000);
+                C.log(('Sending PING. latency: ' + live.latency).blue(), {logLevel:-1});
+            }, pingInter);
             
         },
         
@@ -311,7 +379,7 @@ var live = {
             //feedback from rover.
             this.sub.on('message', function(channel, data){
                 data = JSON.parse(data);
-                C.log('rover feed back', data);
+                C.log('Recieved rover feed back', data.func, {logLevel:-2});
                 switch (data.func) {
                     case 'popup':
                         C.log('Resetting video stream for all clients', {color:'blue'});
@@ -319,23 +387,29 @@ var live = {
                         live.popup(data);
                     break;
                     case 'ping':    //recieve rover ping.
-                        if (live.pings >= live.maxPings) {
+                        if (live.latency > live.maxLatency) {
                             live.popup({title:'Rover is back',
                                         message:'Internet has been returned to the rover.',
                                         disconnect:false, room:'rover' });
                             C.log('Rover is alive. ',new Date(), {color:'green', font:'bold'});
                         }
+                        
                         live.roverAlive = true;
-                        live.pings = 0;
-                        C.log('recieved PING', live.pings, {color:'blue', logLevel:-2});
+                        live.lastPingReturn = new Date().getTime();
+                        live.latency = live.lastPingReturn - live.lastPingSent;
+                        C.log('recieved PING.  latency: ', live.latency, {color:'blue', logLevel:-1});
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {
+                            if (key == 'gps') {
+                                if (!data[key].valid) return;
+                            }
                             db.store.set(key, JSON.stringify(data[key]));
                         }
-                        C.log('Recieved info from rover.', {color:'green'});
-                        C.log('GPS : ', data.gps, {color:'green'});
-                        data.ifconfig = '';
+                        C.log('Recieved info from rover.', {color:'green', logLevel:-2});
+                        C.log('GPS : ', data.gps, {color:'green', logLevel:-2});
+                        delete data.ifconfig;
+                        data.latency = live.latency;
                         live.socket.io.sockets.emit('info', data);
                     break;
                     case 'stdout':      //return stdout from rover
@@ -350,6 +424,7 @@ var live = {
     },
     //Use this to send popups to clients
     /*
+    socket - specify a socket.io socket to emit to only.
     @param global - sends to everyone on site.  annoying
     @param title, message - for popup
     @param room - part of site to send popup to. e.g. rover, admin
@@ -367,4 +442,6 @@ var live = {
     }
 }
 
-module.exports = live;
+return live;
+
+})();
