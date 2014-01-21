@@ -38,21 +38,9 @@ var Rover = {
                 baudrate: 9600
             });
             Rover.serial.on('data', function(data){
-		//Handle feedback from board here
-		console.log('motor driver data ', data);
+		console.log('motor driver feedback: ', data);
             });
-	    //write stop command to start off.
-	    /*var buf = new Buffer([0x88, 0x7F]);
-	    console.log('WRITING BUF : ', buf);
-	    Rover.serial.write(buf, function(err, results) {
-		if (err) {
-		    C.log('Error connecting rover: ' , err );
-	    	}
-		if (results) {
-		    console.log('results ', results);
-		}
-    	    });*/
-	    
+
 	    Rover.ready = true;
 	});
 	
@@ -84,31 +72,38 @@ var Rover = {
 	
 	command format e.g.: 0x88, 0x7f
     */
+    
+    /*
+     Set speed where scale is float ranging 0 - 1,
+     0 being stop and 1 being full speed.
+    */ 
+    setSpeed: function(scale){
+	scale = parseFloat(scale),
+	scale = (scale <= 1) ? scale : 1;
+	this.speed = 0x7f * scale;
+    },
+    speed: 0x7f,
     forward: function(){
-	var speed = 0x7f;
-	this.write( 0x8a, speed );
-	this.write( 0x8e, speed );
+	this.write( 0x8a, this.speed );
+	this.write( 0x8e, this.speed );
 	Rover.moving();
     },
     
     reverse: function(){
-	var speed = 0x7f;
-	this.write( 0x88, speed );
-	this.write( 0x8c, speed );
+	this.write( 0x88, this.speed );
+	this.write( 0x8c, this.speed );
 	Rover.moving();
     },
     
     left: function(){
-	var speed = 0x7f;
-	this.write( 0x8a, speed) ;
-	this.write( 0x8c, speed );
+	this.write( 0x8a, this.speed) ;
+	this.write( 0x8c, this.speed );
 	Rover.moving();
     },
     
     right: function(){
-	var speed = 0x7f;
-	this.write( 0x88, speed );
-	this.write( 0x8e, speed );
+	this.write( 0x88, this.speed );
+	this.write( 0x8e, this.speed );
 	Rover.moving();
     },
     
@@ -124,35 +119,26 @@ var Rover = {
 
     blink: function(on){},
     
+    //right - 0x86, left - 0x87
+    /*
+	Set braking power with float scale,
+	0 being coast and 1 being full stop
+    */
+    setBrake: function(scale){
+	scale = parseFloat(scale),
+	scale = (scale <= 1) ? scale : 1;
+	this.brake = 0x7f * scale;
+    },
+    brake: 0x64,
     stop: function(){
         C.log('stopping', {newline:false, color:'red',background:'white'});
-        this.write(0x88,0);
-        this.write(0x8a,0);
-        this.write(0x8c,0);
-        this.write(0x8e,0);
+        this.write(0x86, this.brake);
+        this.write(0x87, this.brake);
         setTimeout(function(){      //safety
-	    Rover.write(0x88,0);
-	    Rover.write(0x8a,0);
-	    Rover.write(0x8c,0);
-	    Rover.write(0x8e,0);
+	    this.write(0x86, this.brake);
+	    this.write(0x87, this.brake);
         },5);
     },
-    /*
-	Call once to listen for commands.
-	motor args:
-	Left F fastest - 1
-	Left F slowest - 60
-	
-	Left R fastest - 127
-	Left R slowest - 68
-	
-	Right F fastest - 128
-	Right F slowest - 185
-	
-	Right R fastest - 255
-	Right R slowest - 195
-    */
-
 
     
     GPSListen: function(){

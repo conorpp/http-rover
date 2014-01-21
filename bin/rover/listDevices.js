@@ -41,7 +41,7 @@ var C = require('./lib/colorLog');
       });
       
       serial.on('open', function(){
-         write( new Buffer( [0x8D, 0x7F] ) );
+         //write( new Buffer( [0x8D, 0x7F] ) );
       });
    
    });
