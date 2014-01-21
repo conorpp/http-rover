@@ -73,31 +73,25 @@ module.exports = (function(){
         console.log('rover func : ', data.func);
         switch (data.func) {                
             case 'forward':
-                Rover.moving();
-                Rover.write(127,255);
+                Rover.forward();
             break;
             case 'left':
-                Rover.moving();
-                Rover.write(107,158);
+                Rover.left();
             break;
             case 'right':
-                Rover.moving();
-                Rover.write(21,235);
+                Rover.right();
             break;
             case 'forwardleft':
-                Rover.moving();
-                Rover.write(31,128);                        
+                Rover.left();          
             break;
             case 'forwardright':
-                Rover.moving();
-                Rover.write(1,160);
+                Rover.right();
             break;
             case 'stop':
                 Rover.stop();
             break;
             case 'reverse':
-                Rover.moving();
-                Rover.write(1,128);
+                Rover.reverse();
             break;
             default:
                 C.err('Error: No cases were met on rover pubsub.');

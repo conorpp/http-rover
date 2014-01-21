@@ -39,15 +39,19 @@ var Rover = {
             });
             Rover.serial.on('data', function(data){
 		//Handle feedback from board here
+		console.log('motor driver data ', data);
             });
 	    //write stop command to start off.
-	    var buf = new Buffer(1);
-	    buf.writeUInt8(0x0,0);  //0x0 0x0
+	    /*var buf = new Buffer([0x88, 0x7F]);
+	    console.log('WRITING BUF : ', buf);
 	    Rover.serial.write(buf, function(err, results) {
 		if (err) {
 		    C.log('Error connecting rover: ' , err );
 	    	}
-    	    });
+		if (results) {
+		    console.log('results ', results);
+		}
+    	    });*/
 	    
 	    Rover.ready = true;
 	});
@@ -61,28 +65,53 @@ var Rover = {
 	this.GPSListen();
     },
     
-    /* writes all args to serial port. */
+    /* writes a buffer to serial port. */
     write: function(){
         if (!this.ready) { 
             C.log('Board not ready yet.', {color:'red', background:'black'});
             return;
         }
-        for (var i = 0; i < arguments.length; i++) {
-            var num = parseInt(arguments[i]);
-            var errs = num<0 || num>255 ||isNaN(num);
-            if (errs) {
-                C.err('You must enter a decimal in range of 0-255');
-                return;
-            }
-            var hex = num.toString(16);
-            var buf = new Buffer(1);
-            buf.writeUInt8('0x'+hex,0);
-            Rover.serial.write(buf, function(err, results){
-                if (err) console.error('Error writing to serial : ', err);
-            });
-        }
-
+	var buf = new Buffer(Array.prototype.slice.call(arguments));
+        Rover.serial.write(buf, function(err, results){
+            if (err) console.error('Error writing to serial : ', err);
+        });
     },
+    /*
+	Motor Channel right - reverse: 0x88, forward: 8A
+	Motor Channel left - reverse: 0x8c, forward: 0x8e
+	
+	speed - 0x0 - 0x7f
+	
+	command format e.g.: 0x88, 0x7f
+    */
+    forward: function(){
+	var speed = 0x7f;
+	this.write( 0x8a, speed );
+	this.write( 0x8e, speed );
+	Rover.moving();
+    },
+    
+    reverse: function(){
+	var speed = 0x7f;
+	this.write( 0x88, speed );
+	this.write( 0x8c, speed );
+	Rover.moving();
+    },
+    
+    left: function(){
+	var speed = 0x7f;
+	this.write( 0x8a, speed) ;
+	this.write( 0x8c, speed );
+	Rover.moving();
+    },
+    
+    right: function(){
+	var speed = 0x7f;
+	this.write( 0x88, speed );
+	this.write( 0x8e, speed );
+	Rover.moving();
+    },
+    
     /* prevent infinite moving */
     timeout:null,
     moving:function(){
@@ -97,10 +126,16 @@ var Rover = {
     
     stop: function(){
         C.log('stopping', {newline:false, color:'red',background:'white'});
-        this.write(0,0);
+        this.write(0x88,0);
+        this.write(0x8a,0);
+        this.write(0x8c,0);
+        this.write(0x8e,0);
         setTimeout(function(){      //safety
-            Rover.write(0,0);    
-        },10);
+	    Rover.write(0x88,0);
+	    Rover.write(0x8a,0);
+	    Rover.write(0x8c,0);
+	    Rover.write(0x8e,0);
+        },5);
     },
     /*
 	Call once to listen for commands.
