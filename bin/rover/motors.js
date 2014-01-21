@@ -135,8 +135,8 @@ var Rover = {
         this.write(0x86, this.brake);
         this.write(0x87, this.brake);
         setTimeout(function(){      //safety
-	    this.write(0x86, this.brake);
-	    this.write(0x87, this.brake);
+	    Rover.write(0x86, this.brake);
+	    Rover.write(0x87, this.brake);
         },5);
     },
 
