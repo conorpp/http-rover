@@ -5,6 +5,10 @@
 		custom lib - serial, colorLog (in server.js)
 */
 
+module.exports =
+(function (args) {
+
+
 var Rover = {
 	
     ready:false,		//connection indicator
@@ -27,7 +31,10 @@ var Rover = {
 	    //connect to port with correct ID. see `$ lspnp`
             ports.forEach(function(port) {
                 C.log(port, {color:'yellow', logLevel:-1});
-                if (port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0')
+                if (
+		    port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||
+		    port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0' 
+		    )
                         addr = port.comName;
             });
             if (!addr) {
@@ -40,28 +47,35 @@ var Rover = {
             Rover.serial.on('data', function(data){
 		console.log('motor driver feedback: ', data);
             });
+            Rover.serial.on('open', function(){
+		C.log('Motor connection ready'.green().bold());
+		Rover.ready = true;
+            });
 
-	    Rover.ready = true;
+	    
 	});
 	
 	/* accept a decimal number on range 0-255 
 	   writes the hex conversion to usb.  STDIN.   */
-	process.stdin.resume();
+	/*process.stdin.resume();
 	process.stdin.on('data', function(data){
-	    Rover.write(data);
-	});
-	this.GPSListen();
+	   // Rover.write(data);
+	});*/
+	//this.GPSListen();
     },
     
     /* writes a buffer to serial port. */
     write: function(){
-        if (!this.ready) { 
+        if (!Rover.ready) { 
             C.log('Board not ready yet.', {color:'red', background:'black'});
             return;
         }
 	var buf = new Buffer(Array.prototype.slice.call(arguments));
         Rover.serial.write(buf, function(err, results){
-            if (err) console.error('Error writing to serial : ', err);
+            if (err){
+		console.error('Error writing to serial : ', err, Rover.serial);
+		Rover.reset();
+	    }
         });
     },
     /*
@@ -139,7 +153,15 @@ var Rover = {
 	    Rover.write(0x87, this.brake);
         },5);
     },
-
+    
+    reset: function(){
+	C.log('RESETING motors');
+	clearInterval(this.timeout);
+	this.ready = false;
+	this.serial.close(function(){
+	    Rover.connect();
+	});
+    },
     
     GPSListen: function(){
 	GPS.on('data', function(data){
@@ -149,5 +171,34 @@ var Rover = {
     
 };
 
-module.exports = Rover;
+if (process.argv.indexOf('connect')) {
+    
+    C = require('./lib/colorLog');
+    Rover.connect();
+    
+    process.stdin.resume();
+    
+    process.stdin.on('data', function(data){
+	
+	data = (data.toString() + '').replace(' ','');
+	    if (data.indexOf('f') != -1) 
+		Rover.forward();
+		
+	    else if (data.indexOf('r') != -1) 
+		Rover.right();
+		
+	    else if (data.indexOf('l') != -1)
+		Rover.left();
+		
+	    else if (data.indexOf('r') != -1) 
+		Rover.reverse();
+
+    });
+}
+
+
+return Rover;
+
+})();
+
 

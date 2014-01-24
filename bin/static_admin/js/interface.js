@@ -91,7 +91,6 @@ var Command = {
                  {millis:2500});
         UI.timer(millis);
         this.keyupUnbind();
-        console.log('about to call this.keyupListen();');
         this.keyupListen();
         this.inCommand = true;
         //audio

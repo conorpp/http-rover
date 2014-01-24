@@ -108,6 +108,7 @@ var live = {
     
     logInterval:null,
     beginQueue: function(){
+        clearInterval(live._queueInterval);
         live._queueInterval = setInterval(function(){
             C.log('Interval executed. Changing command.  Length - ', live.queue.length, {color:'green', logLevel:1});
             
@@ -116,32 +117,15 @@ var live = {
             if (live.queue.length <= 0 ) clearInterval(live._queueInterval);
             
         }, live.time);
-        
-        //logging purposes.
-        /*clearInterval(this.logInterval);
-        var copyTime = Math.floor(this.time/1000);
-        console.log('current queue time - ', copyTime);
-        this.logInterval = setInterval(function(){
-            
-            if(live.queue[0].start){
-                
-                var timeleft = live.time - (new Date().getTime() - live.queue[0].start);
-                console.log('secs left : ', Math.floor(timeleft/1000));
-            }
-            //live.time;
-            copyTime--;
-            
-            //console.log('current queue time - ', copyTime);
-            if (copyTime <= 0)  clearInterval(live.logInterval);
-            
-        },1000);*/
+
         
     },
     
-    //for getting a queue member by an attribute
-    //return 0 if none.  Adds index as an attribute.
-    // usage: this.getQueue(name:'dude');
-    // or:    this.getQueue(id: 45);
+    /* for getting a queue member by an attribute
+    return null if none.  Adds index as an attribute.
+     usage: this.getQueue(name:'dude');
+     or:    this.getQueue(id: 45);
+    */
     getQueue: function(filter){
         for (i in filter) {
             var key = i;
@@ -154,7 +138,7 @@ var live = {
                 return this.queue[s];
             }
         }
-        return 0;
+        return null;
     },
     
     /* move queue, change command.  promote is bool to indicate promote or demote current socket.  default false. */
