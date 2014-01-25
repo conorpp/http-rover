@@ -117,15 +117,18 @@ var Stream = {
             },1500);
         }
     },
-    ffmpeg:null,
+    ffmpeg_video:null,
+    ffmpeg_audio:null,
     run: function(options){
         options = options || {};
-        C.log('Stream commands: ', {color:'blue',font:'bold', logLevel:-1});
-        
-        //var vid = this.canvas();
-        //Terminal.spawn(this.audio());
-        C.log(this.audio(), {color:'blue', logLevel:-1});
-        var args = ['-s',S.width+'x'+S.height,
+        var a_args = ['-f', 'alsa',
+                      '-ac','1',
+                      '-i', this.aSource,
+                      '-acodec', 'nellymoser',
+                      '-f', 'flv',
+                      this.rtmpHost+'/roveraudio/'+this.app
+                      ];
+        var v_args = ['-s',S.width+'x'+S.height,
                     '-f', 'video4linux2',
                     '-i', this.vSource,
                     '-an', '-f', 'mpeg1video',
@@ -134,19 +137,18 @@ var Stream = {
                     'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
                      + '/'+S.width+'/'+S.height,
                     '-f', 'flv',    //flash
-                    'rtmp://184.173.103.51:31002/rovervideo/mystream'];
-        C.log('ffmpeg', {newline:false, color:'blue'});
-        for (var a in args) C.log(' '+args[a], {newline:false, color:'blue'});
-        // -f flv rtmp://184.173.103.51:31002/rovervideo/mystream  <-flash
-        this.ffmpeg = Terminal.spawn('ffmpeg', args, { detached: true});
+                    this.rtmpHost+'/rovervideo/'+this.app];
+        C.log('VIDEO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
+        for (var a1 in v_args) C.log(' '+v_args[a1], {newline:false, color:'blue'});
+        C.log('');
+        C.log('AUDIO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
+        for (var a2 in a_args) C.log(' '+a_args[a2], {newline:false, color:'blue'});
+        C.log('\n');
         
-        this.ffmpeg.unref()
-                
-        //this.ffmpeg.stdout.on('data', function (data) {
-        //  C.log('stdout: ' + data, {color:'yellow', logLevel:-1});
-        //});
+        this.ffmpeg_video = Terminal.spawn('ffmpeg', v_args, { detached: true});
+        this.ffmpeg_audio = Terminal.spawn('ffmpeg', a_args, { detached: true});
         var error = false;
-        this.ffmpeg.stderr.on('data', function (data) {
+        var errorCatcher = function(data){
             data = (''+data);
             var cases = data.indexOf('busy') != -1||
                         data.indexOf('error') != -1 ||
@@ -156,9 +158,10 @@ var Stream = {
                 C.err('Error with ffmpeg: ', data);
                 Emit.errors.webcam = data;
             }
-        });
+        }
+        this.ffmpeg_video.stderr.on('data', errorCatcher);
+        this.ffmpeg_audio.stderr.on('data', errorCatcher);
 
-        
         
         var inter = setTimeout(function(){
             if (!error) {
@@ -179,7 +182,8 @@ var Stream = {
     kill: function(callback){
         this.running = false;
         callback = callback || function(){};
-        if (this.ffmpeg) this.ffmpeg.kill('SIGINT');
+        if (this.ffmpeg_video) this.ffmpeg_video.kill('SIGINT');
+        if (this.ffmpeg_audio) this.ffmpeg_audio.kill('SIGINT');
         Terminal.exec('sudo pkill -SIGINT ffmpeg', function(){
             
             

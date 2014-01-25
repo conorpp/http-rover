@@ -104,7 +104,7 @@ var C = {
                 args += temp[a];
             }
             args = '\r' + args;
-        }else */ if (args.indexOf('\\n') != -1) {
+        }else */ if (args.indexOf('\\n') != -1 || this.options.newline == false) {
             var temp = args.split('\\n');
             var args = '';
             for (var a in temp) {
