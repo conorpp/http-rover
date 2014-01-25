@@ -6,6 +6,9 @@ echo "Running rover scripts as daemon..."
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+#set full volume
+amixer set PCM 100%
+
 #this is forever daemon startup
 sudo -u $USER $DIR/../node_modules/forever/bin/forever start $DIR/../bin/rover/control.js deploy -debug 5
 

@@ -152,7 +152,7 @@ var R = {
 	destroy: function(){
 	    this.stop();
 	    this.context = this.volume = this._recorder = null;
-	    if (R.client) R.client.close();
+	    if (R.client) R.client.destroy();
 	},
 	//For attempting to improve latency
 	_resetStream: function(){
