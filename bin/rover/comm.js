@@ -127,18 +127,21 @@ module.exports = (function(){
                     _emit.info();
                 }, this.infoTime);
             }
-            var lastPing = this.lastInfo - new Date().getTime();
             var data = {func:'info', gps:GPS.read(), errors: _emit.errors};
-            if (lastPing < 30 * 1000) {
+            
+            var lastConfig = new Date().getTime() - _emit.lastInfo;
+            if (lastConfig > 30 * 1000) {
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
                 return;
             }
-            this.lastInfo = new Date().getTime();
+            
+            _emit.lastInfo = new Date().getTime();
+            
             Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
                 data.ifconfig = stdout;
-                C.log('sending config ', {color:'green', logLevel:-2});
+                C.log('sending config ', {color:'purple'});
                 _emit._parse(data);
             });
         },
@@ -148,7 +151,7 @@ module.exports = (function(){
         },
                 
         popup: function(data){
-            C.log('sendig popup ', data, {logLevel:-1});
+            C.log('sendig popup ', data, {logLevel:-2});
             data.func = 'popup';
             this._parse(data);
         },

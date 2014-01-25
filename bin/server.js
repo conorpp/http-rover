@@ -23,7 +23,7 @@ app.use(express.bodyParser());
 
 var debug = process.argv.indexOf('-debug');
 if (debug != -1) 
-  C.set({logLevel: process.argv[parseInt(debug)]});
+  C.set({logLevel: parseInt(process.argv[debug + 1]) });
 else
   C.set({logLevel: 0});
 

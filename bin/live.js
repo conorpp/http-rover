@@ -381,7 +381,7 @@ var live = {
                         live.roverAlive = true;
                         live.lastPingReturn = new Date().getTime();
                         live.latency = live.lastPingReturn - live.lastPingSent;
-                        C.log('recieved PING.  latency: ', live.latency, {color:'blue', logLevel:-1});
+                        C.log('recieved PING.  latency: ', live.latency, {color:'blue', logLevel:-2});
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {
