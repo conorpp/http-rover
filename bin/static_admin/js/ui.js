@@ -191,7 +191,6 @@ var UI = {
         UI.homeMarker.addTo(UI.map);
         UI.marker.bindPopup('<h4 class="color1">The rover</h4>').openPopup();
         UI.homeMarker.bindPopup('<h4 class="color1">Rover home point</h4>');
-        //UI.marker.setLatLng();
     }
 };
 //get templates.
