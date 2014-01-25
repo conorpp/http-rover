@@ -386,13 +386,13 @@ var live = {
                     case 'info':        //set latest network stats
                         for (key in data) {
                             if (key == 'gps') {
-                                if (!data[key].valid) return;
+                                if (!data[key].valid) continue;
                             }
                             db.store.set(key, JSON.stringify(data[key]));
                         }
                         C.log('Recieved info from rover.', {color:'green', logLevel:-2});
                         C.log('GPS : ', data.gps, {color:'green', logLevel:-2});
-                        delete data.ifconfig;
+                        delete data.ifconfig;   //sensitive info
                         data.latency = live.latency;
                         live.socket.io.sockets.emit('info', data);
                     break;
