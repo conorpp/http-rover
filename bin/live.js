@@ -385,10 +385,13 @@ var live = {
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {
-                            if (key == 'gps') {
+                            
+                            if (key == 'func' || key == 'errors') continue;
+                            else if (key == 'gps') 
                                 if (!data[key].valid) continue;
-                            }
-                            db.store.set(key, JSON.stringify(data[key]));
+                            var val = JSON.stringify(data[key]);
+                            //C.log('SETTING '+key, val, {logLevel:0});
+                            db.store.set(key, val);
                         }
                         C.log('Recieved info from rover.', {color:'green', logLevel:-2});
                         C.log('GPS : ', data.gps, {color:'green', logLevel:-2});

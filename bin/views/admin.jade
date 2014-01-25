@@ -23,7 +23,7 @@ block content
         p latitute: #{gps.lat}
         p longitude: #{gps.lng}
         p altitude: #{gps.altitude} m
-        p date: #{gps.date}
+        p date: #{new Date(gps.date) + ''}
         p age: #{gps.age} ms
         p speed: #{gps.mph} mph
         

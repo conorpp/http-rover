@@ -130,7 +130,7 @@ module.exports = (function(){
             var data = {func:'info', gps:GPS.read(), errors: _emit.errors};
             
             var lastConfig = new Date().getTime() - _emit.lastInfo;
-            if (lastConfig > 30 * 1000) {
+            if (lastConfig < 30 * 1000) {
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
                 return;
@@ -140,8 +140,10 @@ module.exports = (function(){
             
             Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
+                stdout = stdout+'',
+                stdout = 'Taken on ' + new Date()+ '\n\n'+stdout;
                 data.ifconfig = stdout;
-                C.log('sending config ', {color:'purple'});
+                C.log('sending network config ', {color:'purple'});
                 _emit._parse(data);
             });
         },
