@@ -122,15 +122,14 @@ module.exports = (function(){
         info: function(){
             if (this.infoInter == null) {
                 clearInterval(this.infoInter);
+                C.log('Starting info inter'.purple(), {logLevel:-1});
                 this.infoInter = setInterval(function(){
                     _emit.info();
                 }, this.infoTime);
             }
             var lastPing = this.lastInfo - new Date().getTime();
-            var data = {func:'info'};
+            var data = {func:'info', gps:GPS.read(), errors: _emit.errors};
             if (lastPing < 30 * 1000) {
-                data.errors = _emit.errors;
-                data.gps = GPS.read();
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
                 return;
@@ -139,8 +138,6 @@ module.exports = (function(){
             Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
                 data.ifconfig = stdout;
-                data.errors = _emit.errors;
-                data.gps = GPS.read();
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
             });
