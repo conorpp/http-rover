@@ -171,9 +171,10 @@ var Rover = {
     
 };
 
-if (process.argv.indexOf('connect')) {
+if (process.argv.indexOf('connect') != -1) {
     
     C = require('./lib/colorLog');
+    C.log('Testing rover motors . . .');
     Rover.connect();
     
     process.stdin.resume();
