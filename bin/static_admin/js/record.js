@@ -37,6 +37,17 @@ var R = {
 		R._createSocket();
 	    });
 	    this._record();
+	    
+	    if (Settings.audioBitDepth == 8) {
+		this._intArr = Int8Array;
+		this._intRange = 0xFF;
+	    }else if (Settings.audioBitDepth == 16){
+		this._intArr = Int16Array;
+		this._intRange = 0xFFFF;
+	    }else if (Settings.audioBitDepth == 32) {
+		this._intArr = Int32Array;
+		this._intRange = 0xFFFFFFFF;
+	    }
 	},
 	
 	_createSocket: function(){
@@ -76,23 +87,26 @@ var R = {
 		return result;
 	},
 	
+	_intArr:Int16Array,
+	_intRange:0xFFFF,
 	_stream: function(AudioBuffer){
-		if (!Command.inCommand) return; 
-        	var left = AudioBuffer.inputBuffer.getChannelData (0);
-        	var right = AudioBuffer.inputBuffer.getChannelData (1);
-		var weaved = R.interleave(left, right);
+		if (!Command.inCommand) return;
+		
+		var weaved = R.interleave(AudioBuffer.inputBuffer.getChannelData (0)
+					  , AudioBuffer.inputBuffer.getChannelData (1));
 			
 		var l = weaved.length;
-		var buf = new Int8Array(l)
-		
+		var buf =  new R._intArr(l);
+		console.log(R._intArr, R._intRange);
 		while (l--) {
-			buf[l] = (weaved[l]*0xFF); 	//convert to 8 bit
+			buf[l] = (weaved[l]*R._intRange); 	//convert to 16 bit
 		}
 			
 		if (R.socket) R.socket.write(buf.buffer);
 		else console.log('not connected yet');
 		
 	},
+
 	/*	Prompt browser to get mic recording	*/
 	_recorder: null,
 	_record: function(){

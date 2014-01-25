@@ -381,18 +381,21 @@ var live = {
                         live.roverAlive = true;
                         live.lastPingReturn = new Date().getTime();
                         live.latency = live.lastPingReturn - live.lastPingSent;
-                        C.log('recieved PING.  latency: ', live.latency, {color:'blue', logLevel:-1});
+                        C.log('recieved PING.  latency: ', live.latency, {color:'blue', logLevel:-2});
                     break;
                     case 'info':        //set latest network stats
                         for (key in data) {
-                            if (key == 'gps') {
-                                if (!data[key].valid) return;
-                            }
-                            db.store.set(key, JSON.stringify(data[key]));
+                            
+                            if (key == 'func' || key == 'errors') continue;
+                            else if (key == 'gps') 
+                                if (!data[key].valid) continue;
+                            var val = JSON.stringify(data[key]);
+                            //C.log('SETTING '+key, val, {logLevel:0});
+                            db.store.set(key, val);
                         }
                         C.log('Recieved info from rover.', {color:'green', logLevel:-2});
                         C.log('GPS : ', data.gps, {color:'green', logLevel:-2});
-                        delete data.ifconfig;
+                        delete data.ifconfig;   //sensitive info
                         data.latency = live.latency;
                         live.socket.io.sockets.emit('info', data);
                     break;

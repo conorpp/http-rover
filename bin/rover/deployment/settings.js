@@ -14,9 +14,10 @@ var Settings = {
     width:160,
     height:120,
     logLevel:5,
-    home:[44.646875, -68.95869],
+    home:[37.2316867, -80.42346629999997],
     ip:'184.173.103.51',
-    udp_port:12554
+    udp_port:12554,
+    audioBitDepth:16  //Only can be 8, 16, or 32
 };
 
 try{

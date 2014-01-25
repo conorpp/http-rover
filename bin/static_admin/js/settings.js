@@ -15,9 +15,10 @@ var Settings = {
     width:320,
     height:240,
     logLevel:0,
-    home:[44.646875, -68.95869],
+    home:[37.2316867, -80.42346629999997],
     ip:'127.0.0.1',
-    udp_port:9000
+    udp_port:9000,
+    audioBitDepth:16  //only supports 8,16, or 32
     
 };
 

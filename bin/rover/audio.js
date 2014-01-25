@@ -11,7 +11,7 @@ var Speaker = require('speaker');
 // Create the Speaker instance
 var speaker = new Speaker({
   channels: 2,          
-  bitDepth: 8,          
+  bitDepth: S.audioBitDepth,          
   sampleRate: 48000,    
   signed:true
 });

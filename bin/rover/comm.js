@@ -122,26 +122,28 @@ module.exports = (function(){
         info: function(){
             if (this.infoInter == null) {
                 clearInterval(this.infoInter);
+                C.log('Starting info inter'.purple(), {logLevel:-1});
                 this.infoInter = setInterval(function(){
                     _emit.info();
                 }, this.infoTime);
             }
-            var lastPing = this.lastInfo - new Date().getTime();
-            var data = {func:'info'};
-            if (lastPing < 30 * 1000) {
-                data.errors = _emit.errors;
-                data.gps = GPS.read();
+            var data = {func:'info', gps:GPS.read(), errors: _emit.errors};
+            
+            var lastConfig = new Date().getTime() - _emit.lastInfo;
+            if (lastConfig < 30 * 1000) {
                 C.log('sending config ', {color:'green', logLevel:-2});
                 _emit._parse(data);
                 return;
             }
-            this.lastInfo = new Date().getTime();
+            
+            _emit.lastInfo = new Date().getTime();
+            
             Terminal.exec('ifconfig', function(err, stdout, stderr){
                 if (err) C.log('err in info ', err, {color:'red'});
+                stdout = stdout+'',
+                stdout = 'Taken on ' + new Date()+ '\n\n'+stdout;
                 data.ifconfig = stdout;
-                data.errors = _emit.errors;
-                data.gps = GPS.read();
-                C.log('sending config ', {color:'green', logLevel:-2});
+                C.log('sending network config ', {color:'purple'});
                 _emit._parse(data);
             });
         },
@@ -151,7 +153,7 @@ module.exports = (function(){
         },
                 
         popup: function(data){
-            C.log('sendig popup ', data, {logLevel:-1});
+            C.log('sendig popup ', data, {logLevel:-2});
             data.func = 'popup';
             this._parse(data);
         },
