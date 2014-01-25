@@ -66,14 +66,16 @@ var UI = {
         
         millis - millisecond duration for countdown - number
     */
+    _timerInter:null,
     timer: function(millis){
+        clearInterval(UI._timerInter);
         var secs = Math.floor(millis/1000);
         $('#time').html(secs);
-        var interval = setInterval(function(){
+        UI._timerInter = setInterval(function(){
             secs = parseInt($('#time').text());
             secs--;
             if (secs<0) {
-                clearInterval(interval);
+                clearInterval(UI._timerInter);
                 secs='';
             }
             $('#time').html(secs);
