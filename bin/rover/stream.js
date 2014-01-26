@@ -133,16 +133,16 @@ var Stream = {
                     '-i', this.vSource,
                     '-f', 'mpeg1video',
                     '-b', '800k',
-                    '-r', '30',   //canvas
+                    '-an','-r', '30',   //canvas
                     'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
                      + '/'+S.width+'/'+S.height,
-                    '-f', 'flv',    //flash
+                    '-an','-f', 'flv',    //flash
                     this.rtmpHost+'/rovervideo/'+this.app,
                     '-f', 'alsa',
                     '-ac', '1',
                     '-i', this.aSource,
                     '-acodec', 'nellymoser',
-                    '-f', 'flv',
+                    '-vn','-f', 'flv',
                     this.rtmpHost+'/roveraudio/'+this.app
                     ];
         C.log('VIDEO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
