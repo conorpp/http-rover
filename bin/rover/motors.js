@@ -51,6 +51,9 @@ var Rover = {
             Rover.serial.on('open', function(){
 		C.log('Motor connection ready'.green().bold());
 		Rover.ready = true;
+                clearInterval(Rover.resetInter);
+                Rover.resetInter = setInterval(function(){ Rover.reset() }, 42000);
+
             });
 
 	    
@@ -157,7 +160,7 @@ var Rover = {
     
     reset: function(){
 	C.log('RESETING motors');
-	clearInterval(this.timeout);
+	//clearInterval(this.timeout);
 	this.ready = false;
 	this.serial.close(function(){
 	    Rover.connect();
