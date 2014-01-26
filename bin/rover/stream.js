@@ -137,14 +137,17 @@ var Stream = {
                     'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
                      + '/'+S.width+'/'+S.height,
                     '-an','-f', 'flv',    //flash
-                    this.rtmpHost+'/rovervideo/'+this.app,
-                    '-f', 'alsa',
-                    '-ac', '1',
-                    '-i', this.aSource,
-                    '-acodec', 'nellymoser',
-                    '-vn','-f', 'flv',
-                    this.rtmpHost+'/roveraudio/'+this.app
+                    this.rtmpHost+'/rovervideo/'+this.app
                     ];
+        var stream_the_audio_too = false;
+        if (stream_the_audio_too) {
+            v_args.concat(['-f', 'alsa',
+                        '-ac', '1',
+                        '-i', this.aSource,
+                        '-acodec', 'nellymoser',
+                        '-vn','-f', 'flv',
+                        this.rtmpHost+'/roveraudio/'+this.app]);
+        }
         C.log('VIDEO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
         for (var a1 in v_args) C.log(' '+v_args[a1], {newline:false, color:'blue'});
         C.log('');
