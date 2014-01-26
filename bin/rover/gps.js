@@ -12,8 +12,10 @@ module.exports =
 Number.prototype.toRad = function() {
     return this * Math.PI / 180;
 }
-           
-return  {
+
+var C = require('./lib/colorLog');
+
+var GPS =  {
     
     records:[],
     maxRecords:100,
@@ -275,6 +277,8 @@ return  {
         this.isTesting=true;
     }
 }
+
+return GPS;
 
 })();
 

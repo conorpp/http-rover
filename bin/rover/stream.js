@@ -121,32 +121,39 @@ var Stream = {
     ffmpeg_audio:null,
     run: function(options){
         options = options || {};
-        var a_args = ['-f', 'alsa',
+        /*var a_args = ['-f', 'alsa',
                       '-ac','1',
                       '-i', this.aSource,
                       '-acodec', 'nellymoser',
                       '-f', 'flv',
                       this.rtmpHost+'/roveraudio/'+this.app
-                      ];
+                      ];*/
         var v_args = ['-s',S.width+'x'+S.height,
                     '-f', 'video4linux2',
                     '-i', this.vSource,
-                    '-an', '-f', 'mpeg1video',
+                    '-f', 'mpeg1video',
                     '-b', '800k',
                     '-r', '30',   //canvas
                     'http://' + S.host + ':' + S.canvasSource +'/'+ this.password
                      + '/'+S.width+'/'+S.height,
                     '-f', 'flv',    //flash
-                    this.rtmpHost+'/rovervideo/'+this.app];
+                    this.rtmpHost+'/rovervideo/'+this.app,
+                    '-f', 'alsa',
+                    '-ac', '1',
+                    '-i', this.aSource,
+                    '-acodec', 'nellymoser',
+                    '-f', 'flv',
+                    this.rtmpHost+'/roveraudio/'+this.app
+                    ];
         C.log('VIDEO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
         for (var a1 in v_args) C.log(' '+v_args[a1], {newline:false, color:'blue'});
         C.log('');
-        C.log('AUDIO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
-        for (var a2 in a_args) C.log(' '+a_args[a2], {newline:false, color:'blue'});
-        C.log('\n');
+        //C.log('AUDIO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
+        //for (var a2 in a_args) C.log(' '+a_args[a2], {newline:false, color:'blue'});
+        //C.log('\n');
         
         this.ffmpeg_video = Terminal.spawn('ffmpeg', v_args, { detached: true});
-        this.ffmpeg_audio = Terminal.spawn('ffmpeg', a_args, { detached: true});
+       // this.ffmpeg_audio = Terminal.spawn('ffmpeg', a_args, { detached: true});
         var error = false;
         var errorCatcher = function(data){
             data = (''+data);
@@ -160,7 +167,7 @@ var Stream = {
             }
         }
         this.ffmpeg_video.stderr.on('data', errorCatcher);
-        this.ffmpeg_audio.stderr.on('data', errorCatcher);
+        //this.ffmpeg_audio.stderr.on('data', errorCatcher);
 
         
         var inter = setTimeout(function(){

@@ -9,7 +9,9 @@
     TODO: 
 */
 
-module.exports = (function(){
+module.exports =
+
+(function(){
     var redis = require('redis');
     var pub = redis.createClient(S.redis_port, S.host);	//to server	
     var subRover = redis.createClient(S.redis_port, S.host);	//from server

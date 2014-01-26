@@ -8,6 +8,7 @@
 module.exports =
 (function (args) {
 
+var C = require('./lib/colorLog');
 
 var Rover = {
 	
