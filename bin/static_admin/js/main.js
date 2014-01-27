@@ -66,21 +66,19 @@ Command.socket.on('syncTime', function(data){       //not client specific
 Command.socket.on('info', function(data){       //not client specific
     console.log('got info , ', data);
     
-    if (!data.gps) return;
-    else if (!data.gps.valid) return;
-    
-    if (UI.marker && data.gps.lat && data.gps.lng ){
-        var coord = [data.gps.lat, data.gps.lng];
-        UI.marker.setLatLng(coord);
-        UI.map.panTo(coord);
+    if (data.gps && data.gps.valid){
+        if (UI.marker && data.gps.lat && data.gps.lng ){
+            var coord = [data.gps.lat, data.gps.lng];
+            UI.marker.setLatLng(coord);
+            UI.map.panTo(coord);
+        }
+            
+        if (data.gps.mph != undefined) {
+            var num = parseFloat(data.gps.mph)*100,
+                num = Math.floor(num)/100;
+            $('#mph').html(num+' mph');
+        }
     }
-        
-    if (data.gps.mph != undefined) {
-        var num = parseFloat(data.gps.mph)*100,
-            num = Math.floor(num)/100;
-        $('#mph').html(num+' mph');
-    }
-    
     if (data.latency != undefined) {
         $('#latency').html(data.latency+' ms');
     }

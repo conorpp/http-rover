@@ -33,8 +33,9 @@ var Rover = {
             ports.forEach(function(port) {
                 C.log(port, {color:'yellow', logLevel:-1});
                 if (
-		    port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0' ||
-		    port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0' 
+		    port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0'
+		   // port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0' 
+		    || port.pnpId == 'usb-Arduino__www.arduino.cc__0042_7523230313535110E0B2-if00'
 		    )
                         addr = port.comName;
             });
@@ -43,7 +44,8 @@ var Rover = {
                 return;
             }
             Rover.serial = new _serialConstr(addr, {
-                baudrate: 9600
+                baudrate: 9600,
+		disconnectedCallback: function(d){ console.log('DDDDDDDDCCCCCCCCCCC\'d', d);}
             });
             Rover.serial.on('data', function(data){
 		console.log('motor driver feedback: ', data);
@@ -51,20 +53,14 @@ var Rover = {
             Rover.serial.on('open', function(){
 		C.log('Motor connection ready'.green().bold());
 		Rover.ready = true;
-                clearInterval(Rover.resetInter);
-                Rover.resetInter = setInterval(function(){ Rover.reset() }, 42000);
+                Rover.resetInter = setTimeout(function(){ Rover.reset() }, 42000);
 
             });
 
 	    
 	});
 	
-	/* accept a decimal number on range 0-255 
-	   writes the hex conversion to usb.  STDIN.   */
-	/*process.stdin.resume();
-	process.stdin.on('data', function(data){
-	   // Rover.write(data);
-	});*/
+
 	//this.GPSListen();
     },
     
@@ -162,9 +158,13 @@ var Rover = {
 	C.log('RESETING motors');
 	//clearInterval(this.timeout);
 	this.ready = false;
-	this.serial.close(function(){
-	    Rover.connect();
-	});
+	clearTimeout(Rover.resetInter);
+	//this.serial.drain(function(){
+	    Rover.serial.close(function(){
+		Rover.connect();
+	    });
+	    
+	//});
     },
     
     GPSListen: function(){
