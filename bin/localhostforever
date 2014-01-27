@@ -1,0 +1,10 @@
+#!/bin/bash
+
+echo "Running everything rover on localhost FOREVER"
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+forever start node server.js -debug -1 $@ &
+forever start node canvas-server.js $@ &
+forever start sudo node rover/control.js -debug -1 $@ &
+

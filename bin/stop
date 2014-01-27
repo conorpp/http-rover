@@ -1,4 +1,4 @@
 #!/bin/bash
 sudo pkill -SIGINT node
 sudo pkill -SIGINT ffmpeg
-
+sudo pkill -9 forever
