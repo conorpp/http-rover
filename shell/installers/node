@@ -1,0 +1,4 @@
+#!/bin/sh
+# executable for node.js
+ 
+/opt/node/bin/node $@

@@ -1,0 +1,4 @@
+#!/bin/sh
+# executable for npm
+ 
+/opt/node/bin/npm $@

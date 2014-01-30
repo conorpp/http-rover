@@ -30,6 +30,11 @@ echo "---------------------------------------------"
 
 sleep 2
 
+echo "_________installing other packages________"
+./other-packages
+
+sleep 2
+
 echo "---------------------------------------------"
 echo "Installing node.js and npm."
 echo "---------------------------------------------"
