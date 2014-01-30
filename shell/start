@@ -6,6 +6,12 @@ echo "Running rover scripts as daemon..."
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+
+# reset logs
+echo " " > $DIR/stdout.log
+echo " " > $DIR/stderr.log
+
+
 #set full volume
 amixer set PCM 100%
 
