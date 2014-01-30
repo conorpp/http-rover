@@ -197,7 +197,7 @@ var Stream = {
         Terminal.exec('sudo pkill -SIGINT ffmpeg', function(){
             
             
-            Terminal.exec('lsusb',function(err, stdout, stderr){
+            /*Terminal.exec('lsusb',function(err, stdout, stderr){
                 var devices = stdout.match(/[^\n]+(?:\n|$)/g); //split by newlines
                 var device;
                 for (var i in devices) {
@@ -231,7 +231,8 @@ var Stream = {
                         callback(err, {});
                     }
                 });
-            });
+            });*/
+            callback(null, device);
         });
 
     },
