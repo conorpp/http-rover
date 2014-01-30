@@ -232,7 +232,7 @@ var Stream = {
                     }
                 });
             });*/
-            callback(null, device);
+            callback(null, {});
         });
 
     },
