@@ -72,7 +72,7 @@ module.exports =
     });
     subRover.on('message', function(channel, data){
         data = JSON.parse(data);
-        console.log('rover func : ', data.func);
+        C.log('rover func : ', data.func);
         switch (data.func) {                
             case 'forward':
                 Rover.forward();
@@ -94,6 +94,9 @@ module.exports =
             break;
             case 'reverse':
                 Rover.reverse();
+            break;
+            case 'ping':
+                //handled in admin.
             break;
             default:
                 C.err('Error: No cases were met on rover pubsub.');

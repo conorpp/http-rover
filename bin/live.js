@@ -332,6 +332,7 @@ var live = {
             var pingInter = 3*1000;
             setInterval(function(){
                 live.redis.pub.publish('roverAdmin', JSON.stringify({func: 'ping'}));
+                live.redis.pub.publish('rover', JSON.stringify({func: 'ping'}));
                 live.lastPingSent = new Date().getTime();
                 live.latency = live.lastPingSent - live.lastPingReturn - pingInter;
                 if (live.latency > live.maxLatency && live.latency < live.disconnected) {

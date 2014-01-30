@@ -95,7 +95,7 @@ var Command = {
         this.inCommand = true;
         //audio
         R.init();
-        setTimeout(function(){ if (Command.inCommand) Command.demote(); }, millis+500);
+        //setTimeout(function(){ if (Command.inCommand) Command.demote(); }, millis+500);
     },
     
     /*

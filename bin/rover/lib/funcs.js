@@ -45,6 +45,9 @@ Number.prototype.naturaltime = function(){
   
 };
 
+resetUSB = function(keyword) {
+  
+}
 
 
 })();

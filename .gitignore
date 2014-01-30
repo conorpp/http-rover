@@ -3,6 +3,7 @@ dependencies.txt
 
 lib-cov
 *.seed
+*.txt
 *.log
 *.csv
 *.dat

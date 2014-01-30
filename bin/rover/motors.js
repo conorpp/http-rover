@@ -51,11 +51,18 @@ var Rover = {
 		console.log('motor driver feedback: ', data);
             });
             Rover.serial.on('open', function(){
-		C.log('Motor connection ready'.green().bold());
+		C.log('Motor connection ready'.green().bold(), Rover.serial);
 		Rover.ready = true;
                 Rover.resetInter = setTimeout(function(){ Rover.reset() }, 42000);
 
             });
+	    Rover.serial.on('error', function(){
+		C.log('ERRRRRORRR');
+		Rover.reset();
+	    });
+	    Rover.serial.on('close', function(){
+		C.log('SERIAL PORT IS CLOSED');
+	    });
 
 	    
 	});
@@ -66,17 +73,21 @@ var Rover = {
     
     /* writes a buffer to serial port. */
     write: function(){
+	try{
         if (!Rover.ready) { 
             C.log('Board not ready yet.', {color:'red', background:'black'});
             return;
         }
 	var buf = new Buffer(Array.prototype.slice.call(arguments));
         Rover.serial.write(buf, function(err, results){
+	    try{
             if (err){
 		console.error('Error writing to serial : ', err, Rover.serial);
 		Rover.reset();
 	    }
+	    }catch(e){ C.log('Motor write error in callback:', e); }
         });
+	}catch(e){ C.log('Motor write error', e); }
     },
     /*
 	Motor Channel right - reverse: 0x88, forward: 8A
@@ -123,13 +134,22 @@ var Rover = {
     
     /* prevent infinite moving */
     timeout:null,
+
+    
+    
     moving:function(){
         this.isMoving = true;
         clearInterval(this.timeout);
+	
         this.timeout = setInterval(function(){
 	    Rover.stop();
         },this.stopInter);
+	
     },
+    
+    
+    
+    
 
     blink: function(on){},
     
@@ -156,7 +176,6 @@ var Rover = {
     
     reset: function(){
 	C.log('RESETING motors');
-	//clearInterval(this.timeout);
 	this.ready = false;
 	clearTimeout(Rover.resetInter);
 	//this.serial.drain(function(){
@@ -197,6 +216,9 @@ if (process.argv.indexOf('connect') != -1) {
 		
 	    else if (data.indexOf('r') != -1) 
 		Rover.reverse();
+		
+	    else if (data.indexOf('n') != -1) 
+		clearInterval(Rover.timeout);
 
     });
 }

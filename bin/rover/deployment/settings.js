@@ -8,8 +8,8 @@ var Settings = {
     ip:'184.173.103.51',
     
     /* video resolution */
-    width:320,
-    height:240,
+    width:160,
+    height:120,
     
     /* logging */
     logLevel:5,
