@@ -19,7 +19,7 @@ var Settings = {
     
     
     /* audio recording */
-    audioBitDepth:16,  //Only can be 8, 16, or 32
+    audioBitDepth:32,  //Only can be 8, 16, or 32
     
     /* ports for processes to listen on */
     command_port:12133,
