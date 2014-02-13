@@ -151,9 +151,6 @@ var Stream = {
         C.log('VIDEO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
         for (var a1 in v_args) C.log(' '+v_args[a1], {newline:false, color:'blue'});
         C.log('');
-        //C.log('AUDIO COMMAND: '.blue().bold(),'ffmpeg'.blue(), {newline:false});
-        //for (var a2 in a_args) C.log(' '+a_args[a2], {newline:false, color:'blue'});
-        //C.log('\n');
         
         this.ffmpeg_video = Terminal.spawn('ffmpeg', v_args, { detached: true});
        // this.ffmpeg_audio = Terminal.spawn('ffmpeg', a_args, { detached: true});

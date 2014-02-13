@@ -44,7 +44,7 @@ var Rover = {
                 return;
             }
             Rover.serial = new _serialConstr(addr, {
-                baudrate: 9600,
+                baudrate: 1000000,
 		disconnectedCallback: function(d){ console.log('DDDDDDDDCCCCCCCCCCC\'d', d);}
             });
             Rover.serial.on('data', function(data){
