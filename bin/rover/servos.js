@@ -11,7 +11,7 @@ var _serialport = require("serialport");
 var _serialConstr = _serialport.SerialPort;
 var serial;
 var Terminal = require('child_process');
-var BAUD = 9600;
+var BAUD = 1000000;
 
 _serialport.list(function (err, ports) {
     var addr;
@@ -21,7 +21,6 @@ _serialport.list(function (err, ports) {
         if (
 	    port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0'
 	    || port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0' 
-	    || port.pnpId == 'usb-Arduino__www.arduino.cc__0042_7523230313535110E0B2-if00'
 	    )
                 addr = port.comName;
     });
@@ -30,7 +29,9 @@ _serialport.list(function (err, ports) {
         return;
     }
     // Use dynamixel_util to set baud to 9600 before establishing connection
-    Terminal.exec('dynamixel_util Path='+addr+' Baud=1000000 baud rate '+BAUD, function(){
+    var changeBaudCmd = 'dynamixel_util Path='+addr+' Baud=1000000 baud rate '+BAUD;
+    C.log(('Changing Baud with $ \n'+changeBaudCmd).blue().bold());
+    Terminal.exec(changeBaudCmd, function(){
         __connect();
     });
     var __connect = function(){
@@ -50,7 +51,6 @@ _serialport.list(function (err, ports) {
             Servo.serial = serial;
 	    Servo.set(Servo.stats);
 	    
-	    Servo.read();
         });
         serial.on('error', function(){
             C.err('SERVO ERRRRRORRR');
@@ -131,22 +131,22 @@ var Servo = {
             return;
         }
         this.position = ((pos/360) * 1023) | 0;
-        C.log(('Going to position '+this.position).purple());
+        C.log(('Going to position '+this.position+'/1023').purple());
         var buf = new Buffer([this.position]);
         var cb = function(){ /*rvo.blinkLED(); */};
         this.write({params:[0x1e,  this.position & 0xff,
 			    (this.position & 0xff00) >> 8 ] });	
     },
     
-    blinkLED: function(){
+    blinkLED: function(blinkInter){
         C.log('Blinking'.green());
         Servo.write({
             params:[0x19, 0x1] });
-        setTimeout(function(){
+        /*setTimeout(function(){
             Servo.write({
                 params:[0x19, 0] //turn off
             });
-        },550);
+        }, blinkInter/2);*/
     
     },
 
@@ -155,9 +155,11 @@ var Servo = {
 	CWLimit: 0, 		//0-1023, both 0 limits means no limit
 	CCWLimit: 0, 		//0-1023, both 0 limits means no limit
 	movingSpeed: 1023,	// 0-1023 if limit, 0-2047 if no limit
-	ID:4
+	ID:4,
+	baud: 9600		// see baudRates()
     },
-    /*synchronously sets servo attributes for all applicable commands
+    
+    /*asynchronously sets servo attributes for all applicable commands
      *see stats.
      */
     set: function(params){
@@ -166,41 +168,75 @@ var Servo = {
 	
 	if (params.CWLimit) {	// range from 0 to 1023.  0 means no limit.
 	    this.write({params:[0x06,  params.CWLimit & 0xff,
-				(params.CWLimit & 0xff00) >> 8] });	//upper byte
+				(params.CWLimit & 0xff00) >> 8] });	
 	}
 	if (params.CCWLimit) {
 	    this.write({params:[0x08,  params.CCWLimit & 0xff,
-				(params.CCWLimit & 0xff00) >> 8] });	//upper byte
+				(params.CCWLimit & 0xff00) >> 8] });	
 	}
         if (params.maxTorque){
 	    this.write({params:[0x0e,  params.maxTorque & 0xff,
-				(params.maxTorque & 0xff00) >> 8] });	//upper byte
+				(params.maxTorque & 0xff00) >> 8] });	
         }
         if (params.movingSpeed){
 	    this.write({params:[0x20,  params.movingSpeed & 0xff,
-				(params.movingSpeed & 0xff00) >> 8] });	//upper byte
+				(params.movingSpeed & 0xff00) >> 8] });	
         }
+	// uncomment to set an id
         if (params.ID){
 	    //this.write({params:[0x3,  params.ID ] });	//upper byte
-	    C.log('SETTING ID');
+	    //C.log('SETTING ID');
+        }
+        if (params.baud){
+	    //this.write({params:[0x4,  this._baudPrescale(params.baud)] });	
         }
         
     },
+    
+    _baudPrescale: function(_baud){
+	switch (_baud) {
+	    case 1000000:
+		return 1;
+	    break;
+	    case 115200:
+		return 16;
+	    break;
+	    case  57600:
+		return 34;
+	    break;
+	    case 19200:
+		return 103;
+	    break;
+	    case 9600:
+		return 207;
+	    break;
+	}
+	return 207;
+    }
     
     
 };
 
 process.stdin.resume();
 process.stdin.on('data', function(d){
+    if (d.toString().indexOf('reset') != -1) {
+	Servo.write({params:[], _instruction:0x6}, function(err, results){
+	    console.log('RESET SERVO '.blue(), err, results);
+	}); return;
+    }
     if (d.toString().indexOf('r') != -1) {
 	Servo.read(); return;
     }
+
     d = parseInt(d);
     Servo.goTo(d);
 });
-Servo.blinkLED();
+
+var blinkInter = 200;
+setInterval( function(){   Servo.blinkLED(blinkInter);    }, blinkInter);
 
 return Servo;
+
 })();
 
 

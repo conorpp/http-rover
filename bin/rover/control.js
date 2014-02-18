@@ -34,7 +34,7 @@ Emit.info();
 
 if (process.argv.indexOf('test') != -1) 
     GPS.test();
-else
+else if (process.argv.indexOf('nogps') != -1) 
     GPS.connect();
 
 if (process.argv.indexOf('nostream') == -1) 

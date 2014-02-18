@@ -34,7 +34,7 @@ var Rover = {
                 C.log(port, {color:'yellow', logLevel:-1});
                 if (
 		    port.pnpId == 'usb-FTDI_FT232R_USB_UART_A901QJ43-if00-port0'
-		   // port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0' 
+		   || port.pnpId == 'usb-Prolific_Technology_Inc._USB-Serial_Controller-if00-port0' 
 		    || port.pnpId == 'usb-Arduino__www.arduino.cc__0042_7523230313535110E0B2-if00'
 		    )
                         addr = port.comName;
