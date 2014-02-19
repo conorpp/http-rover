@@ -15,7 +15,7 @@ echo " " > $DIR/stderr.log
 amixer set PCM 100%
 
 #this is forever daemon startup
-sudo $DIR/../node_modules/forever/bin/forever -o stdout.log -e stderr.log start $DIR/../bin/rover/control.js deploy -debug -1 nogps
+sudo $DIR/../node_modules/forever/bin/forever -o stdout.log -e stderr.log start $DIR/../bin/rover/control.js deploy -debug -1
 
 #this is regular node startup
 #sudo -u $USER  /home/pi/nodejs/rover/node.sh /home/pi/nodejs/rover/bin/rover/control.js deploy -debug -1
