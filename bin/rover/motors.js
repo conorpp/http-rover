@@ -179,9 +179,9 @@ var Rover = {
 	this.ready = false;
 	clearTimeout(Rover.resetInter);
 	//this.serial.drain(function(){
-	    Rover.serial.close(function(){
-		Rover.connect();
-	    });
+	    //Rover.serial.close(function(){
+		//Rover.connect();
+	    //});
 	    
 	//});
     },
