@@ -44,7 +44,7 @@ var Rover = {
                 return;
             }
             Rover.serial = new _serialConstr(addr, {
-                baudrate: 1000000,
+                baudrate: 9600,
 		disconnectedCallback: function(d){ console.log('DDDDDDDDCCCCCCCCCCC\'d', d);}
             });
             Rover.serial.on('data', function(data){
@@ -53,7 +53,7 @@ var Rover = {
             Rover.serial.on('open', function(){
 		C.log('Motor connection ready'.green().bold(), Rover.serial);
 		Rover.ready = true;
-                Rover.resetInter = setTimeout(function(){ Rover.reset() }, 42000);
+                //Rover.resetInter = setTimeout(function(){ Rover.reset() }, 42000);
 
             });
 	    Rover.serial.on('error', function(){
