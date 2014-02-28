@@ -25,8 +25,7 @@ C = require('./lib/colorLog'),
 GPS = require('./gps'),
 Stream = require('./stream'),
 Rover = require('./motors'),
-Emit = require('./comm'),
-Audio = require('./audio');
+Emit = require('./comm');
 
 //Start dependent scripts.
 Rover.connect();
@@ -34,14 +33,16 @@ Emit.info();
 
 if (process.argv.indexOf('test') != -1) 
     GPS.test();
-else if (process.argv.indexOf('gps') == -1) 
+else if (process.argv.indexOf('gps') != -1) 
     GPS.connect();
 
 if (process.argv.indexOf('nostream') == -1) 
     Stream.connect();
     
-if (process.argv.indexOf('noaudio') == -1) 
+if (process.argv.indexOf('noaudio') == -1){
+    Audio = require('./audio');
     Audio.listen();
+}
 
 //Set addition settings
 GPS.set({home: S.home});
@@ -71,6 +72,8 @@ try{
 }catch(e){
     console.log('FATAL ERROR: ', e);
 }
+
+require('./auto__');
 
 
 
