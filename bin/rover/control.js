@@ -73,7 +73,7 @@ try{
     console.log('FATAL ERROR: ', e);
 }
 
-require('./auto__');
+
 
 
 
