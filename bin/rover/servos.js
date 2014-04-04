@@ -3,6 +3,23 @@
     
     /usr/local/Tekkotsu/tools/dynamixel_util
     is good
+
+    Responible for controlling servos
+    
+    /usr/local/Tekkotsu/tools/dynamixel_util
+    is good
+    
+    E.g.
+    
+    Servo = require('./servos');
+    Servo.on('ready', function(){
+	console.log('servos are connected.');
+    });
+    
+    // 0-360
+    Servo.goTo(50, {id:254});
+    
+    Servo.write({params:[0x22, 0xff], id:2 }, function(){});
 */
 
 module.exports =
