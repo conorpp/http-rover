@@ -90,8 +90,8 @@ var Rover = {
 	}catch(e){ C.log('Motor write error', e); }
     },
     /*
-	Motor Channel right - reverse: 1, forward: 127
-	Motor Channel left - reverse: 128, forward: 255
+	Motor Channel right - reverse: 0x88, forward: 8A
+	Motor Channel left - reverse: 0x8c, forward: 0x8e
 	
 	speed - 0x0 - 0x7f
 	
@@ -105,30 +105,30 @@ var Rover = {
     setSpeed: function(scale){
 	scale = parseFloat(scale),
 	scale = (scale <= 1) ? scale : 1;
-	this.speed = scale;
+	this.speed = 0x7f * scale;
     },
-    speed: 1,
+    speed: 0x7f,
     forward: function(){
-	this.write( 127 * this.speed );
-	this.write( 255 * this.speed );
+	this.write( 0x8a, this.speed );
+	this.write( 0x8e, this.speed );
 	Rover.moving();
     },
     
     reverse: function(){
-	this.write( 1 * this.speed );
-	this.write( 128 * this.speed );
+	this.write( 0x88, this.speed );
+	this.write( 0x8c, this.speed );
 	Rover.moving();
     },
     
     left: function(){
-	this.write( 128 * this.speed );
-	this.write( 127 *this.speed );
+	this.write( 0x8a, this.speed) ;
+	this.write( 0x8c, this.speed );
 	Rover.moving();
     },
     
     right: function(){
-	this.write( 1 * this.speed );
-	this.write( 255 * this.speed );
+	this.write( 0x88, this.speed );
+	this.write( 0x8e, this.speed );
 	Rover.moving();
     },
     
@@ -166,9 +166,11 @@ var Rover = {
     brake: 0x64,
     stop: function(){
         C.log('stopping', {newline:false, color:'red',background:'white'});
-        this.write(0);
+        this.write(0x86, this.brake);
+        this.write(0x87, this.brake);
         setTimeout(function(){      //safety
-	    Rover.write(0);
+	    Rover.write(0x86, this.brake);
+	    Rover.write(0x87, this.brake);
         },5);
     },
     
