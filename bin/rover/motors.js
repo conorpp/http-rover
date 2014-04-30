@@ -120,13 +120,13 @@ var Rover = {
 	Rover.moving();
     },
     
-    reverse: function(){
+    forward: function(){
 	this.write( 128 * this.speed );
 	this.write( 127 *this.speed );
 	Rover.moving();
     },
     
-    forward: function(){
+    reverse: function(){
 	this.write( 1 * this.speed );
 	this.write( 255 * this.speed );
 	Rover.moving();
