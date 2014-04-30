@@ -108,25 +108,25 @@ var Rover = {
 	this.speed = scale;
     },
     speed: 1,
-    forward: function(){
+    right: function(){
 	this.write( 127 * this.speed );
 	this.write( 255 * this.speed );
 	Rover.moving();
     },
     
-    reverse: function(){
+    left: function(){
 	this.write( 1 * this.speed );
 	this.write( 128 * this.speed );
 	Rover.moving();
     },
     
-    left: function(){
+    reverse: function(){
 	this.write( 128 * this.speed );
 	this.write( 127 *this.speed );
 	Rover.moving();
     },
     
-    right: function(){
+    forward: function(){
 	this.write( 1 * this.speed );
 	this.write( 255 * this.speed );
 	Rover.moving();
